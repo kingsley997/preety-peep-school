@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Tech | School Feeding Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- SPLASH SCREEN SEQUENCE -->
+    <div id="splash-container">
+        <div id="school-splash" class="splash-screen active">
+            <img src="images/school-logo.png" alt="Preety Peep School Logo" class="splash-logo">
+            <h1 class="school-name">PREETY PEEP SCHOOL</h1>
+            <div class="loader"><span></span></div>
+        </div>
+        <div id="alpha-splash" class="splash-screen">
+            <img src="images/alpha-logo.png" alt="Alpha Tech Logo" class="splash-logo alpha-logo">
+            <p class="powered-by">Powered by <span class="gold-text">Alpha Tech</span></p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <main class="container" id="app" style="display: none;">
+        
+        <!-- SCREEN: First Time Admin Setup -->
+        <div id="setup-screen" class="auth-container" style="display: none;">
+            <h2>Welcome to Alpha Tech</h2>
+            <p>Let's set up the Master Admin account for Preety Peep School.</p>
+            <div id="setup-step-1">
+                <div class="form-group">
+                    <label>Admin Username</label>
+                    <input type="text" id="setup-username" class="form-input" placeholder="e.g., headmaster">
+                </div>
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="setup-password" class="form-input" placeholder="Make it strong">
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('setup-password', this)">👁️</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="setup-confirm-password" class="form-input" placeholder="Re-enter password">
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('setup-confirm-password', this)">👁️</button>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="UI.showRecoveryPhrase()">Generate Account & Recovery Phrase</button>
+            </div>
+            <div id="setup-step-2" style="display: none;">
+                <div class="recovery-box">
+                    <div class="warning-text">⚠️ CRITICAL: Write this down on paper!</div>
+                    <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">If you forget your password, this is the ONLY way to recover your account. Store it in a safe place.</p>
+                    <div class="recovery-words" id="recovery-words-display"></div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="recovery-confirm">
+                    <label for="recovery-confirm">I have written down this recovery phrase and stored it safely.</label>
+                </div>
+                <button class="btn btn-accent btn-full" onclick="UI.completeSetup()">I Understand, Create Account</button>
+            </div>
+        </div>
+
+        <!-- SCREEN: Normal Login (NEW STUNNING HERO DESIGN) -->
+        <div id="login-screen" style="display: none;">
+            <!-- Stunning Hero Header -->
+            <div class="login-hero">
+                <!-- Animated Background Pattern -->
+                <div class="hero-pattern"></div>
+                
+                <!-- Floating Particles -->
+                <div class="hero-particles">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+
+                <!-- Hero Content -->
+                <div class="hero-content">
+                    <div class="hero-logos">
+                        <div class="logo-wrapper school-logo-wrapper">
+                            <img src="images/school-logo.png" alt="Preety Peep School" class="hero-logo">
+                        </div>
+                        <div class="logo-divider"></div>
+                        <div class="logo-wrapper alpha-logo-wrapper">
+                            <img src="images/alpha-logo.png" alt="Alpha Tech" class="hero-logo">
+                        </div>
+                    </div>
+                    
+                    <h1 class="hero-title">PREETY PEEP SCHOOL</h1>
+                    <div class="hero-tagline">
+                        <span class="tagline-line"></span>
+                        <span class="tagline-text">Smart Feeding Management</span>
+                        <span class="tagline-line"></span>
+                    </div>
+                    <p class="hero-subtitle">Powered by Alpha Tech</p>
+                </div>
+            </div>
+
+            <!-- Login Form Card (Overlaps the hero slightly) -->
+            <div class="auth-container login-form-card">
+                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back 👋</h2>
+                <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Sign in to access the system</p>
+                
+                <div class="form-group">
+                    <label>Select Role</label>
+                    <select id="login-role" class="form-select" onchange="UI.toggleForgotPasswordLink()">
+                        <option value="cashier">Cash Officer</option>
+                        <option value="admin">Master Key (Admin)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" class="form-input" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" class="form-input" placeholder="Enter password">
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('login-password', this)">👁️</button>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="UI.handleLogin()">Log In</button>
+                <p id="login-error" style="color: var(--color-danger); margin-top: 1rem; font-size: 0.9rem; display: none;">Invalid username or password.</p>
+                
+                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()">
+                    🔐 Forgot Password? (Admin Recovery)
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN: Forgot Password Recovery -->
+        <div id="forgot-password-screen" class="auth-container" style="display: none;">
+            <h2>🔐 Account Recovery</h2>
+            <p>Enter your 6-word recovery phrase to reset your Admin account.</p>
+            
+            <!-- Step 1: Verify Phrase -->
+            <div id="recovery-step-1">
+                <div class="form-group">
+                    <label>Your Recovery Phrase</label>
+                    <textarea id="recovery-phrase-input" class="form-input" rows="3" placeholder="e.g., apple river mountain clock window tree" style="resize: vertical; font-size: 0.95rem;"></textarea>
+                    <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.5rem;">Type the 6 words you wrote down during setup, separated by spaces.</p>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="UI.verifyRecoveryPhrase()">Verify Phrase</button>
+                <p id="recovery-error" style="color: var(--color-danger); margin-top: 1rem; font-size: 0.9rem; display: none;">Invalid recovery phrase. Please check and try again.</p>
+                <p style="margin-top: 1.5rem; font-size: 0.9rem;">
+                    <a href="#" onclick="UI.backToLogin(); return false;" style="color: var(--color-text-muted);">← Back to Login</a>
+                </p>
+            </div>
+
+            <!-- Step 2: Create New Credentials -->
+            <div id="recovery-step-2" style="display: none;">
+                <div class="recovery-box" style="background: #d1fae5; border-color: #10b981;">
+                    <div style="color: #065f46; font-weight: 700; margin-bottom: 0.5rem;">✅ Phrase Verified!</div>
+                    <p style="font-size: 0.9rem; color: #065f46;">You can now create a new Admin username and password.</p>
+                </div>
+                <div class="form-group">
+                    <label>New Admin Username</label>
+                    <input type="text" id="new-admin-username" class="form-input" placeholder="e.g., headmaster">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="new-admin-password" class="form-input" placeholder="Make it strong">
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-password', this)">👁️</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="new-admin-confirm" class="form-input" placeholder="Re-enter password">
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-confirm', this)">👁️</button>
+                    </div>
+                </div>
+                <button class="btn btn-accent btn-full" onclick="UI.resetAdminPassword()">🔓 Reset Admin Account</button>
+            </div>
+        </div>
+
+        <!-- SCREEN: Main Dashboard -->
+        <div id="dashboard-screen" style="display: none;">
+            <div class="dashboard-header">
+                <div>
+                    <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
+                        Good Morning, <span id="user-display-name">Admin</span>
+                    </h1>
+                    <p class="text-muted" id="current-date">Loading date...</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">⚙️ Admin Settings</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p class="stat-label">Total Expected Today</p>
+                    <h3 class="stat-value" id="stat-expected">GHS 0.00</h3>
+                </div>
+                <div class="stat-card highlight">
+                    <p class="stat-label">Total Collected</p>
+                    <h3 class="stat-value" id="stat-collected">GHS 0.00</h3>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Total Outstanding</p>
+                    <h3 class="stat-value" id="stat-outstanding">GHS 0.00</h3>
+                </div>
+            </div>
+
+            <h2 style="font-size: 1.2rem; color: var(--color-primary); margin: 2rem 0 1rem 0;">Classes</h2>
+            <div class="class-grid" id="class-grid-container"></div>
+        </div>
+
+        <!-- SCREEN: Class Portal -->
+        <div id="class-portal-screen" style="display: none;">
+            <div class="portal-header">
+                <button class="btn btn-primary" onclick="UI.goBackToDashboard()" style="padding: 0.5rem 1rem;">← Back</button>
+                <div class="portal-title">
+                    <h1 id="portal-class-name" style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">Class Name</h1>
+                    <p class="text-muted" id="portal-class-fee">Daily Fee: GHS 0.00</p>
+                </div>
+                <div class="portal-stats">
+                    <div class="mini-stat">
+                        <span class="mini-label">Paid</span>
+                        <span class="mini-value" id="portal-paid-count">0/0</span>
+                    </div>
+                    <div class="mini-stat highlight">
+                        <span class="mini-label">Collected</span>
+                        <span class="mini-value" id="portal-collected-total">GHS 0.00</span>
+                    </div>
+                    <button class="btn btn-primary" style="margin-left: 1.5rem; padding: 0.5rem 1rem;" onclick="UI.logout()">Log Out</button>
+                </div>
+            </div>
+            
+            <div style="margin: 1.5rem 0; text-align: right;">
+                <button class="btn btn-accent" onclick="UI.finishDayAndSave()">✅ Finish Day & Save Report</button>
+            </div>
+
+            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <input type="text" id="new-student-name" class="form-input" placeholder="Add new student for today..." style="max-width: 300px;">
+                <button class="btn btn-accent" onclick="UI.addStudentForToday()">+ Add Student</button>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="student-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterStudents()">
+            </div>
+
+            <div class="student-list-container" id="student-list-container"></div>
+        </div>
+
+        <!-- SCREEN: Admin Settings -->
+        <div id="admin-settings-screen" style="display: none;">
+            <div class="portal-header">
+                <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
+                <div class="portal-title">
+                    <h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1>
+                    <p class="text-muted">Manage Fees, Staff & Reports</p>
+                </div>
+                <button class="btn btn-primary" onclick="UI.logout()">Log Out</button>
+            </div>
+            
+            <div class="settings-container" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">👤 Cashier Account Management</h3>
+                <div class="form-group">
+                    <label>Cashier Username</label>
+                    <input type="text" id="cashier-username" class="form-input" placeholder="e.g., cashier1">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="cashier-password" class="form-input" placeholder="Set secure password">
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('cashier-password', this)">👁️</button>
+                    </div>
+                </div>
+                <button class="btn btn-accent" onclick="UI.saveCashierAccount()">💾 Save Cashier Credentials</button>
+            </div>
+
+            <div class="settings-container" style="margin-bottom: 2rem;">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">💰 Class Fee Management</h3>
+                <div id="settings-list-container"></div>
+                <button class="btn btn-accent" style="margin-top: 1.5rem;" onclick="UI.saveAdminFees()">💾 Save Fee Changes</button>
+            </div>
+
+            <div class="settings-container">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">📊 Saved Daily Reports</h3>
+                <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Click a report to view and copy the daily summary.</p>
+                <div id="reports-list-container"></div>
+            </div>
+        </div>
+
+        <!-- Report View Modal -->
+        <div id="report-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: var(--color-primary); margin: 0;">Daily Summary</h3>
+                    <button class="btn-icon" onclick="UI.closeReportModal()" style="font-size: 1.5rem; cursor: pointer;">✖️</button>
+                </div>
+                <div id="report-content" style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; border: 1px solid var(--color-border); max-height: 300px; overflow-y: auto;"></div>
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="UI.downloadReport()">⬇️ Download</button>
+                    <button class="btn btn-accent" style="flex: 1;" onclick="UI.copyReportText()">📋 Copy</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/store.js"></script>
+    <script src="js/seed.js"></script>
+    <script src="js/logic.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
