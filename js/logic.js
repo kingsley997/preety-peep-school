@@ -57,7 +57,7 @@ const UI = {
         else { input.type = "password"; btn.textContent = "👁️"; }
     },
 
-    // NEW: Navigation helper that pushes to browser history
+    // Navigation helper that pushes to browser history
     navigateTo(screenId, pushHistory = true) {
         // Hide all screens
         const screens = ['setup-screen', 'login-screen', 'dashboard-screen', 'class-portal-screen', 'admin-settings-screen', 'forgot-password-screen'];
@@ -78,14 +78,27 @@ const UI = {
         this.currentScreen = screenId;
     },
 
-    // NEW: Handle browser back button / swipe-back gesture
+    // UPDATED: Handle browser back button / swipe-back gesture AND re-render data
     handlePopState(event) {
         const state = event.state;
+        let screenId = 'login-screen'; // Default fallback
+
         if (state && state.screen) {
-            this.navigateTo(state.screen, false);
-        } else {
-            // Default fallback
-            this.navigateTo('login-screen', false);
+            screenId = state.screen;
+        }
+
+        // 1. Switch the visible screen
+        this.navigateTo(screenId, false);
+
+        // 2. Re-render the screen to pull fresh data from localStorage
+        if (screenId === 'dashboard-screen') {
+            this.renderDashboard();
+        } else if (screenId === 'class-portal-screen') {
+            const query = document.getElementById('student-search') ? document.getElementById('student-search').value : '';
+            this.renderClassPortal(this.currentClassId, query);
+        } else if (screenId === 'admin-settings-screen') {
+            this.renderAdminSettings();
+            this.renderReportsList();
         }
     },
 
@@ -458,6 +471,7 @@ const UI = {
         Store.set('cashier_user', { username, passwordHash: hashedPassword, role: 'cashier' });
         alert(`✅ Cashier account saved!\nUsername: ${username}`);
         document.getElementById('cashier-password').value = '';
+        history.back(); // Automatically takes you back to the Dashboard with fresh data
     },
 
     saveAdminFees() {
@@ -482,8 +496,11 @@ const UI = {
                 });
                 Store.set(`roster_${dateStr}`, roster);
             }
-            alert("Fees updated successfully!");
-        } else { alert("No changes were made."); }
+            alert("✅ Fees updated successfully!");
+            history.back(); // Automatically takes you back to the Dashboard with fresh data
+        } else { 
+            alert("No changes were made."); 
+        }
     },
 
     finishDayAndSave() {
