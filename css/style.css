@@ -561,14 +561,24 @@ body {
     }
     
     .btn-icon {
-        padding: 0.6rem; /* Larger, comfortable touch target */
+        padding: 0.6rem;
         font-size: 1.3rem;
+        position: relative;
+        z-index: 10; /* Forces button to be on top of any overlapping elements */
+        touch-action: manipulation; /* Prevents double-tap zoom delay on mobile */
+        -webkit-tap-highlight-color: transparent; /* Removes the gray tap box on iOS */
+        cursor: pointer;
     }
 
     .btn-collect {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
-        width: 100%; /* Make the collect button full width on mobile for easy tapping */
+        width: 100%;
+        position: relative;
+        z-index: 10;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer;
     }
     
     /* Ensure settings inputs are easy to tap */
@@ -583,6 +593,7 @@ body {
         justify-content: space-between;
     }
 }
+
 /* ============================================
    11. STUNNING LOGIN HERO SECTION
    ============================================ */

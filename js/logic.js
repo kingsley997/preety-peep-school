@@ -44,7 +44,7 @@ const UI = {
     currentClassId: null,
     currentSession: null,
     currentReportText: "",
-    currentScreen: 'login', // Track current screen for history management
+    currentScreen: 'login',
 
     getLocalDateStr() {
         const d = new Date();
@@ -57,40 +57,32 @@ const UI = {
         else { input.type = "password"; btn.textContent = "👁️"; }
     },
 
-    // Navigation helper that pushes to browser history
     navigateTo(screenId, pushHistory = true) {
-        // Hide all screens
         const screens = ['setup-screen', 'login-screen', 'dashboard-screen', 'class-portal-screen', 'admin-settings-screen', 'forgot-password-screen'];
         screens.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
 
-        // Show target screen
         const target = document.getElementById(screenId);
         if (target) target.style.display = 'block';
 
-        // Push to browser history if requested
         if (pushHistory && screenId !== this.currentScreen) {
             history.pushState({ screen: screenId }, '', `#${screenId}`);
         }
-
         this.currentScreen = screenId;
     },
 
-    // UPDATED: Handle browser back button / swipe-back gesture AND re-render data
     handlePopState(event) {
         const state = event.state;
-        let screenId = 'login-screen'; // Default fallback
+        let screenId = 'login-screen';
 
         if (state && state.screen) {
             screenId = state.screen;
         }
 
-        // 1. Switch the visible screen
         this.navigateTo(screenId, false);
 
-        // 2. Re-render the screen to pull fresh data from localStorage
         if (screenId === 'dashboard-screen') {
             this.renderDashboard();
         } else if (screenId === 'class-portal-screen') {
@@ -103,9 +95,7 @@ const UI = {
     },
 
     init() {
-        // Listen for browser back/swipe-back events
         window.addEventListener('popstate', (e) => this.handlePopState(e));
-
         if (!Auth.isAdminSetup()) { 
             this.navigateTo('setup-screen');
         } else { 
@@ -166,13 +156,11 @@ const UI = {
             alert("⚠️ The Forgot Password feature is only available for the Master Admin.\n\nIf you are a Cashier who forgot their password, please contact the School Owner/Admin to reset it.");
             return;
         }
-        
         const adminData = Store.get('admin_user');
         if (!adminData || !adminData.recoveryHash) {
             alert("⚠️ No recovery phrase found for this account.\n\nThis may be an older account created before the recovery system was added. Please contact technical support.");
             return;
         }
-        
         this.navigateTo('forgot-password-screen');
         document.getElementById('recovery-step-1').style.display = 'block';
         document.getElementById('recovery-step-2').style.display = 'none';
@@ -180,9 +168,7 @@ const UI = {
         document.getElementById('recovery-error').style.display = 'none';
     },
 
-    backToLogin() {
-        history.back(); // Use browser back to trigger popstate
-    },
+    backToLogin() { history.back(); },
 
     toggleForgotPasswordLink() {
         const role = document.getElementById('login-role').value;
@@ -193,19 +179,12 @@ const UI = {
     async verifyRecoveryPhrase() {
         const input = document.getElementById('recovery-phrase-input').value.trim();
         const errorMsg = document.getElementById('recovery-error');
-        
         if (!input) {
             errorMsg.textContent = "Please enter your recovery phrase.";
             errorMsg.style.display = 'block';
             return;
         }
-        
-        const cleanedPhrase = input
-            .toLowerCase()
-            .replace(/\d+\./g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-        
+        const cleanedPhrase = input.toLowerCase().replace(/\d+\./g, '').replace(/\s+/g, ' ').trim();
         const words = cleanedPhrase.split(' ').filter(w => w.length > 0);
         
         if (words.length !== 6) {
@@ -242,13 +221,7 @@ const UI = {
         const adminData = Store.get('admin_user');
         const hashedPassword = await Auth.hashString(newPassword);
         
-        Store.set('admin_user', {
-            username: newUsername,
-            passwordHash: hashedPassword,
-            recoveryHash: adminData.recoveryHash,
-            role: 'admin'
-        });
-        
+        Store.set('admin_user', { username: newUsername, passwordHash: hashedPassword, recoveryHash: adminData.recoveryHash, role: 'admin' });
         alert(`✅ Admin account reset successfully!\n\nNew Username: ${newUsername}\n\nPlease log in with your new credentials.`);
         location.reload();
     },
@@ -272,8 +245,9 @@ const UI = {
 
         let totalExpected = 0, totalCollected = 0;
         const gridContainer = document.getElementById('class-grid-container');
-        gridContainer.innerHTML = ''; 
-
+        
+        // FIX: Build HTML string first to prevent mobile DOM rendering bugs
+        let gridHtml = '';
         roster.forEach(cls => {
             let classExpected = 0, classCollected = 0, paidCount = 0, absentCount = 0, notPayingCount = 0;
             cls.students.forEach(student => {
@@ -287,7 +261,7 @@ const UI = {
             totalCollected += classCollected;
             const percentage = classExpected > 0 ? Math.round((classCollected / classExpected) * 100) : 0;
 
-            gridContainer.innerHTML += `
+            gridHtml += `
                 <div class="class-card" onclick="UI.openClassPortal('${cls.classId}')">
                     <div class="class-card-header">
                         <span class="class-name">${cls.className}</span>
@@ -302,6 +276,7 @@ const UI = {
                     </div>
                 </div>`;
         });
+        gridContainer.innerHTML = gridHtml;
 
         const totalOutstanding = totalExpected - totalCollected;
         document.getElementById('stat-expected').textContent = `GHS ${(totalExpected / 100).toFixed(2)}`;
@@ -315,9 +290,7 @@ const UI = {
         this.renderClassPortal(classId, '');
     },
 
-    goBackToDashboard() {
-        history.back(); // Use browser back to trigger popstate
-    },
+    goBackToDashboard() { history.back(); },
 
     renderClassPortal(classId, filterQuery = '') {
         this.currentClassId = classId;
@@ -338,43 +311,47 @@ const UI = {
 
         let paidCount = 0, collectedTotal = 0, absentCount = 0, notPayingCount = 0;
         const container = document.getElementById('student-list-container');
-        container.innerHTML = '';
+        
+        // FIX: Build HTML string first to prevent mobile DOM rendering bugs
+        let htmlContent = '';
 
         if (studentsToShow.length === 0) {
-            container.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--color-text-muted);">No students found matching that name.</div>';
+            htmlContent = '<div style="padding: 2rem; text-align: center; color: var(--color-text-muted);">No students found matching that name.</div>';
+        } else {
+            studentsToShow.forEach(student => {
+                if (student.status === 'paid') { paidCount++; collectedTotal += cls.fee; }
+                if (student.status === 'absent') absentCount++;
+                if (student.status === 'exempt') notPayingCount++;
+
+                let badgeHTML = '', actionHTML = '';
+                if (student.status === 'unpaid') {
+                    badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
+                    actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>`;
+                } else if (student.status === 'paid') {
+                    badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
+                    actionHTML = `<button class="btn-icon" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">↩️</button>`;
+                } else if (student.status === 'absent') {
+                    badgeHTML = `<span class="status-badge status-absent">Absent</span>`;
+                    actionHTML = `<button class="btn-icon" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset">↩️</button>`;
+                } else if (student.status === 'exempt') {
+                    badgeHTML = `<span class="status-badge status-exempt">Not Paying</span>`;
+                    actionHTML = `<button class="btn-icon" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset">↩️</button>`;
+                }
+
+                htmlContent += `
+                    <div class="student-row">
+                        <div class="student-info"><span class="student-name">${student.name}</span>${badgeHTML}</div>
+                        <div class="student-actions">
+                            ${actionHTML}
+                            <button class="btn-icon" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
+                            <button class="btn-icon" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>
+                            <button class="btn-icon" onclick="UI.removeStudentToday('${classId}', '${student.id}')" title="Remove for Today">🗑️</button>
+                        </div>
+                    </div>`;
+            });
         }
-
-        studentsToShow.forEach(student => {
-            if (student.status === 'paid') { paidCount++; collectedTotal += cls.fee; }
-            if (student.status === 'absent') absentCount++;
-            if (student.status === 'exempt') notPayingCount++;
-
-            let badgeHTML = '', actionHTML = '';
-            if (student.status === 'unpaid') {
-                badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
-                actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>`;
-            } else if (student.status === 'paid') {
-                badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
-                actionHTML = `<button class="btn-icon" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">↩️</button>`;
-            } else if (student.status === 'absent') {
-                badgeHTML = `<span class="status-badge status-absent">Absent</span>`;
-                actionHTML = `<button class="btn-icon" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset">↩️</button>`;
-            } else if (student.status === 'exempt') {
-                badgeHTML = `<span class="status-badge status-exempt">Not Paying</span>`;
-                actionHTML = `<button class="btn-icon" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset">↩️</button>`;
-            }
-
-            container.innerHTML += `
-                <div class="student-row">
-                    <div class="student-info"><span class="student-name">${student.name}</span>${badgeHTML}</div>
-                    <div class="student-actions">
-                        ${actionHTML}
-                        <button class="btn-icon" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
-                        <button class="btn-icon" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>
-                        <button class="btn-icon" onclick="UI.removeStudentToday('${classId}', '${student.id}')" title="Remove for Today">🗑️</button>
-                    </div>
-                </div>`;
-        });
+        
+        container.innerHTML = htmlContent;
         
         document.getElementById('portal-paid-count').textContent = `${paidCount} / ${cls.students.length - absentCount - notPayingCount}`;
         document.getElementById('portal-collected-total').textContent = `GHS ${(collectedTotal / 100).toFixed(2)}`;
@@ -436,9 +413,7 @@ const UI = {
         this.renderReportsList();
     },
 
-    goBackFromSettings() {
-        history.back(); // Use browser back to trigger popstate
-    },
+    goBackFromSettings() { history.back(); },
 
     renderAdminSettings() {
         const cashierData = Store.get('cashier_user');
@@ -448,10 +423,12 @@ const UI = {
 
         const classes = Store.get('classes');
         const container = document.getElementById('settings-list-container');
-        container.innerHTML = '';
+        
+        // FIX: Build HTML string first
+        let settingsHtml = '';
         classes.forEach(cls => {
             const feeInGhs = (cls.fee / 100).toFixed(2);
-            container.innerHTML += `
+            settingsHtml += `
                 <div class="settings-row">
                     <span class="settings-class-name">${cls.name}</span>
                     <div class="settings-input-wrapper">
@@ -460,6 +437,7 @@ const UI = {
                     </div>
                 </div>`;
         });
+        container.innerHTML = settingsHtml;
     },
 
     async saveCashierAccount() {
@@ -471,7 +449,7 @@ const UI = {
         Store.set('cashier_user', { username, passwordHash: hashedPassword, role: 'cashier' });
         alert(`✅ Cashier account saved!\nUsername: ${username}`);
         document.getElementById('cashier-password').value = '';
-        history.back(); // Automatically takes you back to the Dashboard with fresh data
+        history.back();
     },
 
     saveAdminFees() {
@@ -497,7 +475,7 @@ const UI = {
                 Store.set(`roster_${dateStr}`, roster);
             }
             alert("✅ Fees updated successfully!");
-            history.back(); // Automatically takes you back to the Dashboard with fresh data
+            history.back();
         } else { 
             alert("No changes were made."); 
         }
@@ -506,47 +484,48 @@ const UI = {
     finishDayAndSave() {
         if (!confirm("Are you sure you want to FINISH the day? This will save a report and reset the board for tomorrow.")) return;
 
-        const now = new Date();
-        const dateStr = this.getLocalDateStr();
-        const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        const roster = Store.get(`roster_${dateStr}`);
-        
-        if (!roster) return alert("No data to save for today.");
+        try {
+            const now = new Date();
+            const dateStr = this.getLocalDateStr();
+            const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            const roster = Store.get(`roster_${dateStr}`);
+            
+            if (!roster) return alert("No data to save for today.");
 
-        let totalExpected = 0, totalCollected = 0, totalPresent = 0, totalPaidStudents = 0;
-        let totalAbsent = 0, totalNotPaying = 0;
-        let classSummaries = [];
+            let totalExpected = 0, totalCollected = 0, totalPresent = 0, totalPaidStudents = 0;
+            let totalAbsent = 0, totalNotPaying = 0;
+            let classSummaries = [];
 
-        roster.forEach(cls => {
-            let classExp = 0, classColl = 0, present = 0, paid = 0, absent = 0, notPaying = 0;
-            cls.students.forEach(s => {
-                if (s.status === 'absent') { absent++; totalAbsent++; } else { present++; }
-                if (s.status === 'exempt') { notPaying++; totalNotPaying++; }
-                if (s.status === 'paid') { paid++; classColl += cls.fee; totalPaidStudents++; }
-                if (s.status !== 'absent' && s.status !== 'exempt') { classExp += cls.fee; totalExpected += cls.fee; }
+            roster.forEach(cls => {
+                let classExp = 0, classColl = 0, present = 0, paid = 0, absent = 0, notPaying = 0;
+                cls.students.forEach(s => {
+                    if (s.status === 'absent') { absent++; totalAbsent++; } else { present++; }
+                    if (s.status === 'exempt') { notPaying++; totalNotPaying++; }
+                    if (s.status === 'paid') { paid++; classColl += cls.fee; totalPaidStudents++; }
+                    if (s.status !== 'absent' && s.status !== 'exempt') { classExp += cls.fee; totalExpected += cls.fee; }
+                });
+                totalCollected += classColl;
+                totalPresent += present;
+                classSummaries.push(`${cls.className}: ${paid} Paid | ${absent} Absent | ${notPaying} Free`);
             });
-            totalCollected += classColl;
-            totalPresent += present;
-            classSummaries.push(`${cls.className}: ${paid} Paid | ${absent} Absent | ${notPaying} Free`);
-        });
 
-        const report = {
-            id: Date.now(), date: dateStr, timeFinished: timeStr,
-            officer: this.currentSession ? this.currentSession.username : 'Unknown',
-            totalExpected, totalCollected, totalOutstanding: totalExpected - totalCollected,
-            totalPresent, totalPaidStudents, totalAbsent, totalNotPaying, classDetails: classSummaries
-        };
+            const report = {
+                id: Date.now(), date: dateStr, timeFinished: timeStr,
+                officer: this.currentSession ? this.currentSession.username : 'Unknown',
+                totalExpected, totalCollected, totalOutstanding: totalExpected - totalCollected,
+                totalPresent, totalPaidStudents, totalAbsent, totalNotPaying, classDetails: classSummaries
+            };
 
-        let reports = Store.get('daily_reports') || [];
-        reports.unshift(report); 
-        Store.set('daily_reports', reports);
+            let reports = Store.get('daily_reports') || [];
+            reports.unshift(report); 
+            Store.set('daily_reports', reports);
 
-        const resetRoster = roster.map(cls => ({
-            ...cls, students: cls.students.map(s => ({ ...s, status: 'unpaid', time: null }))
-        }));
-        Store.set(`roster_${dateStr}`, resetRoster);
+            const resetRoster = roster.map(cls => ({
+                ...cls, students: cls.students.map(s => ({ ...s, status: 'unpaid', time: null }))
+            }));
+            Store.set(`roster_${dateStr}`, resetRoster);
 
-        const summary = `
+            const summary = `
 ALPHA TECH - DAILY FEEDING SUMMARY
 ----------------------------------
 Date: ${report.date} | Time: ${report.timeFinished}
@@ -567,38 +546,41 @@ CLASS BREAKDOWN:
 ${report.classDetails.join('\n')}
 ----------------------------------
 Generated by Alpha Tech System
-        `.trim();
+            `.trim();
 
-        this.currentReportText = summary;
-        document.getElementById('report-content').textContent = summary;
-        document.getElementById('report-modal').style.display = 'flex';
+            this.currentReportText = summary;
+            document.getElementById('report-content').textContent = summary;
+            document.getElementById('report-modal').style.display = 'flex';
+        } catch (error) {
+            console.error("Error finishing day:", error);
+            alert("An unexpected error occurred. Please try again.");
+        }
     },
 
     renderReportsList() {
         const reports = Store.get('daily_reports') || [];
         const container = document.getElementById('reports-list-container');
-        container.innerHTML = '';
+        
         if (reports.length === 0) {
             container.innerHTML = '<p style="color: var(--color-text-muted); text-align: center;">No saved reports yet.</p>';
             return;
         }
+        
+        let reportsHtml = '';
         reports.forEach(rep => {
-            const div = document.createElement('div');
-            div.className = 'settings-row';
-            div.style.cursor = 'pointer';
-            div.onclick = () => UI.viewReport(rep.id);
-            div.innerHTML = `
-                <div>
-                    <strong style="color: var(--color-primary);">${rep.date}</strong>
-                    <span style="color: var(--color-text-muted); font-size: 0.85rem; margin-left: 10px;">at ${rep.timeFinished}</span>
-                </div>
-                <div style="text-align: right;">
-                    <span style="font-weight: 700; color: var(--color-accent);">GHS ${(rep.totalCollected / 100).toFixed(2)}</span>
-                    <span style="font-size: 0.8rem; color: var(--color-text-muted); display: block;">By ${rep.officer}</span>
-                </div>
-            `;
-            container.appendChild(div);
+            reportsHtml += `
+                <div class="settings-row" style="cursor: pointer;" onclick="UI.viewReport(${rep.id})">
+                    <div>
+                        <strong style="color: var(--color-primary);">${rep.date}</strong>
+                        <span style="color: var(--color-text-muted); font-size: 0.85rem; margin-left: 10px;">at ${rep.timeFinished}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-weight: 700; color: var(--color-accent);">GHS ${(rep.totalCollected / 100).toFixed(2)}</span>
+                        <span style="font-size: 0.8rem; color: var(--color-text-muted); display: block;">By ${rep.officer}</span>
+                    </div>
+                </div>`;
         });
+        container.innerHTML = reportsHtml;
     },
 
     viewReport(reportId) {
