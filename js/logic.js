@@ -68,17 +68,23 @@ const UI = {
         if (target) target.style.display = 'block';
 
         if (pushHistory && screenId !== this.currentScreen) {
-            history.pushState({ screen: screenId }, '', `#${screenId}`);
+            // FIX: Save classId in history state so it survives the back button
+            const stateData = { screen: screenId };
+            if (screenId === 'class-portal-screen' && this.currentClassId) {
+                stateData.classId = this.currentClassId;
+            }
+            history.pushState(stateData, '', `#${screenId}`);
         }
         this.currentScreen = screenId;
     },
 
     handlePopState(event) {
-        const state = event.state;
-        let screenId = 'login-screen';
-
-        if (state && state.screen) {
-            screenId = state.screen;
+        const state = event.state || {};
+        let screenId = state.screen || 'login-screen';
+        
+        // FIX: Restore classId from history state if it exists
+        if (state.classId) {
+            this.currentClassId = state.classId;
         }
 
         this.navigateTo(screenId, false);
@@ -96,8 +102,43 @@ const UI = {
 
     init() {
         window.addEventListener('popstate', (e) => this.handlePopState(e));
+        
+        // FIX: Check if user is already logged in to prevent logout on refresh
+        const session = Store.get('current_session');
+        
         if (!Auth.isAdminSetup()) { 
             this.navigateTo('setup-screen');
+        } else if (session && session.username) {
+            // Restore session
+            this.currentSession = session;
+            document.getElementById('user-display-name').textContent = session.username;
+            document.getElementById('admin-settings-btn').style.display = session.role === 'admin' ? 'inline-flex' : 'none';
+            
+            // Check URL hash to see where they were, default to dashboard
+            const hash = window.location.hash.replace('#', '');
+            let targetScreen = 'dashboard-screen';
+            
+            if (hash === 'admin-settings-screen') {
+                targetScreen = 'admin-settings-screen';
+            } else if (hash === 'class-portal-screen') {
+                // Restore classId from sessionStorage if refreshing on class portal
+                const savedClassId = sessionStorage.getItem('currentClassId');
+                if (savedClassId) {
+                    this.currentClassId = savedClassId;
+                    targetScreen = 'class-portal-screen';
+                }
+            }
+            
+            this.navigateTo(targetScreen, false);
+            
+            if (targetScreen === 'dashboard-screen') {
+                this.renderDashboard();
+            } else if (targetScreen === 'class-portal-screen') {
+                this.renderClassPortal(this.currentClassId, '');
+            } else if (targetScreen === 'admin-settings-screen') {
+                this.renderAdminSettings();
+                this.renderReportsList();
+            }
         } else { 
             this.navigateTo('login-screen');
             this.toggleForgotPasswordLink();
@@ -136,17 +177,18 @@ const UI = {
         
         if (success) {
             errorMsg.style.display = 'none';
-            this.navigateTo('dashboard-screen');
-            document.getElementById('user-display-name').textContent = username;
             this.currentSession = { username, role };
             Store.set('current_session', this.currentSession);
+            document.getElementById('user-display-name').textContent = username;
             document.getElementById('admin-settings-btn').style.display = role === 'admin' ? 'inline-flex' : 'none';
+            this.navigateTo('dashboard-screen');
             this.renderDashboard(); 
         } else { errorMsg.style.display = 'block'; }
     },
 
     logout() { 
         Store.set('current_session', null); 
+        sessionStorage.removeItem('currentClassId');
         location.reload(); 
     },
 
@@ -245,9 +287,8 @@ const UI = {
 
         let totalExpected = 0, totalCollected = 0;
         const gridContainer = document.getElementById('class-grid-container');
-        
-        // FIX: Build HTML string first to prevent mobile DOM rendering bugs
         let gridHtml = '';
+        
         roster.forEach(cls => {
             let classExpected = 0, classCollected = 0, paidCount = 0, absentCount = 0, notPayingCount = 0;
             cls.students.forEach(student => {
@@ -285,12 +326,17 @@ const UI = {
     },
 
     openClassPortal(classId) {
+        this.currentClassId = classId;
+        sessionStorage.setItem('currentClassId', classId); // FIX: Save for refresh recovery
         this.navigateTo('class-portal-screen');
         document.getElementById('student-search').value = '';
         this.renderClassPortal(classId, '');
     },
 
-    goBackToDashboard() { history.back(); },
+    goBackToDashboard() { 
+        sessionStorage.removeItem('currentClassId'); // FIX: Clean up on exit
+        history.back(); 
+    },
 
     renderClassPortal(classId, filterQuery = '') {
         this.currentClassId = classId;
@@ -311,8 +357,6 @@ const UI = {
 
         let paidCount = 0, collectedTotal = 0, absentCount = 0, notPayingCount = 0;
         const container = document.getElementById('student-list-container');
-        
-        // FIX: Build HTML string first to prevent mobile DOM rendering bugs
         let htmlContent = '';
 
         if (studentsToShow.length === 0) {
@@ -423,8 +467,6 @@ const UI = {
 
         const classes = Store.get('classes');
         const container = document.getElementById('settings-list-container');
-        
-        // FIX: Build HTML string first
         let settingsHtml = '';
         classes.forEach(cls => {
             const feeInGhs = (cls.fee / 100).toFixed(2);
