@@ -77,6 +77,31 @@ const UI = {
         this.pendingConfirmCallback = null;
     },
 
+    // NEW: Factory Reset Functions
+    showFactoryResetModal() {
+        document.getElementById('factory-reset-input').value = '';
+        document.getElementById('factory-reset-modal').style.display = 'flex';
+    },
+
+    closeFactoryResetModal() {
+        document.getElementById('factory-reset-modal').style.display = 'none';
+    },
+
+    confirmFactoryReset() {
+        const input = document.getElementById('factory-reset-input').value.trim().toUpperCase();
+        if (input === 'RESET') {
+            // Wipe all data
+            localStorage.clear();
+            sessionStorage.clear();
+            alert("System has been factory reset. Reloading...");
+            location.reload();
+        } else {
+            alert("⚠️ You must type exactly RESET to confirm.");
+            document.getElementById('factory-reset-input').value = '';
+            document.getElementById('factory-reset-input').focus();
+        }
+    },
+
     navigateTo(screenId, pushHistory = true) {
         const screens = ['setup-screen', 'login-screen', 'dashboard-screen', 'class-portal-screen', 'admin-settings-screen', 'forgot-password-screen'];
         screens.forEach(id => {
@@ -383,7 +408,7 @@ const UI = {
 
                 let badgeHTML = '', actionHTML = '';
                 
-                // FIXED: Unpaid students now see Collect, Absent, AND Free buttons
+                // Unpaid students see Collect, Absent, AND Free buttons
                 if (student.status === 'unpaid') {
                     badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
                     actionHTML = `
@@ -450,7 +475,6 @@ const UI = {
     markAbsent(classId, studentId) { this.updateStudentStatus(classId, studentId, 'absent'); },
     markNotPaying(classId, studentId) { this.updateStudentStatus(classId, studentId, 'exempt'); },
     
-    // FIXED: Added custom confirm for resetting status
     resetStatus(classId, studentId) {
         this.showConfirm("Reset this student to Unpaid?", () => {
             this.updateStudentStatus(classId, studentId, 'unpaid');

@@ -51,7 +51,7 @@
             </div>
             <div id="setup-step-2" style="display: none;">
                 <div class="recovery-box">
-                    <div class="warning-text">⚠️ CRITICAL: Write this down on paper!</div>
+                    <div class="warning-text">️ CRITICAL: Write this down on paper!</div>
                     <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">If you forget your password, this is the ONLY way to recover your account. Store it in a safe place.</p>
                     <div class="recovery-words" id="recovery-words-display"></div>
                 </div>
@@ -126,6 +126,11 @@
                 <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()">
                     🔐 Forgot Password? (Admin Recovery)
                 </button>
+
+                <!-- Factory Reset Link -->
+                <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7; transition: opacity 0.2s;">
+                    Lost recovery phrase? Reset System
+                </a>
             </div>
         </div>
 
@@ -186,7 +191,7 @@
                     <p class="text-muted" id="current-date">Loading date...</p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
-                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">⚙️ Admin Settings</button>
+                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">️ Admin Settings</button>
                 </div>
             </div>
 
@@ -251,7 +256,7 @@
             <div class="portal-header">
                 <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
                 <div class="portal-title">
-                    <h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1>
+                    <h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">️ Admin Settings</h1>
                     <p class="text-muted">Manage Fees, Staff & Reports</p>
                 </div>
                 <button class="btn btn-primary" onclick="UI.logout()">Log Out</button>
@@ -300,13 +305,30 @@
                 </div>
             </div>
         </div>
-                <!-- NEW: Custom Confirm Modal (Replaces native browser popups) -->
+
+        <!-- Custom Confirm Modal (Replaces native browser popups) -->
         <div id="confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
             <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg); text-align: center;">
                 <p id="confirm-message" style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--color-text-main); font-weight: 500;">Are you sure?</p>
                 <div style="display: flex; gap: 1rem; justify-content: center;">
                     <button onclick="UI.handleConfirmCancel()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
                     <button onclick="UI.handleConfirmOk()" class="btn btn-primary" style="flex: 1;">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Factory Reset Modal -->
+        <div id="factory-reset-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10002; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 450px; width: 90%; box-shadow: var(--shadow-lg); text-align: center; border-top: 5px solid var(--color-danger);">
+                <h3 style="color: var(--color-danger); margin-bottom: 1rem; font-size: 1.25rem;">⚠️ FACTORY RESET</h3>
+                <p style="color: var(--color-text-main); margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">
+                    This will <strong>permanently delete</strong> the Admin account, Cashier accounts, and all saved daily reports. The system will start completely fresh.
+                </p>
+                <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">To confirm, type <strong style="color: var(--color-danger);">RESET</strong> below:</p>
+                <input type="text" id="factory-reset-input" class="form-input" style="text-align: center; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 2px; font-weight: bold;" placeholder="Type RESET">
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button onclick="UI.closeFactoryResetModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.confirmFactoryReset()" class="btn" style="background: var(--color-danger); color: white; flex: 1;">Erase Everything</button>
                 </div>
             </div>
         </div>

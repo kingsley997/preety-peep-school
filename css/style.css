@@ -1029,3 +1029,10 @@ body {
 #confirm-modal[style*="flex"] {
     display: flex !important;
 }
+/* Factory Reset Modal Styles */
+#factory-reset-modal {
+    display: none;
+}
+#factory-reset-modal[style*="flex"] {
+    display: flex !important;
+}
