@@ -387,16 +387,16 @@ const UI = {
                     actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>`;
                 } else if (student.status === 'paid') {
                     badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
-                    // FIXED: Explicitly restored the ↩️ emoji
-                    actionHTML = `<button class="btn-icon" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">↩️</button>`;
+                    // UPDATED: Added btn-undo class for yellow background
+                    actionHTML = `<button class="btn-icon btn-undo" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">↩️</button>`;
                 } else if (student.status === 'absent') {
                     badgeHTML = `<span class="status-badge status-absent">Absent</span>`;
-                    // FIXED: Explicitly restored the 🚫 emoji
-                    actionHTML = `<button class="btn-icon" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>`;
+                    // UPDATED: Added btn-absent class for red background
+                    actionHTML = `<button class="btn-icon btn-absent" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>`;
                 } else if (student.status === 'exempt') {
                     badgeHTML = `<span class="status-badge status-exempt">Not Paying</span>`;
-                    // FIXED: Explicitly restored the 🆓 emoji
-                    actionHTML = `<button class="btn-icon" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>`;
+                    // UPDATED: Added btn-exempt class for blue background
+                    actionHTML = `<button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>`;
                 }
 
                 htmlContent += `

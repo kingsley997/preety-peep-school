@@ -131,7 +131,7 @@ body {
 }
 
 .password-wrapper .form-input {
-    padding-right: 45px; /* Makes room for the eye button so text doesn't hide behind it */
+    padding-right: 45px;
 }
 
 .eye-btn {
@@ -469,7 +469,7 @@ body {
 /* 9. LOCKED STATE & MODAL STYLES (BULLETPROOF) */
 .class-grid.locked {
     opacity: 0.6 !important;
-    pointer-events: none !important; /* FORCE disable all clicks */
+    pointer-events: none !important;
     filter: grayscale(80%) !important;
 }
 
@@ -498,7 +498,6 @@ body {
 
 /* 10. MOBILE & TABLET RESPONSIVENESS */
 @media (max-width: 768px) {
-    /* Stack dashboard header on mobile/tablet */
     .dashboard-header {
         flex-direction: column;
         align-items: flex-start;
@@ -513,11 +512,10 @@ body {
     }
     
     .dashboard-header > div:last-child .btn {
-        flex: 1; /* Makes buttons stretch to be easy to tap */
+        flex: 1;
         justify-content: center;
     }
 
-    /* Stack portal header on mobile/tablet */
     .portal-header {
         flex-direction: column;
         align-items: flex-start;
@@ -531,16 +529,15 @@ body {
         gap: 1rem;
     }
 
-    /* --- FIXED: Mobile Student Row Layout (Stacked) --- */
     .student-row {
-        flex-direction: column; /* Stack name and buttons vertically */
+        flex-direction: column;
         align-items: flex-start;
         gap: 0.75rem;
         padding: 1rem;
     }
     
     .student-info {
-        width: 100%; /* Give the name full width so it wraps naturally */
+        width: 100%;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
@@ -548,19 +545,19 @@ body {
 
     .student-name {
         word-wrap: break-word;
-        overflow-wrap: break-word; /* Only breaks at spaces, prevents vertical letter stacking */
+        overflow-wrap: break-word;
         line-height: 1.4;
         font-size: 1rem;
     }
     
     .student-actions {
         width: 100%;
-        justify-content: flex-end; /* Push buttons to the right */
+        justify-content: flex-end;
         flex-wrap: wrap;
         gap: 0.5rem;
     }
     
-    /* UPDATED: Visible background and circular shape for mobile icon buttons */
+    /* UPDATED: Bulletproof visible buttons with intuitive color coding */
     .btn-icon {
         padding: 0;
         font-size: 1.3rem;
@@ -569,20 +566,49 @@ body {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         cursor: pointer;
-        background-color: #f1f5f9; 
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         width: 44px;
         height: 44px;
-        color: var(--color-text-main);
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-weight: bold;
     }
 
-    .btn-icon:hover {
+    /* Default Delete Button (Gray) */
+    .btn-icon:not(.btn-undo):not(.btn-absent):not(.btn-exempt) {
+        background-color: #f1f5f9;
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+    .btn-icon:not(.btn-undo):not(.btn-absent):not(.btn-exempt):hover {
         background-color: #e2e8f0;
     }
+
+    /* Undo Button (Yellow/Amber) */
+    .btn-undo {
+        background-color: #fef3c7;
+        color: #92400e;
+        border-color: #fcd34d;
+    }
+    .btn-undo:hover { background-color: #fde68a; }
+
+    /* Absent Button (Red) */
+    .btn-absent {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border-color: #fca5a5;
+    }
+    .btn-absent:hover { background-color: #fecaca; }
+
+    /* Exempt/Free Button (Blue) */
+    .btn-exempt {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border-color: #93c5fd;
+    }
+    .btn-exempt:hover { background-color: #bfdbfe; }
 
     .btn-collect {
         padding: 0.75rem 1rem;
@@ -595,7 +621,6 @@ body {
         cursor: pointer;
     }
     
-    /* Ensure settings inputs are easy to tap */
     .settings-row {
         flex-direction: column;
         align-items: flex-start;
@@ -611,8 +636,6 @@ body {
 /* ============================================
    11. STUNNING LOGIN HERO SECTION
    ============================================ */
-
-/* Hero Container */
 .login-hero {
     position: relative;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
@@ -625,7 +648,6 @@ body {
     justify-content: center;
 }
 
-/* Animated Geometric Pattern Background */
 .hero-pattern {
     position: absolute;
     top: 0;
@@ -645,7 +667,6 @@ body {
     50% { transform: scale(1.1) rotate(2deg); }
 }
 
-/* Floating Particles */
 .hero-particles {
     position: absolute;
     top: 0;
@@ -675,7 +696,6 @@ body {
     50% { transform: translateY(-30px) translateX(15px); opacity: 0.8; }
 }
 
-/* Hero Content */
 .hero-content {
     position: relative;
     z-index: 2;
@@ -687,7 +707,6 @@ body {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Logo Section */
 .hero-logos {
     display: flex;
     align-items: center;
@@ -738,7 +757,6 @@ body {
     100% { opacity: 1; height: 60px; }
 }
 
-/* Hero Title */
 .hero-title {
     color: white;
     font-size: 2rem;
@@ -755,7 +773,6 @@ body {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Hero Tagline with Lines */
 .hero-tagline {
     display: flex;
     align-items: center;
@@ -800,7 +817,6 @@ body {
     100% { opacity: 1; }
 }
 
-/* Login Form Card - Overlaps Hero */
 .login-form-card {
     margin-top: -2rem;
     position: relative;
@@ -818,7 +834,6 @@ body {
    12. MOBILE & TABLET HERO RESPONSIVENESS
    ============================================ */
 
-/* Tablet View (768px and below) */
 @media (max-width: 768px) {
     .login-hero {
         padding: 2rem 1rem 3rem;
@@ -873,7 +888,6 @@ body {
     }
 }
 
-/* Mobile View (480px and below) */
 @media (max-width: 480px) {
     .login-hero {
         padding: 1.5rem 1rem 2.5rem;
@@ -931,13 +945,11 @@ body {
         padding: 1.75rem;
     }
     
-    /* Reduce particle animation on mobile for better performance */
     .hero-particles span {
         animation-duration: 12s;
     }
 }
 
-/* Very Small Mobile (360px and below) */
 @media (max-width: 360px) {
     .login-hero {
         padding: 1.25rem 0.75rem 2rem;
@@ -967,7 +979,6 @@ body {
     }
 }
 
-/* Landscape Mobile */
 @media (max-height: 500px) and (orientation: landscape) {
     .login-hero {
         padding: 1rem;
@@ -993,11 +1004,10 @@ body {
     }
     
     .hero-subtitle {
-        display: none; /* Hide subtitle in landscape to save space */
+        display: none;
     }
 }
 
-/* Dark Mode Support (if user prefers) */
 @media (prefers-reduced-motion: reduce) {
     .hero-pattern,
     .hero-particles span,
