@@ -997,3 +997,10 @@ body {
         transform: none !important;
     }
 }
+/* Custom Confirm Modal Styles */
+#confirm-modal {
+    display: none;
+}
+#confirm-modal[style*="flex"] {
+    display: flex !important;
+}

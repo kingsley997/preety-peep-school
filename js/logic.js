@@ -45,6 +45,7 @@ const UI = {
     currentSession: null,
     currentReportText: "",
     currentScreen: 'login',
+    pendingConfirmCallback: null, // For custom confirm modal
 
     getLocalDateStr() {
         const d = new Date();
@@ -55,6 +56,26 @@ const UI = {
         const input = document.getElementById(inputId);
         if (input.type === "password") { input.type = "text"; btn.textContent = "🙈"; } 
         else { input.type = "password"; btn.textContent = "👁️"; }
+    },
+
+    // NEW: Custom Confirm Modal Functions
+    showConfirm(message, callback) {
+        document.getElementById('confirm-message').textContent = message;
+        this.pendingConfirmCallback = callback;
+        document.getElementById('confirm-modal').style.display = 'flex';
+    },
+
+    handleConfirmOk() {
+        document.getElementById('confirm-modal').style.display = 'none';
+        if (this.pendingConfirmCallback) {
+            this.pendingConfirmCallback();
+            this.pendingConfirmCallback = null;
+        }
+    },
+
+    handleConfirmCancel() {
+        document.getElementById('confirm-modal').style.display = 'none';
+        this.pendingConfirmCallback = null;
     },
 
     navigateTo(screenId, pushHistory = true) {
@@ -68,7 +89,6 @@ const UI = {
         if (target) target.style.display = 'block';
 
         if (pushHistory && screenId !== this.currentScreen) {
-            // FIX: Save classId in history state so it survives the back button
             const stateData = { screen: screenId };
             if (screenId === 'class-portal-screen' && this.currentClassId) {
                 stateData.classId = this.currentClassId;
@@ -82,7 +102,6 @@ const UI = {
         const state = event.state || {};
         let screenId = state.screen || 'login-screen';
         
-        // FIX: Restore classId from history state if it exists
         if (state.classId) {
             this.currentClassId = state.classId;
         }
@@ -103,25 +122,21 @@ const UI = {
     init() {
         window.addEventListener('popstate', (e) => this.handlePopState(e));
         
-        // FIX: Check if user is already logged in to prevent logout on refresh
         const session = Store.get('current_session');
         
         if (!Auth.isAdminSetup()) { 
             this.navigateTo('setup-screen');
         } else if (session && session.username) {
-            // Restore session
             this.currentSession = session;
             document.getElementById('user-display-name').textContent = session.username;
             document.getElementById('admin-settings-btn').style.display = session.role === 'admin' ? 'inline-flex' : 'none';
             
-            // Check URL hash to see where they were, default to dashboard
             const hash = window.location.hash.replace('#', '');
             let targetScreen = 'dashboard-screen';
             
             if (hash === 'admin-settings-screen') {
                 targetScreen = 'admin-settings-screen';
             } else if (hash === 'class-portal-screen') {
-                // Restore classId from sessionStorage if refreshing on class portal
                 const savedClassId = sessionStorage.getItem('currentClassId');
                 if (savedClassId) {
                     this.currentClassId = savedClassId;
@@ -195,7 +210,7 @@ const UI = {
     showForgotPassword() {
         const role = document.getElementById('login-role').value;
         if (role !== 'admin') {
-            alert("⚠️ The Forgot Password feature is only available for the Master Admin.\n\nIf you are a Cashier who forgot their password, please contact the School Owner/Admin to reset it.");
+            alert("️ The Forgot Password feature is only available for the Master Admin.\n\nIf you are a Cashier who forgot their password, please contact the School Owner/Admin to reset it.");
             return;
         }
         const adminData = Store.get('admin_user');
@@ -327,14 +342,14 @@ const UI = {
 
     openClassPortal(classId) {
         this.currentClassId = classId;
-        sessionStorage.setItem('currentClassId', classId); // FIX: Save for refresh recovery
+        sessionStorage.setItem('currentClassId', classId);
         this.navigateTo('class-portal-screen');
         document.getElementById('student-search').value = '';
         this.renderClassPortal(classId, '');
     },
 
     goBackToDashboard() { 
-        sessionStorage.removeItem('currentClassId'); // FIX: Clean up on exit
+        sessionStorage.removeItem('currentClassId');
         history.back(); 
     },
 
@@ -373,13 +388,13 @@ const UI = {
                     actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>`;
                 } else if (student.status === 'paid') {
                     badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
-                    actionHTML = `<button class="btn-icon" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">↩️</button>`;
+                    actionHTML = `<button class="btn-icon" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">️</button>`;
                 } else if (student.status === 'absent') {
                     badgeHTML = `<span class="status-badge status-absent">Absent</span>`;
-                    actionHTML = `<button class="btn-icon" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset">↩️</button>`;
+                    actionHTML = `<button class="btn-icon" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>`;
                 } else if (student.status === 'exempt') {
                     badgeHTML = `<span class="status-badge status-exempt">Not Paying</span>`;
-                    actionHTML = `<button class="btn-icon" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset">↩️</button>`;
+                    actionHTML = `<button class="btn-icon" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>`;
                 }
 
                 htmlContent += `
@@ -387,8 +402,6 @@ const UI = {
                         <div class="student-info"><span class="student-name">${student.name}</span>${badgeHTML}</div>
                         <div class="student-actions">
                             ${actionHTML}
-                            <button class="btn-icon" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
-                            <button class="btn-icon" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>
                             <button class="btn-icon" onclick="UI.removeStudentToday('${classId}', '${student.id}')" title="Remove for Today">🗑️</button>
                         </div>
                     </div>`;
@@ -422,10 +435,29 @@ const UI = {
     },
 
     collectFee(classId, studentId) { this.updateStudentStatus(classId, studentId, 'paid'); },
-    undoPayment(classId, studentId) { if(confirm(`Undo payment?`)) this.updateStudentStatus(classId, studentId, 'unpaid'); },
+    
+    // FIXED: Replaced native confirm() with custom modal
+    undoPayment(classId, studentId) {
+        this.showConfirm("Undo this payment?", () => {
+            this.updateStudentStatus(classId, studentId, 'unpaid');
+        });
+    },
+
     markAbsent(classId, studentId) { this.updateStudentStatus(classId, studentId, 'absent'); },
     markNotPaying(classId, studentId) { this.updateStudentStatus(classId, studentId, 'exempt'); },
-    resetStatus(classId, studentId) { if(confirm(`Reset to Unpaid?`)) this.updateStudentStatus(classId, studentId, 'unpaid'); },
+    
+    // FIXED: Replaced native confirm() with custom modal
+    removeStudentToday(classId, studentId) {
+        this.showConfirm("Remove this student from today's list?", () => {
+            const dateStr = this.getLocalDateStr();
+            const roster = Store.get(`roster_${dateStr}`);
+            const cls = roster.find(c => c.classId === classId);
+            cls.students = cls.students.filter(s => s.id !== studentId);
+            Store.set(`roster_${dateStr}`, roster); 
+            const currentQuery = document.getElementById('student-search').value;
+            this.renderClassPortal(classId, currentQuery);
+        });
+    },
     
     addStudentForToday() {
         const nameInput = document.getElementById('new-student-name');
@@ -438,17 +470,6 @@ const UI = {
         Store.set(`roster_${dateStr}`, roster); nameInput.value = ''; 
         document.getElementById('student-search').value = '';
         this.renderClassPortal(this.currentClassId, '');
-    },
-
-    removeStudentToday(classId, studentId) {
-        if (!confirm("Remove this student from today's list?")) return;
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`);
-        const cls = roster.find(c => c.classId === classId);
-        cls.students = cls.students.filter(s => s.id !== studentId);
-        Store.set(`roster_${dateStr}`, roster); 
-        const currentQuery = document.getElementById('student-search').value;
-        this.renderClassPortal(classId, currentQuery);
     },
 
     openAdminSettings() {
@@ -523,51 +544,51 @@ const UI = {
         }
     },
 
+    // FIXED: Replaced native confirm() with custom modal
     finishDayAndSave() {
-        if (!confirm("Are you sure you want to FINISH the day? This will save a report and reset the board for tomorrow.")) return;
+        this.showConfirm("Are you sure you want to FINISH the day? This will save a report and reset the board for tomorrow.", () => {
+            try {
+                const now = new Date();
+                const dateStr = this.getLocalDateStr();
+                const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                const roster = Store.get(`roster_${dateStr}`);
+                
+                if (!roster) return alert("No data to save for today.");
 
-        try {
-            const now = new Date();
-            const dateStr = this.getLocalDateStr();
-            const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            const roster = Store.get(`roster_${dateStr}`);
-            
-            if (!roster) return alert("No data to save for today.");
+                let totalExpected = 0, totalCollected = 0, totalPresent = 0, totalPaidStudents = 0;
+                let totalAbsent = 0, totalNotPaying = 0;
+                let classSummaries = [];
 
-            let totalExpected = 0, totalCollected = 0, totalPresent = 0, totalPaidStudents = 0;
-            let totalAbsent = 0, totalNotPaying = 0;
-            let classSummaries = [];
-
-            roster.forEach(cls => {
-                let classExp = 0, classColl = 0, present = 0, paid = 0, absent = 0, notPaying = 0;
-                cls.students.forEach(s => {
-                    if (s.status === 'absent') { absent++; totalAbsent++; } else { present++; }
-                    if (s.status === 'exempt') { notPaying++; totalNotPaying++; }
-                    if (s.status === 'paid') { paid++; classColl += cls.fee; totalPaidStudents++; }
-                    if (s.status !== 'absent' && s.status !== 'exempt') { classExp += cls.fee; totalExpected += cls.fee; }
+                roster.forEach(cls => {
+                    let classExp = 0, classColl = 0, present = 0, paid = 0, absent = 0, notPaying = 0;
+                    cls.students.forEach(s => {
+                        if (s.status === 'absent') { absent++; totalAbsent++; } else { present++; }
+                        if (s.status === 'exempt') { notPaying++; totalNotPaying++; }
+                        if (s.status === 'paid') { paid++; classColl += cls.fee; totalPaidStudents++; }
+                        if (s.status !== 'absent' && s.status !== 'exempt') { classExp += cls.fee; totalExpected += cls.fee; }
+                    });
+                    totalCollected += classColl;
+                    totalPresent += present;
+                    classSummaries.push(`${cls.className}: ${paid} Paid | ${absent} Absent | ${notPaying} Free`);
                 });
-                totalCollected += classColl;
-                totalPresent += present;
-                classSummaries.push(`${cls.className}: ${paid} Paid | ${absent} Absent | ${notPaying} Free`);
-            });
 
-            const report = {
-                id: Date.now(), date: dateStr, timeFinished: timeStr,
-                officer: this.currentSession ? this.currentSession.username : 'Unknown',
-                totalExpected, totalCollected, totalOutstanding: totalExpected - totalCollected,
-                totalPresent, totalPaidStudents, totalAbsent, totalNotPaying, classDetails: classSummaries
-            };
+                const report = {
+                    id: Date.now(), date: dateStr, timeFinished: timeStr,
+                    officer: this.currentSession ? this.currentSession.username : 'Unknown',
+                    totalExpected, totalCollected, totalOutstanding: totalExpected - totalCollected,
+                    totalPresent, totalPaidStudents, totalAbsent, totalNotPaying, classDetails: classSummaries
+                };
 
-            let reports = Store.get('daily_reports') || [];
-            reports.unshift(report); 
-            Store.set('daily_reports', reports);
+                let reports = Store.get('daily_reports') || [];
+                reports.unshift(report); 
+                Store.set('daily_reports', reports);
 
-            const resetRoster = roster.map(cls => ({
-                ...cls, students: cls.students.map(s => ({ ...s, status: 'unpaid', time: null }))
-            }));
-            Store.set(`roster_${dateStr}`, resetRoster);
+                const resetRoster = roster.map(cls => ({
+                    ...cls, students: cls.students.map(s => ({ ...s, status: 'unpaid', time: null }))
+                }));
+                Store.set(`roster_${dateStr}`, resetRoster);
 
-            const summary = `
+                const summary = `
 ALPHA TECH - DAILY FEEDING SUMMARY
 ----------------------------------
 Date: ${report.date} | Time: ${report.timeFinished}
@@ -588,15 +609,16 @@ CLASS BREAKDOWN:
 ${report.classDetails.join('\n')}
 ----------------------------------
 Generated by Alpha Tech System
-            `.trim();
+                `.trim();
 
-            this.currentReportText = summary;
-            document.getElementById('report-content').textContent = summary;
-            document.getElementById('report-modal').style.display = 'flex';
-        } catch (error) {
-            console.error("Error finishing day:", error);
-            alert("An unexpected error occurred. Please try again.");
-        }
+                this.currentReportText = summary;
+                document.getElementById('report-content').textContent = summary;
+                document.getElementById('report-modal').style.display = 'flex';
+            } catch (error) {
+                console.error("Error finishing day:", error);
+                alert("An unexpected error occurred. Please try again.");
+            }
+        });
     },
 
     renderReportsList() {
@@ -675,7 +697,7 @@ Generated by Alpha Tech System
             if (successful) alert("✅ Summary copied! You can now paste it into WhatsApp.");
             else alert("⚠️ Copy failed. Please select the text manually and copy.");
         } catch (err) {
-            alert("⚠️ Your browser doesn't support auto-copy. Please select the text manually.");
+            alert("️ Your browser doesn't support auto-copy. Please select the text manually.");
         }
         document.body.removeChild(textArea);
     },
