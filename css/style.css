@@ -560,14 +560,28 @@ body {
         gap: 0.5rem;
     }
     
+    /* UPDATED: Visible background and circular shape for mobile icon buttons */
     .btn-icon {
-        padding: 0.6rem;
+        padding: 0;
         font-size: 1.3rem;
         position: relative;
-        z-index: 10; /* Forces button to be on top of any overlapping elements */
-        touch-action: manipulation; /* Prevents double-tap zoom delay on mobile */
-        -webkit-tap-highlight-color: transparent; /* Removes the gray tap box on iOS */
+        z-index: 10;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
         cursor: pointer;
+        background-color: #f1f5f9; 
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        color: var(--color-text-main);
+    }
+
+    .btn-icon:hover {
+        background-color: #e2e8f0;
     }
 
     .btn-collect {
@@ -997,6 +1011,7 @@ body {
         transform: none !important;
     }
 }
+
 /* Custom Confirm Modal Styles */
 #confirm-modal {
     display: none;
