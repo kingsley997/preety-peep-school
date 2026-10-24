@@ -382,21 +382,24 @@ const UI = {
                 if (student.status === 'exempt') notPayingCount++;
 
                 let badgeHTML = '', actionHTML = '';
+                
+                // FIXED: Unpaid students now see Collect, Absent, AND Free buttons
                 if (student.status === 'unpaid') {
                     badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
-                    actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>`;
+                    actionHTML = `
+                        <button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>
+                        <button class="btn-icon btn-absent" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
+                        <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>
+                    `;
                 } else if (student.status === 'paid') {
                     badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
-                    // UPDATED: Added btn-undo class for yellow background
-                    actionHTML = `<button class="btn-icon btn-undo" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo">↩️</button>`;
+                    actionHTML = `<button class="btn-icon btn-undo" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo Payment">↩️</button>`;
                 } else if (student.status === 'absent') {
                     badgeHTML = `<span class="status-badge status-absent">Absent</span>`;
-                    // UPDATED: Added btn-absent class for red background
-                    actionHTML = `<button class="btn-icon btn-absent" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>`;
+                    actionHTML = `<button class="btn-icon btn-undo" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset to Unpaid">↩️</button>`;
                 } else if (student.status === 'exempt') {
                     badgeHTML = `<span class="status-badge status-exempt">Not Paying</span>`;
-                    // UPDATED: Added btn-exempt class for blue background
-                    actionHTML = `<button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>`;
+                    actionHTML = `<button class="btn-icon btn-undo" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset to Unpaid">↩️</button>`;
                 }
 
                 htmlContent += `
@@ -446,6 +449,13 @@ const UI = {
 
     markAbsent(classId, studentId) { this.updateStudentStatus(classId, studentId, 'absent'); },
     markNotPaying(classId, studentId) { this.updateStudentStatus(classId, studentId, 'exempt'); },
+    
+    // FIXED: Added custom confirm for resetting status
+    resetStatus(classId, studentId) {
+        this.showConfirm("Reset this student to Unpaid?", () => {
+            this.updateStudentStatus(classId, studentId, 'unpaid');
+        });
+    },
     
     removeStudentToday(classId, studentId) {
         this.showConfirm("Remove this student from today's list?", () => {
