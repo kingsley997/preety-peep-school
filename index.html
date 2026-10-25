@@ -297,24 +297,83 @@
             </div>
         </div>
 
-        <!-- SCREEN: Toiletries (Placeholder) -->
+        <!-- SCREEN: Toiletries (FULLY FUNCTIONAL) -->
         <div id="toiletries-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
                     <div>
-                        <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
-                            🧴 Toiletries
-                        </h1>
-                        <p class="text-muted">Inventory and distribution</p>
+                        <h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;">🧴 Toiletries</h1>
+                        <p class="text-muted">Inventory & Distribution</p>
                     </div>
                 </div>
             </div>
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🧴</div>
-                <h2>Toiletries Module</h2>
-                <p>Coming soon: Track soap, tissue, and hygiene product inventory and distribution.</p>
-                <button class="btn btn-primary" onclick="UI.navigateToModule('feeding-fee')">← Back to Feeding Fee</button>
+
+            <!-- Toiletries Sub-Tabs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
+                <button class="tab-btn active" onclick="UI.switchToiletriesTab('inventory')" id="tab-inventory">📦 Inventory</button>
+                <button class="tab-btn" onclick="UI.switchToiletriesTab('distribute')" id="tab-distribute">📤 Distribute</button>
+                <button class="tab-btn" onclick="UI.switchToiletriesTab('reports')" id="tab-reports">📊 Reports</button>
+            </div>
+
+            <!-- Tab 1: Inventory -->
+            <div id="toiletries-inventory-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: var(--color-primary); margin: 0;">Current Stock</h3>
+                    <button class="btn btn-accent" onclick="UI.showAddToiletryModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add Item</button>
+                </div>
+                <div id="toiletries-inventory-list" class="toiletries-grid"></div>
+            </div>
+
+            <!-- Tab 2: Distribute -->
+            <div id="toiletries-distribute-view" style="display: none;">
+                <div class="form-group">
+                    <label>Select Class for Distribution</label>
+                    <select id="toiletry-distribute-class" class="form-select" onchange="UI.renderToiletriesDistribution()">
+                        <option value="">-- Select a Class --</option>
+                    </select>
+                </div>
+                <div id="toiletries-distribute-list" class="student-list-container" style="margin-top: 1rem; display: none;">
+                    <!-- Dynamically populated -->
+                </div>
+                <button id="save-distribution-btn" class="btn btn-primary btn-full" style="margin-top: 1.5rem; display: none;" onclick="UI.saveToiletriesDistribution()">
+                    ✅ Save Today's Distribution
+                </button>
+            </div>
+
+            <!-- Tab 3: Reports -->
+            <div id="toiletries-reports-view" style="display: none;">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Recent Distributions</h3>
+                <div id="toiletries-reports-list" class="settings-container">
+                    <p style="color: var(--color-text-muted); text-align: center;">No distributions recorded yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Restock Toiletry Modal -->
+        <div id="toiletry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
+                <h3 id="toiletry-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add New Item</h3>
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" id="toiletry-name" class="form-input" placeholder="e.g., Liquid Soap">
+                </div>
+                <div class="form-group">
+                    <label>Unit (e.g., bars, packs, bottles)</label>
+                    <input type="text" id="toiletry-unit" class="form-input" placeholder="e.g., bars">
+                </div>
+                <div class="form-group">
+                    <label>Current Stock</label>
+                    <input type="number" id="toiletry-stock" class="form-input" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Low Stock Alert At</label>
+                    <input type="number" id="toiletry-min-stock" class="form-input" placeholder="10" min="1">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeToiletryModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.saveToiletryItem()" class="btn btn-primary" style="flex: 1;">Save</button>
+                </div>
             </div>
         </div>
 
