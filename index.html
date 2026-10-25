@@ -333,6 +333,12 @@
                         <option value="">-- Select a Class --</option>
                     </select>
                 </div>
+                
+                <!-- NEW: Search Bar for Checklist -->
+                <div style="margin-bottom: 1rem; display: none;" id="toiletry-search-container">
+                    <input type="text" id="toiletry-checklist-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterToiletriesChecklist()">
+                </div>
+
                 <div id="toiletries-checklist-list" class="student-list-container" style="margin-top: 1rem; display: none;">
                     <!-- Dynamically populated -->
                 </div>
