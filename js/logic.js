@@ -971,7 +971,7 @@ const UI = {
     },
 
     // ==========================================
-    // SCHOOL FEES MODULE FUNCTIONS
+    // SCHOOL FEES MODULE FUNCTIONS (ENHANCED & DEBUGGED)
     // ==========================================
     switchSchoolFeesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -991,12 +991,10 @@ const UI = {
     renderFeeTypesSetup() {
         const feeTypes = Store.get('school_fee_types') || [];
         const container = document.getElementById('school-fees-setup-list');
-        
         if (feeTypes.length === 0) {
             container.innerHTML = '<p style="color: var(--color-text-muted); text-align: center; padding: 2rem;">No fee types set yet. Click "+ Add Fee Type" to start.</p>';
             return;
         }
-
         let html = '';
         feeTypes.forEach(fee => {
             html += `
@@ -1027,7 +1025,6 @@ const UI = {
         const feeTypes = Store.get('school_fee_types') || [];
         const fee = feeTypes.find(f => f.id === feeId);
         if (!fee) return;
-
         document.getElementById('fee-type-modal-title').textContent = 'Edit Fee Type';
         document.getElementById('fee-type-name').value = fee.name;
         document.getElementById('fee-type-amount').value = (fee.amount / 100).toFixed(2);
@@ -1035,9 +1032,7 @@ const UI = {
         document.getElementById('fee-type-modal').style.display = 'flex';
     },
 
-    closeFeeTypeModal() {
-        document.getElementById('fee-type-modal').style.display = 'none';
-    },
+    closeFeeTypeModal() { document.getElementById('fee-type-modal').style.display = 'none'; },
 
     saveFeeType() {
         const name = document.getElementById('fee-type-name').value.trim();
@@ -1080,19 +1075,29 @@ const UI = {
         document.getElementById('school-fees-payment-details').style.display = 'none';
     },
 
-    // FIXED: Now searches the master 'classes' list
+    // ENHANCED: Triggers on 1 character, shows helpful messages
     searchStudentForPayment() {
-        const query = document.getElementById('school-fees-student-search').value.toLowerCase();
+        const query = document.getElementById('school-fees-student-search').value.trim().toLowerCase();
         const listContainer = document.getElementById('school-fees-student-list');
 
-        if (query.length < 2) {
+        console.log("🔍 Searching for payment:", query);
+
+        if (query.length < 1) {
             listContainer.style.display = 'none';
+            listContainer.innerHTML = '';
             return;
         }
 
         const classes = Store.get('classes') || [];
-        const allStudents = [];
+        console.log("📚 Total classes found in database:", classes.length);
+        
+        if (classes.length === 0) {
+            listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-danger);">⚠️ No classes found. Please add classes and students in Admin Settings first.</div>';
+            listContainer.style.display = 'block';
+            return;
+        }
 
+        const allStudents = [];
         classes.forEach(cls => {
             cls.students.forEach(student => {
                 if (student.name.toLowerCase().includes(query)) {
@@ -1101,10 +1106,11 @@ const UI = {
             });
         });
 
+        console.log("👤 Students matching query:", allStudents.length);
         allStudents.sort((a, b) => a.name.localeCompare(b.name));
 
         if (allStudents.length === 0) {
-            listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students found.</div>';
+            listContainer.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students found matching "${query}".</div>`;
             listContainer.style.display = 'block';
             return;
         }
@@ -1123,14 +1129,21 @@ const UI = {
         listContainer.style.display = 'block';
     },
 
-    // FIXED: Now fetches from master 'classes' list
+    // ENHANCED: Robust selection logic
     selectStudentForPayment(studentId, classId) {
+        console.log("✅ Selecting student for payment:", studentId, classId);
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
-        if (!cls) return;
+        if (!cls) {
+            console.error("❌ Class not found:", classId);
+            return;
+        }
 
         const student = cls.students.find(s => s.id === studentId);
-        if (!student) return;
+        if (!student) {
+            console.error("❌ Student not found:", studentId);
+            return;
+        }
 
         document.getElementById('school-fees-student-list').style.display = 'none';
         document.getElementById('school-fees-student-search').value = student.name;
@@ -1139,6 +1152,7 @@ const UI = {
     },
 
     renderPaymentDetails(student, cls) {
+        console.log("💰 Rendering payment details for:", student.name);
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
         
@@ -1187,7 +1201,6 @@ const UI = {
         document.getElementById('school-fees-payment-details').style.display = 'block';
     },
 
-    // FIXED: Now fetches from master 'classes' list
     showRecordPaymentModal(studentId, classId) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -1360,19 +1373,27 @@ Thank you for your payment!
         document.getElementById('school-fees-ledger-details').style.display = 'none';
     },
 
-    // FIXED: Now searches the master 'classes' list
+    // ENHANCED: Triggers on 1 character, shows helpful messages
     searchStudentForLedger() {
-        const query = document.getElementById('school-fees-ledger-search').value.toLowerCase();
+        const query = document.getElementById('school-fees-ledger-search').value.trim().toLowerCase();
         const listContainer = document.getElementById('school-fees-ledger-list');
 
-        if (query.length < 2) {
+        console.log("🔍 Searching for ledger:", query);
+
+        if (query.length < 1) {
             listContainer.style.display = 'none';
+            listContainer.innerHTML = '';
             return;
         }
 
         const classes = Store.get('classes') || [];
-        const allStudents = [];
+        if (classes.length === 0) {
+            listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-danger);">⚠️ No classes found. Please add classes and students in Admin Settings first.</div>';
+            listContainer.style.display = 'block';
+            return;
+        }
 
+        const allStudents = [];
         classes.forEach(cls => {
             cls.students.forEach(student => {
                 if (student.name.toLowerCase().includes(query)) {
@@ -1381,10 +1402,11 @@ Thank you for your payment!
             });
         });
 
+        console.log("👤 Students matching query:", allStudents.length);
         allStudents.sort((a, b) => a.name.localeCompare(b.name));
 
         if (allStudents.length === 0) {
-            listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students found.</div>';
+            listContainer.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students found matching "${query}".</div>`;
             listContainer.style.display = 'block';
             return;
         }
@@ -1403,8 +1425,8 @@ Thank you for your payment!
         listContainer.style.display = 'block';
     },
 
-    // FIXED: Now fetches from master 'classes' list
     selectStudentForLedger(studentId, classId) {
+        console.log("✅ Selecting student for ledger:", studentId, classId);
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
