@@ -1500,3 +1500,446 @@ body {
         padding: 0.5rem 0.25rem;
     }
 }
+/* ============================================
+   SCHOOL FEES MODULE STYLES
+   ============================================ */
+
+.fee-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.fee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.fee-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+}
+
+.fee-amount {
+    background: var(--color-accent-light);
+    color: #065f46;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.fee-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.btn-edit-fee, .btn-delete-fee {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-edit-fee {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn-edit-fee:hover { background: var(--color-primary-light); }
+
+.btn-delete-fee {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.btn-delete-fee:hover { background: #fecaca; }
+
+/* Student Search Results */
+.student-search-result {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: background 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.student-search-result:hover {
+    background: var(--color-bg);
+}
+
+.student-search-result:last-child {
+    border-bottom: none;
+}
+
+.student-search-name {
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 0.25rem;
+}
+
+.student-search-class {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+/* Payment Details */
+.payment-student-card {
+    background: white;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.payment-student-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.payment-student-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.payment-student-class {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.payment-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.payment-summary-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+}
+
+.payment-summary-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.payment-summary-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.payment-summary-value.paid {
+    color: var(--color-accent);
+}
+
+.payment-summary-value.outstanding {
+    color: var(--color-danger);
+}
+
+.btn-record-payment {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-record-payment:hover {
+    filter: brightness(0.9);
+}
+
+/* Fee Checkbox in Payment Modal */
+.fee-checkbox-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.fee-checkbox-item.selected {
+    border-color: var(--color-accent);
+    background: var(--color-accent-light);
+}
+
+.fee-checkbox-item.paid {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.fee-checkbox-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.fee-checkbox-icon {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+}
+
+.fee-checkbox-item.selected .fee-checkbox-icon {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.fee-checkbox-name {
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.fee-checkbox-amount {
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+/* Ledger Styles */
+.ledger-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ledger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.ledger-student-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.ledger-student-class {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.ledger-fee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.ledger-fee-row:last-child {
+    border-bottom: none;
+}
+
+.ledger-fee-name {
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+
+.ledger-fee-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ledger-fee-amount {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.ledger-payment-history {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--color-border);
+}
+
+.ledger-payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.ledger-payment-item:last-child {
+    border-bottom: none;
+}
+
+.ledger-payment-date {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.ledger-payment-details {
+    font-size: 0.9rem;
+    color: var(--color-text-main);
+    margin-top: 0.25rem;
+}
+
+.ledger-payment-amount {
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+/* Receipt Modal */
+.receipt-content {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.receipt-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.receipt-school-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+}
+
+.receipt-title {
+    font-size: 1.2rem;
+    color: var(--color-text-muted);
+}
+
+.receipt-details {
+    margin-bottom: 1.5rem;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.receipt-row:last-child {
+    border-bottom: none;
+}
+
+.receipt-label {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.receipt-value {
+    color: var(--color-text-main);
+    font-weight: 700;
+}
+
+.receipt-total {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--color-primary);
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.receipt-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.btn-copy-receipt, .btn-close-receipt {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-copy-receipt {
+    background: var(--color-accent);
+    color: white;
+}
+
+.btn-close-receipt {
+    background: #f1f5f9;
+    color: var(--color-text-main);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .payment-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .fee-checkbox-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .fee-checkbox-amount {
+        font-size: 1.2rem;
+    }
+}

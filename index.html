@@ -255,24 +255,134 @@
             <div class="class-grid" id="class-grid-container"></div>
         </div>
 
-        <!-- SCREEN: School Fees (Placeholder) -->
+        <!-- SCREEN: School Fees (FULLY FUNCTIONAL) -->
         <div id="school-fees-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
                     <div>
-                        <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
-                            🎓 School Fees
-                        </h1>
-                        <p class="text-muted">Term-based fee management</p>
+                        <h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;">🎓 School Fees</h1>
+                        <p class="text-muted">Term-based Fee Management</p>
                     </div>
                 </div>
             </div>
-            <div class="placeholder-card">
-                <div class="placeholder-icon">🎓</div>
-                <h2>School Fees Module</h2>
-                <p>Coming soon: Term-based tuition, books, and uniform fee tracking with installment support.</p>
-                <button class="btn btn-primary" onclick="UI.navigateToModule('feeding-fee')">← Back to Feeding Fee</button>
+
+            <!-- School Fees Sub-Tabs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
+                <button class="tab-btn active" onclick="UI.switchSchoolFeesTab('setup')" id="tab-fees-setup">💰 Fee Setup</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('payment')" id="tab-fees-payment">💵 Record Payment</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('ledger')" id="tab-fees-ledger">📋 Student Ledger</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('reports')" id="tab-fees-reports">📊 Reports</button>
+            </div>
+
+            <!-- Tab 1: Fee Setup (Admin) -->
+            <div id="school-fees-setup-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <h3 style="color: var(--color-primary); margin: 0;">Current Term Fees</h3>
+                        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">Term 1, 2026</p>
+                    </div>
+                    <button class="btn btn-accent" onclick="UI.showAddFeeTypeModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add Fee Type</button>
+                </div>
+                <div id="school-fees-setup-list" class="toiletries-grid"></div>
+            </div>
+
+            <!-- Tab 2: Record Payment (Cashier) -->
+            <div id="school-fees-payment-view" style="display: none;">
+                <div class="form-group">
+                    <label>Select Student</label>
+                    <input type="text" id="school-fees-student-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.searchStudentForPayment()">
+                </div>
+                <div id="school-fees-student-list" class="student-list-container" style="display: none; max-height: 300px; overflow-y: auto; margin-bottom: 1rem;">
+                    <!-- Dynamically populated with search results -->
+                </div>
+                <div id="school-fees-payment-details" style="display: none;">
+                    <!-- Dynamically populated when student is selected -->
+                </div>
+            </div>
+
+            <!-- Tab 3: Student Ledger -->
+            <div id="school-fees-ledger-view" style="display: none;">
+                <div class="form-group">
+                    <label>Select Student to View</label>
+                    <input type="text" id="school-fees-ledger-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.searchStudentForLedger()">
+                </div>
+                <div id="school-fees-ledger-list" class="student-list-container" style="display: none; max-height: 300px; overflow-y: auto; margin-bottom: 1rem;">
+                    <!-- Dynamically populated -->
+                </div>
+                <div id="school-fees-ledger-details" style="display: none;">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Tab 4: Reports -->
+            <div id="school-fees-reports-view" style="display: none;">
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <p class="stat-label">Total Expected</p>
+                        <h3 class="stat-value" id="fees-stat-expected">GHS 0.00</h3>
+                    </div>
+                    <div class="stat-card highlight">
+                        <p class="stat-label">Total Collected</p>
+                        <h3 class="stat-value" id="fees-stat-collected">GHS 0.00</h3>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Outstanding</p>
+                        <h3 class="stat-value" id="fees-stat-outstanding">GHS 0.00</h3>
+                    </div>
+                </div>
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Payment Summary by Student</h3>
+                <div id="school-fees-reports-list" class="settings-container">
+                    <p style="color: var(--color-text-muted); text-align: center;">Loading reports...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Fee Type Modal -->
+        <div id="fee-type-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
+                <h3 id="fee-type-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Fee Type</h3>
+                <div class="form-group">
+                    <label>Fee Name</label>
+                    <input type="text" id="fee-type-name" class="form-input" placeholder="e.g., Tuition Fee">
+                </div>
+                <div class="form-group">
+                    <label>Amount (GHS)</label>
+                    <input type="number" id="fee-type-amount" class="form-input" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeFeeTypeModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.saveFeeType()" class="btn btn-primary" style="flex: 1;">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Record Payment Modal -->
+        <div id="record-payment-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Record Payment</h3>
+                <div id="record-payment-student-info" style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                    <!-- Dynamically populated -->
+                </div>
+                <div id="record-payment-fees-list">
+                    <!-- Dynamically populated with fee checkboxes -->
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label>Payment Method</label>
+                    <select id="payment-method" class="form-select">
+                        <option value="Cash">Cash</option>
+                        <option value="MoMo">Mobile Money (MoMo)</option>
+                        <option value="Bank">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Note (Optional)</label>
+                    <input type="text" id="payment-note" class="form-input" placeholder="e.g., Paid by parent in person">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeRecordPaymentModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.confirmRecordPayment()" class="btn btn-primary" style="flex: 1;">💾 Save Payment</button>
+                </div>
             </div>
         </div>
 

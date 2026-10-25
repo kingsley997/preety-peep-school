@@ -127,6 +127,7 @@ const UI = {
             if (links[0]) links[0].classList.add('active');
         } else if (moduleName === 'school-fees') {
             document.getElementById('school-fees-screen').style.display = 'block';
+            this.renderFeeTypesSetup(); // Initialize School Fees view
             if (links[1]) links[1].classList.add('active');
         } else if (moduleName === 'assessment') {
             document.getElementById('assessment-screen').style.display = 'block';
@@ -777,7 +778,6 @@ const UI = {
         sortedStudents.forEach(student => {
             let itemsHtml = '';
             
-            // Sanitize names to prevent HTML breaking
             const safeStudentNameAttr = student.name.toLowerCase().replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             const safeDisplayName = student.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             
@@ -792,7 +792,6 @@ const UI = {
                 const selectedClass = isSelected ? 'selected' : '';
                 const safeItemName = item.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 
-                // The onclick is now completely safe from quote-breaking
                 itemsHtml += `<button class="item-toggle ${selectedClass}" onclick="UI.toggleToiletryItem(this, '${student.id}', '${item.id}')" data-student="${student.id}" data-item="${item.id}">${safeItemName}</button>`;
             });
 
@@ -833,7 +832,6 @@ const UI = {
         });
     },
 
-    // DEBUG: Added console.log to prove the button is being clicked
     toggleToiletryItem(btn, studentId, itemId) {
         console.log("✅ Button clicked! Student:", studentId, "Item:", itemId);
         btn.classList.toggle('selected');
@@ -970,5 +968,605 @@ const UI = {
             else alert("⚠️ Copy failed. Please select the text manually.");
         } catch (err) { alert("⚠️ Your browser doesn't support auto-copy."); }
         document.body.removeChild(textArea);
+    },
+
+    // ==========================================
+    // SCHOOL FEES MODULE FUNCTIONS
+    // ==========================================
+    switchSchoolFeesTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-fees-${tabName}`).classList.add('active');
+        
+        document.getElementById('school-fees-setup-view').style.display = tabName === 'setup' ? 'block' : 'none';
+        document.getElementById('school-fees-payment-view').style.display = tabName === 'payment' ? 'block' : 'none';
+        document.getElementById('school-fees-ledger-view').style.display = tabName === 'ledger' ? 'block' : 'none';
+        document.getElementById('school-fees-reports-view').style.display = tabName === 'reports' ? 'block' : 'none';
+        
+        if (tabName === 'setup') this.renderFeeTypesSetup();
+        if (tabName === 'payment') this.initializePaymentView();
+        if (tabName === 'ledger') this.initializeLedgerView();
+        if (tabName === 'reports') this.renderSchoolFeesReports();
+    },
+
+    renderFeeTypesSetup() {
+        const feeTypes = Store.get('school_fee_types') || [];
+        const container = document.getElementById('school-fees-setup-list');
+        
+        if (feeTypes.length === 0) {
+            container.innerHTML = '<p style="color: var(--color-text-muted); text-align: center; padding: 2rem;">No fee types set yet. Click "+ Add Fee Type" to start.</p>';
+            return;
+        }
+
+        let html = '';
+        feeTypes.forEach(fee => {
+            html += `
+                <div class="fee-card">
+                    <div class="fee-header">
+                        <span class="fee-name">${fee.name}</span>
+                        <span class="fee-amount">GHS ${(fee.amount / 100).toFixed(2)}</span>
+                    </div>
+                    <div class="fee-actions">
+                        <button class="btn-edit-fee" onclick="UI.editFeeType('${fee.id}')">✏️ Edit</button>
+                        <button class="btn-delete-fee" onclick="UI.deleteFeeType('${fee.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    },
+
+    showAddFeeTypeModal() {
+        document.getElementById('fee-type-modal-title').textContent = 'Add Fee Type';
+        document.getElementById('fee-type-name').value = '';
+        document.getElementById('fee-type-amount').value = '';
+        document.getElementById('fee-type-modal').dataset.editId = '';
+        document.getElementById('fee-type-modal').style.display = 'flex';
+    },
+
+    editFeeType(feeId) {
+        const feeTypes = Store.get('school_fee_types') || [];
+        const fee = feeTypes.find(f => f.id === feeId);
+        if (!fee) return;
+
+        document.getElementById('fee-type-modal-title').textContent = 'Edit Fee Type';
+        document.getElementById('fee-type-name').value = fee.name;
+        document.getElementById('fee-type-amount').value = (fee.amount / 100).toFixed(2);
+        document.getElementById('fee-type-modal').dataset.editId = feeId;
+        document.getElementById('fee-type-modal').style.display = 'flex';
+    },
+
+    closeFeeTypeModal() {
+        document.getElementById('fee-type-modal').style.display = 'none';
+    },
+
+    saveFeeType() {
+        const name = document.getElementById('fee-type-name').value.trim();
+        const amountGhs = parseFloat(document.getElementById('fee-type-amount').value);
+        const editId = document.getElementById('fee-type-modal').dataset.editId;
+
+        if (!name) return alert("Please enter a fee name.");
+        if (isNaN(amountGhs) || amountGhs < 0) return alert("Please enter a valid amount.");
+
+        const amountPesewas = Math.round(amountGhs * 100);
+        let feeTypes = Store.get('school_fee_types') || [];
+
+        if (editId) {
+            const index = feeTypes.findIndex(f => f.id === editId);
+            if (index !== -1) {
+                feeTypes[index].name = name;
+                feeTypes[index].amount = amountPesewas;
+            }
+        } else {
+            feeTypes.push({ id: 'fee_' + Date.now(), name, amount: amountPesewas });
+        }
+
+        Store.set('school_fee_types', feeTypes);
+        this.closeFeeTypeModal();
+        this.renderFeeTypesSetup();
+    },
+
+    deleteFeeType(feeId) {
+        this.showConfirm("Delete this fee type? This cannot be undone.", () => {
+            let feeTypes = Store.get('school_fee_types') || [];
+            feeTypes = feeTypes.filter(f => f.id !== feeId);
+            Store.set('school_fee_types', feeTypes);
+            this.renderFeeTypesSetup();
+        });
+    },
+
+    initializePaymentView() {
+        document.getElementById('school-fees-student-search').value = '';
+        document.getElementById('school-fees-student-list').style.display = 'none';
+        document.getElementById('school-fees-payment-details').style.display = 'none';
+    },
+
+    searchStudentForPayment() {
+        const query = document.getElementById('school-fees-student-search').value.toLowerCase();
+        const listContainer = document.getElementById('school-fees-student-list');
+
+        if (query.length < 2) {
+            listContainer.style.display = 'none';
+            return;
+        }
+
+        const dateStr = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr}`) || [];
+        const allStudents = [];
+
+        roster.forEach(cls => {
+            cls.students.forEach(student => {
+                if (student.name.toLowerCase().includes(query)) {
+                    allStudents.push({ ...student, className: cls.className, classId: cls.classId });
+                }
+            });
+        });
+
+        allStudents.sort((a, b) => a.name.localeCompare(b.name));
+
+        if (allStudents.length === 0) {
+            listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students found.</div>';
+            listContainer.style.display = 'block';
+            return;
+        }
+
+        let html = '';
+        allStudents.forEach(student => {
+            html += `
+                <div class="student-search-result" onclick="UI.selectStudentForPayment('${student.id}', '${student.classId}')">
+                    <div class="student-search-name">${student.name}</div>
+                    <div class="student-search-class">${student.className}</div>
+                </div>
+            `;
+        });
+
+        listContainer.innerHTML = html;
+        listContainer.style.display = 'block';
+    },
+
+    selectStudentForPayment(studentId, classId) {
+        const dateStr = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr}`) || [];
+        const cls = roster.find(c => c.classId === classId);
+        if (!cls) return;
+
+        const student = cls.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        document.getElementById('school-fees-student-list').style.display = 'none';
+        document.getElementById('school-fees-student-search').value = student.name;
+
+        this.renderPaymentDetails(student, cls);
+    },
+
+    renderPaymentDetails(student, cls) {
+        const feeTypes = Store.get('school_fee_types') || [];
+        const payments = Store.get('student_fee_payments') || [];
+        
+        let totalExpected = 0;
+        let totalPaid = 0;
+
+        feeTypes.forEach(fee => {
+            totalExpected += fee.amount;
+            const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
+            studentPayments.forEach(p => {
+                totalPaid += p.amount;
+            });
+        });
+
+        const totalOutstanding = totalExpected - totalPaid;
+
+        let html = `
+            <div class="payment-student-card">
+                <div class="payment-student-header">
+                    <div>
+                        <div class="payment-student-name">${student.name}</div>
+                        <div class="payment-student-class">${cls.className}</div>
+                    </div>
+                </div>
+                <div class="payment-summary">
+                    <div class="payment-summary-item">
+                        <div class="payment-summary-label">Total Expected</div>
+                        <div class="payment-summary-value">GHS ${(totalExpected / 100).toFixed(2)}</div>
+                    </div>
+                    <div class="payment-summary-item">
+                        <div class="payment-summary-label">Total Paid</div>
+                        <div class="payment-summary-value paid">GHS ${(totalPaid / 100).toFixed(2)}</div>
+                    </div>
+                    <div class="payment-summary-item">
+                        <div class="payment-summary-label">Outstanding</div>
+                        <div class="payment-summary-value outstanding">GHS ${(totalOutstanding / 100).toFixed(2)}</div>
+                    </div>
+                </div>
+                <button class="btn-record-payment" onclick="UI.showRecordPaymentModal('${student.id}', '${cls.classId}')">
+                    💵 Record Payment
+                </button>
+            </div>
+        `;
+
+        document.getElementById('school-fees-payment-details').innerHTML = html;
+        document.getElementById('school-fees-payment-details').style.display = 'block';
+    },
+
+    showRecordPaymentModal(studentId, classId) {
+        const dateStr = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr}`) || [];
+        const cls = roster.find(c => c.classId === classId);
+        if (!cls) return;
+
+        const student = cls.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        const feeTypes = Store.get('school_fee_types') || [];
+        const payments = Store.get('student_fee_payments') || [];
+
+        let html = `
+            <div id="record-payment-student-info" style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                <strong>${student.name}</strong> - ${cls.className}
+            </div>
+            <div id="record-payment-fees-list">
+        `;
+
+        feeTypes.forEach(fee => {
+            const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === fee.id);
+            const totalPaidForFee = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+            const isFullyPaid = totalPaidForFee >= fee.amount;
+
+            html += `
+                <div class="fee-checkbox-item ${isFullyPaid ? 'paid' : ''}" onclick="${isFullyPaid ? '' : `UI.toggleFeeCheckbox(this, '${fee.id}', ${fee.amount}, ${totalPaidForFee})`}" data-fee-id="${fee.id}" data-fee-amount="${fee.amount}" data-fee-paid="${totalPaidForFee}">
+                    <div class="fee-checkbox-left">
+                        <div class="fee-checkbox-icon">${isFullyPaid ? '✓' : ''}</div>
+                        <div class="fee-checkbox-name">${fee.name}</div>
+                    </div>
+                    <div class="fee-checkbox-amount">GHS ${(fee.amount / 100).toFixed(2)} ${isFullyPaid ? '(Paid)' : ''}</div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+
+        const modal = document.getElementById('record-payment-modal');
+        modal.innerHTML = `
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Record Payment</h3>
+                ${html}
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label>Payment Method</label>
+                    <select id="payment-method" class="form-select">
+                        <option value="Cash">Cash</option>
+                        <option value="MoMo">Mobile Money (MoMo)</option>
+                        <option value="Bank">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Note (Optional)</label>
+                    <input type="text" id="payment-note" class="form-input" placeholder="e.g., Paid by parent in person">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeRecordPaymentModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.confirmRecordPayment()" class="btn btn-primary" style="flex: 1;">💾 Save Payment</button>
+                </div>
+            </div>
+        `;
+
+        modal.dataset.studentId = studentId;
+        modal.dataset.classId = classId;
+        modal.style.display = 'flex';
+    },
+
+    toggleFeeCheckbox(element, feeId, feeAmount, feePaid) {
+        if (element.classList.contains('paid')) return;
+        element.classList.toggle('selected');
+        const icon = element.querySelector('.fee-checkbox-icon');
+        icon.textContent = element.classList.contains('selected') ? '✓' : '';
+    },
+
+    closeRecordPaymentModal() {
+        document.getElementById('record-payment-modal').style.display = 'none';
+    },
+
+    confirmRecordPayment() {
+        const modal = document.getElementById('record-payment-modal');
+        const studentId = modal.dataset.studentId;
+        const classId = modal.dataset.classId;
+        
+        const selectedFees = document.querySelectorAll('.fee-checkbox-item.selected');
+        if (selectedFees.length === 0) {
+            return alert("Please select at least one fee to pay.");
+        }
+
+        const method = document.getElementById('payment-method').value;
+        const note = document.getElementById('payment-note').value.trim();
+        const dateStr = this.getLocalDateStr();
+        const timeStr = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+        const payments = Store.get('student_fee_payments') || [];
+        const feeTypes = Store.get('school_fee_types') || [];
+
+        let totalAmount = 0;
+        const paymentDetails = [];
+
+        selectedFees.forEach(element => {
+            const feeId = element.dataset.feeId;
+            const feeAmount = parseInt(element.dataset.feeAmount);
+            const feePaid = parseInt(element.dataset.feePaid);
+            const remaining = feeAmount - feePaid;
+
+            if (remaining > 0) {
+                payments.push({
+                    id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    studentId: studentId,
+                    feeId: feeId,
+                    amount: remaining,
+                    date: dateStr,
+                    time: timeStr,
+                    method: method,
+                    note: note,
+                    officer: this.currentSession ? this.currentSession.username : 'Unknown'
+                });
+
+                totalAmount += remaining;
+                const feeType = feeTypes.find(f => f.id === feeId);
+                if (feeType) {
+                    paymentDetails.push(`${feeType.name}: GHS ${(remaining / 100).toFixed(2)}`);
+                }
+            }
+        });
+
+        Store.set('student_fee_payments', payments);
+        this.closeRecordPaymentModal();
+
+        this.showPaymentReceipt(studentId, classId, totalAmount, paymentDetails, method, note, dateStr, timeStr);
+    },
+
+    showPaymentReceipt(studentId, classId, totalAmount, paymentDetails, method, note, dateStr, timeStr) {
+        const dateStr2 = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr2}`) || [];
+        const cls = roster.find(c => c.classId === classId);
+        if (!cls) return;
+
+        const student = cls.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        const receiptText = `
+🧾 PAYMENT RECEIPT
+========================
+Preety Peep School
+Date: ${dateStr} | Time: ${timeStr}
+
+Student: ${student.name}
+Class: ${cls.className}
+
+Payment Details:
+${paymentDetails.join('\n')}
+
+Total Amount: GHS ${(totalAmount / 100).toFixed(2)}
+Payment Method: ${method}
+${note ? `Note: ${note}` : ''}
+
+Received by: ${this.currentSession ? this.currentSession.username : 'Unknown'}
+========================
+Thank you for your payment!
+        `.trim();
+
+        document.getElementById('report-content').textContent = receiptText;
+        this.currentReportText = receiptText;
+        document.getElementById('report-modal').style.display = 'flex';
+
+        this.renderPaymentDetails(student, cls);
+    },
+
+    initializeLedgerView() {
+        document.getElementById('school-fees-ledger-search').value = '';
+        document.getElementById('school-fees-ledger-list').style.display = 'none';
+        document.getElementById('school-fees-ledger-details').style.display = 'none';
+    },
+
+    searchStudentForLedger() {
+        const query = document.getElementById('school-fees-ledger-search').value.toLowerCase();
+        const listContainer = document.getElementById('school-fees-ledger-list');
+
+        if (query.length < 2) {
+            listContainer.style.display = 'none';
+            return;
+        }
+
+        const dateStr = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr}`) || [];
+        const allStudents = [];
+
+        roster.forEach(cls => {
+            cls.students.forEach(student => {
+                if (student.name.toLowerCase().includes(query)) {
+                    allStudents.push({ ...student, className: cls.className, classId: cls.classId });
+                }
+            });
+        });
+
+        allStudents.sort((a, b) => a.name.localeCompare(b.name));
+
+        if (allStudents.length === 0) {
+            listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students found.</div>';
+            listContainer.style.display = 'block';
+            return;
+        }
+
+        let html = '';
+        allStudents.forEach(student => {
+            html += `
+                <div class="student-search-result" onclick="UI.selectStudentForLedger('${student.id}', '${student.classId}')">
+                    <div class="student-search-name">${student.name}</div>
+                    <div class="student-search-class">${student.className}</div>
+                </div>
+            `;
+        });
+
+        listContainer.innerHTML = html;
+        listContainer.style.display = 'block';
+    },
+
+    selectStudentForLedger(studentId, classId) {
+        const dateStr = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr}`) || [];
+        const cls = roster.find(c => c.classId === classId);
+        if (!cls) return;
+
+        const student = cls.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        document.getElementById('school-fees-ledger-list').style.display = 'none';
+        document.getElementById('school-fees-ledger-search').value = student.name;
+
+        this.renderStudentLedger(student, cls);
+    },
+
+    renderStudentLedger(student, cls) {
+        const feeTypes = Store.get('school_fee_types') || [];
+        const payments = Store.get('student_fee_payments') || [];
+
+        let html = `
+            <div class="ledger-card">
+                <div class="ledger-header">
+                    <div>
+                        <div class="ledger-student-name">${student.name}</div>
+                        <div class="ledger-student-class">${cls.className}</div>
+                    </div>
+                </div>
+        `;
+
+        feeTypes.forEach(fee => {
+            const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
+            const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+            const outstanding = fee.amount - totalPaid;
+
+            let statusHTML = '';
+            if (totalPaid >= fee.amount) {
+                statusHTML = '<span style="color: var(--color-accent); font-weight: 700;">✅ Paid</span>';
+            } else if (totalPaid > 0) {
+                statusHTML = `<span style="color: #f59e0b; font-weight: 700;">⚠️ Partial</span>`;
+            } else {
+                statusHTML = '<span style="color: var(--color-danger); font-weight: 700;">❌ Unpaid</span>';
+            }
+
+            html += `
+                <div class="ledger-fee-row">
+                    <div class="ledger-fee-name">${fee.name}</div>
+                    <div class="ledger-fee-status">
+                        <div class="ledger-fee-amount">GHS ${(fee.amount / 100).toFixed(2)}</div>
+                        ${statusHTML}
+                    </div>
+                </div>
+            `;
+        });
+
+        const studentPayments = payments.filter(p => p.studentId === student.id);
+        if (studentPayments.length > 0) {
+            html += `
+                <div class="ledger-payment-history">
+                    <h4 style="color: var(--color-primary); margin-bottom: 1rem;">Payment History</h4>
+            `;
+
+            studentPayments.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+
+            studentPayments.forEach(payment => {
+                const feeType = feeTypes.find(f => f.id === payment.feeId);
+                const feeName = feeType ? feeType.name : 'Unknown Fee';
+
+                html += `
+                    <div class="ledger-payment-item">
+                        <div>
+                            <div class="ledger-payment-date">${payment.date} at ${payment.time}</div>
+                            <div class="ledger-payment-details">${feeName} - ${payment.method}</div>
+                            ${payment.note ? `<div class="ledger-payment-details" style="color: var(--color-text-muted); font-size: 0.85rem;">${payment.note}</div>` : ''}
+                        </div>
+                        <div class="ledger-payment-amount">GHS ${(payment.amount / 100).toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+
+        document.getElementById('school-fees-ledger-details').innerHTML = html;
+        document.getElementById('school-fees-ledger-details').style.display = 'block';
+    },
+
+    renderSchoolFeesReports() {
+        const feeTypes = Store.get('school_fee_types') || [];
+        const payments = Store.get('student_fee_payments') || [];
+        const dateStr = this.getLocalDateStr();
+        const roster = Store.get(`roster_${dateStr}`) || [];
+
+        let totalExpected = 0;
+        let totalCollected = 0;
+
+        const allStudents = [];
+        roster.forEach(cls => {
+            cls.students.forEach(student => {
+                allStudents.push({ ...student, className: cls.className });
+            });
+        });
+
+        allStudents.forEach(student => {
+            feeTypes.forEach(fee => {
+                totalExpected += fee.amount;
+                const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
+                studentPayments.forEach(p => {
+                    totalCollected += p.amount;
+                });
+            });
+        });
+
+        const totalOutstanding = totalExpected - totalCollected;
+
+        document.getElementById('fees-stat-expected').textContent = `GHS ${(totalExpected / 100).toFixed(2)}`;
+        document.getElementById('fees-stat-collected').textContent = `GHS ${(totalCollected / 100).toFixed(2)}`;
+        document.getElementById('fees-stat-outstanding').textContent = `GHS ${(totalOutstanding / 100).toFixed(2)}`;
+
+        const container = document.getElementById('school-fees-reports-list');
+        let html = '';
+
+        allStudents.sort((a, b) => a.name.localeCompare(b.name));
+
+        allStudents.forEach(student => {
+            let studentExpected = 0;
+            let studentPaid = 0;
+
+            feeTypes.forEach(fee => {
+                studentExpected += fee.amount;
+                const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
+                studentPayments.forEach(p => {
+                    studentPaid += p.amount;
+                });
+            });
+
+            const studentOutstanding = studentExpected - studentPaid;
+
+            let statusHTML = '';
+            if (studentPaid >= studentExpected) {
+                statusHTML = '<span style="color: var(--color-accent); font-weight: 700;">✅ Fully Paid</span>';
+            } else if (studentPaid > 0) {
+                statusHTML = `<span style="color: #f59e0b; font-weight: 700;">⚠️ Partial</span>`;
+            } else {
+                statusHTML = '<span style="color: var(--color-danger); font-weight: 700;">❌ Unpaid</span>';
+            }
+
+            html += `
+                <div class="settings-row">
+                    <div>
+                        <strong style="color: var(--color-primary);">${student.name}</strong>
+                        <div style="font-size: 0.85rem; color: var(--color-text-muted);">${student.className}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 700; color: var(--color-accent);">Paid: GHS ${(studentPaid / 100).toFixed(2)}</div>
+                        <div style="font-size: 0.85rem; color: var(--color-text-muted);">Owes: GHS ${(studentOutstanding / 100).toFixed(2)}</div>
+                        ${statusHTML}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html || '<p style="color: var(--color-text-muted); text-align: center;">No students found.</p>';
     }
 };
