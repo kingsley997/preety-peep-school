@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alpha Tech | School Feeding Management</title>
-        <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alpha Tech | School Feeding Management</title>
     
-    <!-- FAVICON & MOBILE APP ICONS -->
-    <link rel="icon" type="image/png" href="images/alpha-logo.png">
+    <!-- COMPREHENSIVE FAVICON & MOBILE APP ICONS -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/alpha-logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/alpha-logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" href="images/alpha-logo.png">
     
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Cache-busting version (forces mobile browsers to fetch new icon) -->
+    <link rel="icon" type="image/png" href="images/alpha-logo.png?v=2">
+    <link rel="apple-touch-icon" href="images/alpha-logo.png?v=2">
+    
+    <!-- Mobile-specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -60,7 +67,7 @@
             </div>
             <div id="setup-step-2" style="display: none;">
                 <div class="recovery-box">
-                    <div class="warning-text">️ CRITICAL: Write this down on paper!</div>
+                    <div class="warning-text">⚠️ CRITICAL: Write this down on paper!</div>
                     <p style="margin-bottom: 0.5rem; font-size: 0.9rem;">If you forget your password, this is the ONLY way to recover your account. Store it in a safe place.</p>
                     <div class="recovery-words" id="recovery-words-display"></div>
                 </div>
@@ -200,7 +207,7 @@
                     <p class="text-muted" id="current-date">Loading date...</p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
-                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">️ Admin Settings</button>
+                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">⚙️ Admin Settings</button>
                 </div>
             </div>
 
@@ -265,7 +272,7 @@
             <div class="portal-header">
                 <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
                 <div class="portal-title">
-                    <h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">️ Admin Settings</h1>
+                    <h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1>
                     <p class="text-muted">Manage Fees, Staff & Reports</p>
                 </div>
                 <button class="btn btn-primary" onclick="UI.logout()">Log Out</button>
