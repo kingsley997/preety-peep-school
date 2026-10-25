@@ -483,15 +483,44 @@ const UI = {
             this.renderClassPortal(classId, document.getElementById('student-search').value);
         });
     },
+    
+    // UPDATED: Now adds the student to BOTH the daily roster AND the master classes list
     addStudentForToday() {
         const nameInput = document.getElementById('new-student-name');
         const name = nameInput.value.trim();
         if (!name) return alert("Please enter a student name.");
+        
         const dateStr = this.getLocalDateStr();
         const roster = Store.get(`roster_${dateStr}`);
         const cls = roster.find(c => c.classId === this.currentClassId);
-        cls.students.push({ id: `temp_${Date.now()}`, name: name, fee: cls.fee, status: 'unpaid', time: null });
-        Store.set(`roster_${dateStr}`, roster); 
+        
+        // Get the master classes list
+        const masterClasses = Store.get('classes') || [];
+        const masterClass = masterClasses.find(c => c.id === this.currentClassId);
+        
+        // Create the new student
+        const newStudent = { 
+            id: `student_${Date.now()}`, 
+            name: name, 
+            fee: cls.fee, 
+            status: 'unpaid', 
+            time: null 
+        };
+        
+        // Add to today's feeding roster
+        cls.students.push(newStudent);
+        Store.set(`roster_${dateStr}`, roster);
+        
+        // ALSO add to master classes list (permanent enrollment)
+        if (masterClass) {
+            masterClass.students.push({
+                id: newStudent.id,
+                name: newStudent.name,
+                fee: newStudent.fee
+            });
+            Store.set('classes', masterClasses);
+        }
+        
         nameInput.value = ''; 
         document.getElementById('student-search').value = '';
         this.renderClassPortal(this.currentClassId, '');
