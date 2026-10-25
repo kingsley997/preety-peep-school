@@ -54,7 +54,7 @@ const UI = {
 
     togglePassword(inputId, btn) {
         const input = document.getElementById(inputId);
-        if (input.type === "password") { input.type = "text"; btn.textContent = "🙈"; } 
+        if (input.type === "password") { input.type = "text"; btn.textContent = ""; } 
         else { input.type = "password"; btn.textContent = "👁️"; }
     },
 
@@ -131,6 +131,7 @@ const UI = {
             if (links[1]) links[1].classList.add('active');
         } else if (moduleName === 'assessment') {
             document.getElementById('assessment-screen').style.display = 'block';
+            this.renderAssessmentSubjects();
             if (links[2]) links[2].classList.add('active');
         } else if (moduleName === 'toiletries') {
             document.getElementById('toiletries-screen').style.display = 'block';
@@ -435,7 +436,7 @@ const UI = {
                     badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
                     actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>
                                   <button class="btn-icon btn-absent" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
-                                  <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>`;
+                                  <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying"></button>`;
                 } else if (student.status === 'paid') {
                     badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
                     actionHTML = `<button class="btn-icon btn-undo" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo Payment">↩️</button>`;
@@ -712,6 +713,9 @@ const UI = {
         alert("✅ Report downloaded to your device!");
     },
 
+    // ==========================================
+    // TOILETRIES MODULE FUNCTIONS
+    // ==========================================
     switchToiletriesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
@@ -1007,6 +1011,9 @@ const UI = {
         document.body.removeChild(textArea);
     },
 
+    // ==========================================
+    // SCHOOL FEES MODULE FUNCTIONS
+    // ==========================================
     switchSchoolFeesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-fees-${tabName}`).classList.add('active');
@@ -1522,5 +1529,546 @@ const UI = {
             </div>`;
         });
         container.innerHTML = html;
+    },
+
+    // ==========================================
+    // ASSESSMENT MODULE FUNCTIONS
+    // ==========================================
+    switchAssessmentTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-assess-${tabName}`).classList.add('active');
+        
+        document.getElementById('assessment-setup-view').style.display = tabName === 'setup' ? 'block' : 'none';
+        document.getElementById('assessment-scores-view').style.display = tabName === 'scores' ? 'block' : 'none';
+        document.getElementById('assessment-reports-view').style.display = tabName === 'reports' ? 'block' : 'none';
+        
+        if (tabName === 'setup') this.renderAssessmentSubjects();
+        if (tabName === 'scores') this.initializeScoreEntry();
+        if (tabName === 'reports') this.initializeReportCards();
+    },
+
+    renderAssessmentSubjects() {
+        const subjects = Store.get('assessment_subjects') || [];
+        const container = document.getElementById('assessment-subjects-list');
+        
+        if (subjects.length === 0) {
+            container.innerHTML = '<p style="color: var(--color-text-muted); text-align: center; padding: 2rem;">No subjects added yet. Click "+ Add Subject" to start.</p>';
+            return;
+        }
+
+        let html = '';
+        subjects.forEach(subject => {
+            const sbaTotal = subject.sbaComponents.reduce((sum, comp) => sum + comp.maxScore, 0);
+            html += `
+                <div class="subject-card">
+                    <div class="subject-header">
+                        <span class="subject-name">${subject.name}</span>
+                        <span class="subject-class">${subject.className}</span>
+                    </div>
+                    <div class="subject-breakdown">
+                        <strong>SBA:</strong> ${sbaTotal} pts (${subject.sbaComponents.map(c => c.name).join(', ')}) | 
+                        <strong>Exam:</strong> ${subject.examMaxScore} pts
+                    </div>
+                    <div class="subject-actions">
+                        <button class="btn-edit-subject" onclick="UI.editSubject('${subject.id}')">✏️ Edit</button>
+                        <button class="btn-delete-subject" onclick="UI.deleteSubject('${subject.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    },
+
+    showAddSubjectModal() {
+        document.getElementById('subject-modal-title').textContent = 'Add Subject';
+        document.getElementById('subject-name').value = '';
+        document.getElementById('subject-class-select').value = '';
+        document.getElementById('exam-max-score').value = '50';
+        document.getElementById('sba-components-list').innerHTML = `
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" class="form-input sba-component-name" placeholder="Component name (e.g., Test 1)" style="flex: 1;">
+                <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1">
+                <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
+            </div>
+        `;
+        document.getElementById('subject-modal').dataset.editId = '';
+        
+        const classes = Store.get('classes') || [];
+        const select = document.getElementById('subject-class-select');
+        select.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
+        
+        document.getElementById('subject-modal').style.display = 'flex';
+    },
+
+    addSBAComponent() {
+        const list = document.getElementById('sba-components-list');
+        const div = document.createElement('div');
+        div.style.cssText = 'display: flex; gap: 0.5rem; align-items: center;';
+        div.innerHTML = `
+            <input type="text" class="form-input sba-component-name" placeholder="Component name" style="flex: 1;">
+            <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1">
+            <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
+        `;
+        list.appendChild(div);
+    },
+
+    editSubject(subjectId) {
+        const subjects = Store.get('assessment_subjects') || [];
+        const subject = subjects.find(s => s.id === subjectId);
+        if (!subject) return;
+
+        document.getElementById('subject-modal-title').textContent = 'Edit Subject';
+        document.getElementById('subject-name').value = subject.name;
+        document.getElementById('exam-max-score').value = subject.examMaxScore;
+        document.getElementById('subject-modal').dataset.editId = subjectId;
+
+        const classes = Store.get('classes') || [];
+        const select = document.getElementById('subject-class-select');
+        select.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(cls => { 
+            const selected = cls.id === subject.classId ? 'selected' : '';
+            select.innerHTML += `<option value="${cls.id}" ${selected}>${cls.name}</option>`; 
+        });
+
+        const sbaList = document.getElementById('sba-components-list');
+        sbaList.innerHTML = '';
+        subject.sbaComponents.forEach(comp => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display: flex; gap: 0.5rem; align-items: center;';
+            div.innerHTML = `
+                <input type="text" class="form-input sba-component-name" placeholder="Component name" style="flex: 1;" value="${comp.name}">
+                <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1" value="${comp.maxScore}">
+                <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
+            `;
+            sbaList.appendChild(div);
+        });
+
+        document.getElementById('subject-modal').style.display = 'flex';
+    },
+
+    closeSubjectModal() {
+        document.getElementById('subject-modal').style.display = 'none';
+    },
+
+    saveSubject() {
+        const name = document.getElementById('subject-name').value.trim();
+        const classId = document.getElementById('subject-class-select').value;
+        const examMaxScore = parseInt(document.getElementById('exam-max-score').value) || 50;
+        const editId = document.getElementById('subject-modal').dataset.editId;
+
+        if (!name) return alert("Please enter a subject name.");
+        if (!classId) return alert("Please select a class.");
+
+        const sbaComponents = [];
+        document.querySelectorAll('#sba-components-list > div').forEach(div => {
+            const compName = div.querySelector('.sba-component-name').value.trim();
+            const compMax = parseInt(div.querySelector('.sba-component-max').value) || 0;
+            if (compName && compMax > 0) {
+                sbaComponents.push({ name: compName, maxScore: compMax });
+            }
+        });
+
+        if (sbaComponents.length === 0) return alert("Please add at least one SBA component.");
+
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
+
+        let subjects = Store.get('assessment_subjects') || [];
+
+        if (editId) {
+            const index = subjects.findIndex(s => s.id === editId);
+            if (index !== -1) {
+                subjects[index] = { ...subjects[index], name, classId, className: cls.name, sbaComponents, examMaxScore };
+            }
+        } else {
+            subjects.push({
+                id: 'subj_' + Date.now(),
+                name,
+                classId,
+                className: cls.name,
+                sbaComponents,
+                examMaxScore
+            });
+        }
+
+        Store.set('assessment_subjects', subjects);
+        this.closeSubjectModal();
+        this.renderAssessmentSubjects();
+    },
+
+    deleteSubject(subjectId) {
+        this.showConfirm("Delete this subject? This cannot be undone.", () => {
+            let subjects = Store.get('assessment_subjects') || [];
+            subjects = subjects.filter(s => s.id !== subjectId);
+            Store.set('assessment_subjects', subjects);
+            this.renderAssessmentSubjects();
+        });
+    },
+
+    initializeScoreEntry() {
+        document.getElementById('assess-class-select').value = '';
+        document.getElementById('assess-subject-select').value = '';
+        document.getElementById('assess-type-select').value = 'sba';
+        document.getElementById('assess-score-entry-container').style.display = 'none';
+        document.getElementById('assess-max-score-display').textContent = '50';
+
+        const classes = Store.get('classes') || [];
+        const select = document.getElementById('assess-class-select');
+        select.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
+    },
+
+    onAssessClassChange() {
+        const classId = document.getElementById('assess-class-select').value;
+        const subjectSelect = document.getElementById('assess-subject-select');
+        
+        subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+        document.getElementById('assess-score-entry-container').style.display = 'none';
+
+        if (!classId) return;
+
+        const subjects = Store.get('assessment_subjects') || [];
+        const classSubjects = subjects.filter(s => s.classId === classId);
+        
+        classSubjects.forEach(subj => {
+            subjectSelect.innerHTML += `<option value="${subj.id}">${subj.name}</option>`;
+        });
+    },
+
+    onAssessSubjectChange() {
+        const subjectId = document.getElementById('assess-subject-select').value;
+        document.getElementById('assess-score-entry-container').style.display = 'none';
+        
+        if (!subjectId) return;
+        
+        this.renderScoreEntryForm();
+    },
+
+    onAssessTypeChange() {
+        const subjectId = document.getElementById('assess-subject-select').value;
+        if (subjectId) {
+            this.renderScoreEntryForm();
+        }
+    },
+
+    renderScoreEntryForm() {
+        const subjectId = document.getElementById('assess-subject-select').value;
+        const assessmentType = document.getElementById('assess-type-select').value;
+        const classId = document.getElementById('assess-class-select').value;
+        
+        if (!subjectId || !classId) return;
+
+        const subjects = Store.get('assessment_subjects') || [];
+        const subject = subjects.find(s => s.id === subjectId);
+        if (!subject) return;
+
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
+
+        const scores = Store.get('assessment_scores') || [];
+
+        let maxScore = 50;
+        if (assessmentType === 'sba') {
+            maxScore = subject.sbaComponents[0]?.maxScore || 50;
+        } else {
+            maxScore = subject.examMaxScore;
+        }
+
+        document.getElementById('assess-max-score-display').textContent = maxScore;
+
+        const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
+        const container = document.getElementById('assess-student-scores-list');
+
+        let html = '';
+        sortedStudents.forEach(student => {
+            const existingScore = scores.find(s => 
+                s.studentId === student.id && 
+                s.subjectId === subjectId && 
+                s.assessmentType === assessmentType
+            );
+            const currentScore = existingScore ? existingScore.score : '';
+
+            html += `
+                <div class="score-entry-row">
+                    <span class="score-student-name">${student.name}</span>
+                    <div class="score-input-wrapper">
+                        <input type="number" class="score-input" 
+                               data-student-id="${student.id}" 
+                               data-subject-id="${subjectId}" 
+                               data-assessment-type="${assessmentType}"
+                               value="${currentScore}" 
+                               min="0" 
+                               max="${maxScore}" 
+                               placeholder="0">
+                        <span class="score-max">/ ${maxScore}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        document.getElementById('assess-score-entry-container').style.display = 'block';
+    },
+
+    saveAssessmentScores() {
+        const inputs = document.querySelectorAll('.score-input');
+        const scores = Store.get('assessment_scores') || [];
+        let savedCount = 0;
+
+        inputs.forEach(input => {
+            const studentId = input.dataset.studentId;
+            const subjectId = input.dataset.subjectId;
+            const assessmentType = input.dataset.assessmentType;
+            const score = parseFloat(input.value);
+
+            if (isNaN(score) || score < 0) return;
+
+            const existingIndex = scores.findIndex(s => 
+                s.studentId === studentId && 
+                s.subjectId === subjectId && 
+                s.assessmentType === assessmentType
+            );
+
+            if (existingIndex !== -1) {
+                scores[existingIndex].score = score;
+            } else {
+                scores.push({
+                    id: 'score_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    studentId,
+                    subjectId,
+                    assessmentType,
+                    score,
+                    date: this.getLocalDateStr()
+                });
+            }
+            savedCount++;
+        });
+
+        Store.set('assessment_scores', scores);
+        alert(`✅ Saved ${savedCount} score(s) successfully!`);
+    },
+
+    initializeReportCards() {
+        document.getElementById('report-class-select').value = '';
+        document.getElementById('report-student-select-group').style.display = 'none';
+        document.getElementById('report-student-select').innerHTML = '<option value="">-- Select Student --</option>';
+        document.getElementById('report-card-preview').style.display = 'none';
+
+        const classes = Store.get('classes') || [];
+        const select = document.getElementById('report-class-select');
+        select.innerHTML = '<option value="">-- Select Class --</option>';
+        classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
+    },
+
+    onReportClassChange() {
+        const classId = document.getElementById('report-class-select').value;
+        const studentSelect = document.getElementById('report-student-select');
+        const studentGroup = document.getElementById('report-student-select-group');
+        const preview = document.getElementById('report-card-preview');
+
+        preview.style.display = 'none';
+        studentSelect.innerHTML = '<option value="">-- Select Student --</option>';
+
+        if (!classId) {
+            studentGroup.style.display = 'none';
+            return;
+        }
+
+        studentGroup.style.display = 'block';
+
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
+
+        const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
+        sortedStudents.forEach(student => {
+            studentSelect.innerHTML += `<option value="${student.id}">${student.name}</option>`;
+        });
+    },
+
+    onReportStudentChange() {
+        const studentId = document.getElementById('report-student-select').value;
+        const classId = document.getElementById('report-class-select').value;
+
+        if (!studentId || !classId) {
+            document.getElementById('report-card-preview').style.display = 'none';
+            return;
+        }
+
+        this.generateReportCard(studentId, classId);
+    },
+
+    generateReportCard(studentId, classId) {
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
+
+        const student = cls.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        const subjects = Store.get('assessment_subjects') || [];
+        const scores = Store.get('assessment_scores') || [];
+        const classSubjects = subjects.filter(s => s.classId === classId);
+
+        let totalSBA = 0, totalExam = 0, totalOverall = 0;
+        let subjectRows = '';
+
+        classSubjects.forEach(subject => {
+            const sbaComponents = subject.sbaComponents;
+            let sbaScore = 0;
+            let sbaMax = 0;
+
+            sbaComponents.forEach(comp => {
+                const score = scores.find(s => 
+                    s.studentId === studentId && 
+                    s.subjectId === subject.id && 
+                    s.assessmentType === 'sba' &&
+                    s.componentName === comp.name
+                );
+                if (score) sbaScore += score.score;
+                sbaMax += comp.maxScore;
+            });
+
+            const examScoreObj = scores.find(s => 
+                s.studentId === studentId && 
+                s.subjectId === subject.id && 
+                s.assessmentType === 'exam'
+            );
+            const examScore = examScoreObj ? examScoreObj.score : 0;
+            const examMax = subject.examMaxScore;
+
+            const sbaPercentage = sbaMax > 0 ? (sbaScore / sbaMax) * 50 : 0;
+            const examPercentage = examMax > 0 ? (examScore / examMax) * 50 : 0;
+            const overall = sbaPercentage + examPercentage;
+
+            const grade = this.calculateGrade(overall);
+            const remark = this.getRemark(grade);
+
+            totalSBA += sbaPercentage;
+            totalExam += examPercentage;
+            totalOverall += overall;
+
+            subjectRows += `
+                <tr>
+                    <td><strong>${subject.name}</strong></td>
+                    <td>${sbaPercentage.toFixed(1)}</td>
+                    <td>${examPercentage.toFixed(1)}</td>
+                    <td class="grade-${grade}">${grade}</td>
+                    <td>${remark}</td>
+                </tr>
+            `;
+        });
+
+        const average = classSubjects.length > 0 ? totalOverall / classSubjects.length : 0;
+        const overallGrade = this.calculateGrade(average);
+
+        const html = `
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div class="report-school-name">PREETY PEEP SCHOOL</div>
+                    <div class="report-school-info">Learner's Assessment Report</div>
+                </div>
+
+                <div class="report-student-info">
+                    <div class="report-info-item">
+                        <span class="report-info-label">Student Name</span>
+                        <span class="report-info-value">${student.name}</span>
+                    </div>
+                    <div class="report-info-item">
+                        <span class="report-info-label">Class</span>
+                        <span class="report-info-value">${cls.name}</span>
+                    </div>
+                    <div class="report-info-item">
+                        <span class="report-info-label">Term</span>
+                        <span class="report-info-value">1st Term, 2026</span>
+                    </div>
+                    <div class="report-info-item">
+                        <span class="report-info-label">Date</span>
+                        <span class="report-info-value">${this.getLocalDateStr()}</span>
+                    </div>
+                </div>
+
+                <table class="report-subjects-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>SBA (50%)</th>
+                            <th>Exam (50%)</th>
+                            <th>Grade</th>
+                            <th>Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${subjectRows}
+                    </tbody>
+                </table>
+
+                <div class="report-summary">
+                    <div class="report-summary-item">
+                        <div class="report-summary-label">Total SBA Score</div>
+                        <div class="report-summary-value">${totalSBA.toFixed(1)} / ${classSubjects.length * 50}</div>
+                    </div>
+                    <div class="report-summary-item">
+                        <div class="report-summary-label">Total Exam Score</div>
+                        <div class="report-summary-value">${totalExam.toFixed(1)} / ${classSubjects.length * 50}</div>
+                    </div>
+                    <div class="report-summary-item">
+                        <div class="report-summary-label">Overall Average</div>
+                        <div class="report-summary-value">${average.toFixed(1)}%</div>
+                    </div>
+                    <div class="report-summary-item">
+                        <div class="report-summary-label">Overall Grade</div>
+                        <div class="report-summary-value grade-${overallGrade}">Grade ${overallGrade}</div>
+                    </div>
+                </div>
+
+                <div class="report-remarks">
+                    <div class="report-remarks-title">Teacher's Remarks</div>
+                    <div class="report-remarks-item">
+                        <div class="report-remarks-label">Class Teacher's Comment</div>
+                        <div class="report-remarks-text" contenteditable="true">Enter comment here...</div>
+                    </div>
+                    <div class="report-remarks-item">
+                        <div class="report-remarks-label">Head Teacher's Comment</div>
+                        <div class="report-remarks-text" contenteditable="true">Enter comment here...</div>
+                    </div>
+                </div>
+
+                <button class="btn-print-report" onclick="window.print()">🖨️ Print Report Card</button>
+            </div>
+        `;
+
+        document.getElementById('report-card-preview').innerHTML = html;
+        document.getElementById('report-card-preview').style.display = 'block';
+    },
+
+    calculateGrade(score) {
+        if (score >= 80) return 1;
+        if (score >= 70) return 2;
+        if (score >= 60) return 3;
+        if (score >= 50) return 4;
+        if (score >= 45) return 5;
+        if (score >= 40) return 6;
+        if (score >= 35) return 7;
+        if (score >= 30) return 8;
+        return 9;
+    },
+
+    getRemark(grade) {
+        const remarks = {
+            1: 'Excellent',
+            2: 'Very Good',
+            3: 'Good',
+            4: 'Credit',
+            5: 'Pass',
+            6: 'Pass',
+            7: 'Weak Pass',
+            8: 'Weak',
+            9: 'Very Weak'
+        };
+        return remarks[grade] || 'N/A';
     }
 };

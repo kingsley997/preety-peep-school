@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alpha Tech | School Management System</title>
+    
+    <!-- COMPREHENSIVE FAVICON & MOBILE APP ICONS -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/alpha-logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" href="images/alpha-logo.png">
     <link rel="icon" type="image/png" href="images/alpha-logo.png?v=3">
     <link rel="apple-touch-icon" href="images/alpha-logo.png?v=3">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
+    
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -122,7 +126,7 @@
                 </div>
             </div>
             <div class="auth-container login-form-card">
-                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back 👋</h2>
+                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back </h2>
                 <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Sign in to access the system</p>
                 <div class="form-group">
                     <label>Select Role</label>
@@ -144,7 +148,7 @@
                 </div>
                 <button class="btn btn-primary btn-full" onclick="UI.handleLogin()">Log In</button>
                 <p id="login-error" style="color: var(--color-danger); margin-top: 1rem; font-size: 0.9rem; display: none;">Invalid username or password.</p>
-                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()">🔐 Forgot Password? (Admin Recovery)</button>
+                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()"> Forgot Password? (Admin Recovery)</button>
                 <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7;">Lost recovery phrase? Reset System</a>
             </div>
         </div>
@@ -210,7 +214,7 @@
             <div class="class-grid" id="class-grid-container"></div>
         </div>
 
-        <!-- SCREEN: School Fees (ULTIMATE WORKFLOW) -->
+        <!-- SCREEN: School Fees -->
         <div id="school-fees-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
@@ -221,15 +225,12 @@
                     </div>
                 </div>
             </div>
-
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
                 <button class="tab-btn active" onclick="UI.switchSchoolFeesTab('setup')" id="tab-fees-setup">💰 Fee Setup</button>
                 <button class="tab-btn" onclick="UI.switchSchoolFeesTab('payment')" id="tab-fees-payment">💵 Record Payment</button>
                 <button class="tab-btn" onclick="UI.switchSchoolFeesTab('ledger')" id="tab-fees-ledger">📋 Student Ledger</button>
                 <button class="tab-btn" onclick="UI.switchSchoolFeesTab('reports')" id="tab-fees-reports">📊 Reports</button>
             </div>
-
-            <!-- Tab 1: Fee Setup -->
             <div id="school-fees-setup-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div><h3 style="color: var(--color-primary); margin: 0;">Current Term Fees</h3><p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">Term 1, 2026</p></div>
@@ -237,87 +238,111 @@
                 </div>
                 <div id="school-fees-setup-list" class="toiletries-grid"></div>
             </div>
-
-            <!-- Tab 2: Record Payment -->
             <div id="school-fees-payment-view" style="display: none;">
-                <div class="form-group">
-                    <label>1. Select Class</label>
-                    <select id="payment-class-select" class="form-select" onchange="UI.onPaymentClassChange()">
-                        <option value="">-- Select a Class First --</option>
-                    </select>
-                </div>
+                <div class="form-group"><label>1. Select Class</label><select id="payment-class-select" class="form-select" onchange="UI.onPaymentClassChange()"><option value="">-- Select a Class First --</option></select></div>
                 <div id="payment-student-list-container" style="display: none;">
-                    <div class="form-group">
-                        <label>2. Search or Select Student (Alphabetical)</label>
-                        <input type="text" id="school-fees-student-search" class="form-input" placeholder="🔍 Type to filter..." oninput="UI.filterPaymentStudents()">
-                    </div>
+                    <div class="form-group"><label>2. Search or Select Student (Alphabetical)</label><input type="text" id="school-fees-student-search" class="form-input" placeholder=" Type to filter..." oninput="UI.filterPaymentStudents()"></div>
                     <div id="school-fees-student-list" class="student-list-container" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem;"></div>
                 </div>
                 <div id="school-fees-payment-details" style="display: none;"></div>
             </div>
-
-            <!-- Tab 3: Student Ledger (ENHANCED WITH SEARCH) -->
             <div id="school-fees-ledger-view" style="display: none;">
-                <div class="form-group">
-                    <label>Select Class to View Ledgers</label>
-                    <select id="ledger-class-select" class="form-select" onchange="UI.onLedgerClassChange()">
-                        <option value="">-- Select a Class --</option>
-                    </select>
-                </div>
-                <div id="ledger-search-container" style="display: none; margin-bottom: 1rem;">
-                    <input type="text" id="ledger-student-search" class="form-input" placeholder="🔍 Search student name in this class..." oninput="UI.filterLedgerStudents()">
-                </div>
+                <div class="form-group"><label>Select Class to View Ledgers</label><select id="ledger-class-select" class="form-select" onchange="UI.onLedgerClassChange()"><option value="">-- Select a Class --</option></select></div>
+                <div id="ledger-search-container" style="display: none; margin-bottom: 1rem;"><input type="text" id="ledger-student-search" class="form-input" placeholder="🔍 Search student name in this class..." oninput="UI.filterLedgerStudents()"></div>
                 <div id="school-fees-ledger-list" class="student-list-container" style="display: none; max-height: 600px; overflow-y: auto;"></div>
             </div>
-
-            <!-- Tab 4: Reports -->
             <div id="school-fees-reports-view" style="display: none;">
                 <div class="stats-grid" style="margin-bottom: 2rem;">
                     <div class="stat-card"><p class="stat-label">Total Expected</p><h3 class="stat-value" id="fees-stat-expected">GHS 0.00</h3></div>
                     <div class="stat-card highlight"><p class="stat-label">Total Collected</p><h3 class="stat-value" id="fees-stat-collected">GHS 0.00</h3></div>
                     <div class="stat-card"><p class="stat-label">Total Outstanding</p><h3 class="stat-value" id="fees-stat-outstanding">GHS 0.00</h3></div>
                 </div>
-                <div class="form-group">
-                    <label>Filter by Class (Debtors Only)</label>
-                    <select id="report-class-select" class="form-select" onchange="UI.onReportClassChange()">
-                        <option value="">-- Select a Class to View Debtors --</option>
-                    </select>
-                </div>
-                <div id="school-fees-reports-list" class="settings-container" style="margin-top: 1rem;">
-                    <p style="color: var(--color-text-muted); text-align: center;">Select a class above to view students with outstanding balances.</p>
-                </div>
+                <div class="form-group"><label>Filter by Class (Debtors Only)</label><select id="report-class-select" class="form-select" onchange="UI.onReportClassChange()"><option value="">-- Select a Class to View Debtors --</option></select></div>
+                <div id="school-fees-reports-list" class="settings-container" style="margin-top: 1rem;"><p style="color: var(--color-text-muted); text-align: center;">Select a class above to view students with outstanding balances.</p></div>
             </div>
         </div>
 
-        <!-- Add Fee Type Modal -->
-        <div id="fee-type-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
-            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
-                <h3 id="fee-type-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Fee Type</h3>
-                <div class="form-group"><label>Fee Name</label><input type="text" id="fee-type-name" class="form-input" placeholder="e.g., Tuition Fee"></div>
-                <div class="form-group"><label>Amount (GHS)</label><input type="number" id="fee-type-amount" class="form-input" placeholder="0.00" step="0.01" min="0"></div>
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button onclick="UI.closeFeeTypeModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
-                    <button onclick="UI.saveFeeType()" class="btn btn-primary" style="flex: 1;">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Record Payment Modal (Dynamic) -->
-        <div id="record-payment-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;"></div>
-
-        <!-- SCREEN: Assessment (Placeholder) -->
+        <!-- SCREEN: Assessment (FULLY FUNCTIONAL) -->
         <div id="assessment-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
-                    <div><h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">📝 Assessment</h1><p class="text-muted">Exam and class records</p></div>
+                    <div>
+                        <h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;">📝 Assessment</h1>
+                        <p class="text-muted">Academic Performance & Report Cards</p>
+                    </div>
                 </div>
             </div>
-            <div class="placeholder-card">
-                <div class="placeholder-icon">📝</div>
-                <h2>Assessment Module</h2>
-                <p>Coming soon: Record exam scores, generate report cards, and track student performance.</p>
-                <button class="btn btn-primary" onclick="UI.navigateToModule('feeding-fee')">← Back to Feeding Fee</button>
+
+            <!-- Assessment Sub-Tabs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
+                <button class="tab-btn active" onclick="UI.switchAssessmentTab('setup')" id="tab-assess-setup">⚙️ Subject Setup</button>
+                <button class="tab-btn" onclick="UI.switchAssessmentTab('scores')" id="tab-assess-scores">✏️ Enter Scores</button>
+                <button class="tab-btn" onclick="UI.switchAssessmentTab('reports')" id="tab-assess-reports">📄 Report Cards</button>
+            </div>
+
+            <!-- Tab 1: Subject Setup -->
+            <div id="assessment-setup-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <h3 style="color: var(--color-primary); margin: 0;">Subjects & Assessment Types</h3>
+                        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">Define subjects and scoring breakdown per class</p>
+                    </div>
+                    <button class="btn btn-accent" onclick="UI.showAddSubjectModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add Subject</button>
+                </div>
+                <div id="assessment-subjects-list" class="toiletries-grid"></div>
+            </div>
+
+            <!-- Tab 2: Enter Scores -->
+            <div id="assessment-scores-view" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label>1. Select Class</label>
+                        <select id="assess-class-select" class="form-select" onchange="UI.onAssessClassChange()">
+                            <option value="">-- Select Class --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>2. Select Subject</label>
+                        <select id="assess-subject-select" class="form-select" onchange="UI.onAssessSubjectChange()">
+                            <option value="">-- Select Subject --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>3. Assessment Type</label>
+                        <select id="assess-type-select" class="form-select" onchange="UI.onAssessTypeChange()">
+                            <option value="sba">SBA (Test/Class Exercise)</option>
+                            <option value="exam">Examination</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="assess-score-entry-container" style="display: none;">
+                    <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+                        <strong>Max Score:</strong> <span id="assess-max-score-display">50</span> points
+                    </div>
+                    <div id="assess-student-scores-list" class="student-list-container" style="max-height: 500px; overflow-y: auto;"></div>
+                    <button class="btn btn-primary btn-full" style="margin-top: 1rem;" onclick="UI.saveAssessmentScores()">💾 Save Scores</button>
+                </div>
+            </div>
+
+            <!-- Tab 3: Report Cards -->
+            <div id="assessment-reports-view" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label>Select Class</label>
+                        <select id="report-class-select" class="form-select" onchange="UI.onReportClassChange()">
+                            <option value="">-- Select Class --</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="report-student-select-group" style="display: none;">
+                        <label>Select Student</label>
+                        <select id="report-student-select" class="form-select" onchange="UI.onReportStudentChange()">
+                            <option value="">-- Select Student --</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="report-card-preview" style="display: none;"></div>
             </div>
         </div>
 
@@ -358,20 +383,6 @@
             </div>
         </div>
 
-        <!-- Add Required Toiletry Modal -->
-        <div id="toiletry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
-            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
-                <h3 id="toiletry-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Required Item</h3>
-                <div class="form-group"><label>Item Name</label><input type="text" id="toiletry-name" class="form-input" placeholder="e.g., Bathing Soap"></div>
-                <div class="form-group"><label>Unit</label><input type="text" id="toiletry-unit" class="form-input" placeholder="e.g., bars, packs, bottles"></div>
-                <div class="form-group"><label>Quantity Required Per Student</label><input type="number" id="toiletry-required" class="form-input" placeholder="1" min="1"></div>
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button onclick="UI.closeToiletryModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
-                    <button onclick="UI.saveToiletryItem()" class="btn btn-primary" style="flex: 1;">Save</button>
-                </div>
-            </div>
-        </div>
-
         <!-- SCREEN: Class Portal -->
         <div id="class-portal-screen" style="display: none;">
             <div class="portal-header">
@@ -391,7 +402,7 @@
                 <input type="text" id="new-student-name" class="form-input" placeholder="Add new student for today..." style="max-width: 300px;">
                 <button class="btn btn-accent" onclick="UI.addStudentForToday()">+ Add Student</button>
             </div>
-            <div style="margin-bottom: 1rem;"><input type="text" id="student-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterStudents()"></div>
+            <div style="margin-bottom: 1rem;"><input type="text" id="student-search" class="form-input" placeholder=" Search student name..." oninput="UI.filterStudents()"></div>
             <div class="student-list-container" id="student-list-container"></div>
         </div>
 
@@ -399,7 +410,7 @@
         <div id="admin-settings-screen" style="display: none;">
             <div class="portal-header">
                 <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
-                <div class="portal-title"><h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1><p class="text-muted">Manage Fees, Staff & Reports</p></div>
+                <div class="portal-title"><h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">️ Admin Settings</h1><p class="text-muted">Manage Fees, Staff & Reports</p></div>
                 <button class="btn btn-primary" onclick="UI.logout()">Log Out</button>
             </div>
             <div class="settings-container" style="margin-bottom: 2rem;">
@@ -420,9 +431,77 @@
                 <button class="btn btn-accent" style="margin-top: 1.5rem;" onclick="UI.saveAdminFees()">💾 Save Fee Changes</button>
             </div>
             <div class="settings-container">
-                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">📊 Saved Daily Reports</h3>
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;"> Saved Daily Reports</h3>
                 <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Click a report to view and copy the daily summary.</p>
                 <div id="reports-list-container"></div>
+            </div>
+        </div>
+
+        <!-- MODALS -->
+        
+        <!-- Fee Type Modal -->
+        <div id="fee-type-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
+                <h3 id="fee-type-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Fee Type</h3>
+                <div class="form-group"><label>Fee Name</label><input type="text" id="fee-type-name" class="form-input" placeholder="e.g., Tuition Fee"></div>
+                <div class="form-group"><label>Amount (GHS)</label><input type="number" id="fee-type-amount" class="form-input" placeholder="0.00" step="0.01" min="0"></div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeFeeTypeModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.saveFeeType()" class="btn btn-primary" style="flex: 1;">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Record Payment Modal -->
+        <div id="record-payment-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;"></div>
+
+        <!-- Add Subject Modal (NEW) -->
+        <div id="subject-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
+                <h3 id="subject-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Subject</h3>
+                <div class="form-group">
+                    <label>Subject Name</label>
+                    <input type="text" id="subject-name" class="form-input" placeholder="e.g., Mathematics">
+                </div>
+                <div class="form-group">
+                    <label>Apply to Class</label>
+                    <select id="subject-class-select" class="form-select">
+                        <option value="">-- Select Class --</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">SBA Components (Total = 50%)</label>
+                    <div id="sba-components-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="text" class="form-input sba-component-name" placeholder="Component name (e.g., Test 1)" style="flex: 1;">
+                            <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1">
+                            <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
+                        </div>
+                    </div>
+                    <button class="btn" style="margin-top: 0.5rem; background: var(--color-bg); color: var(--color-primary);" onclick="UI.addSBAComponent()">+ Add SBA Component</button>
+                </div>
+                <div class="form-group">
+                    <label>Exam Max Score (50%)</label>
+                    <input type="number" id="exam-max-score" class="form-input" placeholder="50" value="50" min="1">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeSubjectModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.saveSubject()" class="btn btn-primary" style="flex: 1;">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toiletry Modal -->
+        <div id="toiletry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
+                <h3 id="toiletry-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Required Item</h3>
+                <div class="form-group"><label>Item Name</label><input type="text" id="toiletry-name" class="form-input" placeholder="e.g., Bathing Soap"></div>
+                <div class="form-group"><label>Unit</label><input type="text" id="toiletry-unit" class="form-input" placeholder="e.g., bars, packs, bottles"></div>
+                <div class="form-group"><label>Quantity Required Per Student</label><input type="number" id="toiletry-required" class="form-input" placeholder="1" min="1"></div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeToiletryModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
+                    <button onclick="UI.saveToiletryItem()" class="btn btn-primary" style="flex: 1;">Save</button>
+                </div>
             </div>
         </div>
 
