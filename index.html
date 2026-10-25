@@ -255,7 +255,7 @@
             <div class="class-grid" id="class-grid-container"></div>
         </div>
 
-        <!-- SCREEN: School Fees (FULLY FUNCTIONAL) -->
+        <!-- SCREEN: School Fees (FULLY FUNCTIONAL - ENHANCED WORKFLOW) -->
         <div id="school-fees-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
@@ -287,31 +287,34 @@
                 <div id="school-fees-setup-list" class="toiletries-grid"></div>
             </div>
 
-            <!-- Tab 2: Record Payment (Cashier) -->
+            <!-- Tab 2: Record Payment (ENHANCED: Class dropdown + Student search) -->
             <div id="school-fees-payment-view" style="display: none;">
                 <div class="form-group">
-                    <label>Select Student</label>
-                    <input type="text" id="school-fees-student-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.searchStudentForPayment()">
+                    <label>1. Select Class</label>
+                    <select id="payment-class-select" class="form-select" onchange="UI.onPaymentClassChange()">
+                        <option value="">-- Select a Class First --</option>
+                    </select>
                 </div>
-                <div id="school-fees-student-list" class="student-list-container" style="display: none; max-height: 300px; overflow-y: auto; margin-bottom: 1rem;">
-                    <!-- Dynamically populated with search results -->
+                <div class="form-group" id="payment-student-search-group" style="display: none;">
+                    <label>2. Search Student</label>
+                    <input type="text" id="school-fees-student-search" class="form-input" placeholder="🔍 Type student name..." oninput="UI.searchStudentForPayment()">
                 </div>
+                <div id="school-fees-student-list" class="student-list-container" style="display: none; max-height: 300px; overflow-y: auto; margin-bottom: 1rem;"></div>
+                
                 <div id="school-fees-payment-details" style="display: none;">
-                    <!-- Dynamically populated when student is selected -->
+                    <!-- Dynamically populated with student summary and "Record Payment" button -->
                 </div>
             </div>
 
-            <!-- Tab 3: Student Ledger -->
+            <!-- Tab 3: Student Ledger (ENHANCED: Chronological receipts) -->
             <div id="school-fees-ledger-view" style="display: none;">
                 <div class="form-group">
-                    <label>Select Student to View</label>
-                    <input type="text" id="school-fees-ledger-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.searchStudentForLedger()">
+                    <label>Search Student Ledger</label>
+                    <input type="text" id="school-fees-ledger-search" class="form-input" placeholder="🔍 Type student name..." oninput="UI.searchStudentForLedger()">
                 </div>
-                <div id="school-fees-ledger-list" class="student-list-container" style="display: none; max-height: 300px; overflow-y: auto; margin-bottom: 1rem;">
-                    <!-- Dynamically populated -->
-                </div>
+                <div id="school-fees-ledger-list" class="student-list-container" style="display: none; max-height: 300px; overflow-y: auto; margin-bottom: 1rem;"></div>
                 <div id="school-fees-ledger-details" style="display: none;">
-                    <!-- Dynamically populated -->
+                    <!-- Dynamically populated with chronological receipt history -->
                 </div>
             </div>
 
@@ -357,33 +360,9 @@
             </div>
         </div>
 
-        <!-- Record Payment Modal -->
+        <!-- Record Payment Modal (DYNAMIC - content injected by JS) -->
         <div id="record-payment-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
-            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
-                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Record Payment</h3>
-                <div id="record-payment-student-info" style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
-                    <!-- Dynamically populated -->
-                </div>
-                <div id="record-payment-fees-list">
-                    <!-- Dynamically populated with fee checkboxes -->
-                </div>
-                <div class="form-group" style="margin-top: 1.5rem;">
-                    <label>Payment Method</label>
-                    <select id="payment-method" class="form-select">
-                        <option value="Cash">Cash</option>
-                        <option value="MoMo">Mobile Money (MoMo)</option>
-                        <option value="Bank">Bank Transfer</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Note (Optional)</label>
-                    <input type="text" id="payment-note" class="form-input" placeholder="e.g., Paid by parent in person">
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button onclick="UI.closeRecordPaymentModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
-                    <button onclick="UI.confirmRecordPayment()" class="btn btn-primary" style="flex: 1;">💾 Save Payment</button>
-                </div>
-            </div>
+            <!-- Content injected dynamically by showRecordPaymentModal() -->
         </div>
 
         <!-- SCREEN: Assessment (Placeholder) -->
@@ -426,7 +405,7 @@
                 <button class="tab-btn" onclick="UI.switchToiletriesTab('compliance')" id="tab-compliance">📊 Compliance</button>
             </div>
 
-            <!-- Tab 1: Required Items (Admin sets what parents must bring) -->
+            <!-- Tab 1: Required Items -->
             <div id="toiletries-required-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
                     <h3 style="color: var(--color-primary); margin: 0;">Items Parents Must Bring</h3>
@@ -435,7 +414,7 @@
                 <div id="toiletries-required-list" class="toiletries-grid"></div>
             </div>
 
-            <!-- Tab 2: Daily Checklist (Teacher checks off what each student brought) -->
+            <!-- Tab 2: Daily Checklist -->
             <div id="toiletries-checklist-view" style="display: none;">
                 <div class="form-group">
                     <label>Select Class for Today's Checklist</label>
@@ -444,20 +423,17 @@
                     </select>
                 </div>
                 
-                <!-- NEW: Search Bar for Checklist -->
                 <div style="margin-bottom: 1rem; display: none;" id="toiletry-search-container">
                     <input type="text" id="toiletry-checklist-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterToiletriesChecklist()">
                 </div>
 
-                <div id="toiletries-checklist-list" class="student-list-container" style="margin-top: 1rem; display: none;">
-                    <!-- Dynamically populated -->
-                </div>
+                <div id="toiletries-checklist-list" class="student-list-container" style="margin-top: 1rem; display: none;"></div>
                 <button id="save-checklist-btn" class="btn btn-primary btn-full" style="margin-top: 1.5rem; display: none;" onclick="UI.saveToiletriesChecklist()">
                     ✅ Save Today's Checklist
                 </button>
             </div>
 
-            <!-- Tab 3: Compliance Report (Shows who is missing items) -->
+            <!-- Tab 3: Compliance Report -->
             <div id="toiletries-compliance-view" style="display: none;">
                 <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Compliance Reports</h3>
                 <div id="toiletries-compliance-list">
