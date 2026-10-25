@@ -127,7 +127,7 @@ const UI = {
             if (links[0]) links[0].classList.add('active');
         } else if (moduleName === 'school-fees') {
             document.getElementById('school-fees-screen').style.display = 'block';
-            this.renderFeeTypesSetup(); // Initialize School Fees view
+            this.renderFeeTypesSetup();
             if (links[1]) links[1].classList.add('active');
         } else if (moduleName === 'assessment') {
             document.getElementById('assessment-screen').style.display = 'block';
@@ -1080,6 +1080,7 @@ const UI = {
         document.getElementById('school-fees-payment-details').style.display = 'none';
     },
 
+    // FIXED: Now searches the master 'classes' list
     searchStudentForPayment() {
         const query = document.getElementById('school-fees-student-search').value.toLowerCase();
         const listContainer = document.getElementById('school-fees-student-list');
@@ -1089,14 +1090,13 @@ const UI = {
             return;
         }
 
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`) || [];
+        const classes = Store.get('classes') || [];
         const allStudents = [];
 
-        roster.forEach(cls => {
+        classes.forEach(cls => {
             cls.students.forEach(student => {
                 if (student.name.toLowerCase().includes(query)) {
-                    allStudents.push({ ...student, className: cls.className, classId: cls.classId });
+                    allStudents.push({ ...student, className: cls.name, classId: cls.id });
                 }
             });
         });
@@ -1123,10 +1123,10 @@ const UI = {
         listContainer.style.display = 'block';
     },
 
+    // FIXED: Now fetches from master 'classes' list
     selectStudentForPayment(studentId, classId) {
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`) || [];
-        const cls = roster.find(c => c.classId === classId);
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
         if (!cls) return;
 
         const student = cls.students.find(s => s.id === studentId);
@@ -1160,7 +1160,7 @@ const UI = {
                 <div class="payment-student-header">
                     <div>
                         <div class="payment-student-name">${student.name}</div>
-                        <div class="payment-student-class">${cls.className}</div>
+                        <div class="payment-student-class">${cls.name}</div>
                     </div>
                 </div>
                 <div class="payment-summary">
@@ -1177,7 +1177,7 @@ const UI = {
                         <div class="payment-summary-value outstanding">GHS ${(totalOutstanding / 100).toFixed(2)}</div>
                     </div>
                 </div>
-                <button class="btn-record-payment" onclick="UI.showRecordPaymentModal('${student.id}', '${cls.classId}')">
+                <button class="btn-record-payment" onclick="UI.showRecordPaymentModal('${student.id}', '${cls.id}')">
                     💵 Record Payment
                 </button>
             </div>
@@ -1187,10 +1187,10 @@ const UI = {
         document.getElementById('school-fees-payment-details').style.display = 'block';
     },
 
+    // FIXED: Now fetches from master 'classes' list
     showRecordPaymentModal(studentId, classId) {
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`) || [];
-        const cls = roster.find(c => c.classId === classId);
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
         if (!cls) return;
 
         const student = cls.students.find(s => s.id === studentId);
@@ -1201,7 +1201,7 @@ const UI = {
 
         let html = `
             <div id="record-payment-student-info" style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
-                <strong>${student.name}</strong> - ${cls.className}
+                <strong>${student.name}</strong> - ${cls.name}
             </div>
             <div id="record-payment-fees-list">
         `;
@@ -1319,9 +1319,8 @@ const UI = {
     },
 
     showPaymentReceipt(studentId, classId, totalAmount, paymentDetails, method, note, dateStr, timeStr) {
-        const dateStr2 = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr2}`) || [];
-        const cls = roster.find(c => c.classId === classId);
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
         if (!cls) return;
 
         const student = cls.students.find(s => s.id === studentId);
@@ -1334,7 +1333,7 @@ Preety Peep School
 Date: ${dateStr} | Time: ${timeStr}
 
 Student: ${student.name}
-Class: ${cls.className}
+Class: ${cls.name}
 
 Payment Details:
 ${paymentDetails.join('\n')}
@@ -1361,6 +1360,7 @@ Thank you for your payment!
         document.getElementById('school-fees-ledger-details').style.display = 'none';
     },
 
+    // FIXED: Now searches the master 'classes' list
     searchStudentForLedger() {
         const query = document.getElementById('school-fees-ledger-search').value.toLowerCase();
         const listContainer = document.getElementById('school-fees-ledger-list');
@@ -1370,14 +1370,13 @@ Thank you for your payment!
             return;
         }
 
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`) || [];
+        const classes = Store.get('classes') || [];
         const allStudents = [];
 
-        roster.forEach(cls => {
+        classes.forEach(cls => {
             cls.students.forEach(student => {
                 if (student.name.toLowerCase().includes(query)) {
-                    allStudents.push({ ...student, className: cls.className, classId: cls.classId });
+                    allStudents.push({ ...student, className: cls.name, classId: cls.id });
                 }
             });
         });
@@ -1404,10 +1403,10 @@ Thank you for your payment!
         listContainer.style.display = 'block';
     },
 
+    // FIXED: Now fetches from master 'classes' list
     selectStudentForLedger(studentId, classId) {
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`) || [];
-        const cls = roster.find(c => c.classId === classId);
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
         if (!cls) return;
 
         const student = cls.students.find(s => s.id === studentId);
@@ -1428,7 +1427,7 @@ Thank you for your payment!
                 <div class="ledger-header">
                     <div>
                         <div class="ledger-student-name">${student.name}</div>
-                        <div class="ledger-student-class">${cls.className}</div>
+                        <div class="ledger-student-class">${cls.name}</div>
                     </div>
                 </div>
         `;
@@ -1436,7 +1435,6 @@ Thank you for your payment!
         feeTypes.forEach(fee => {
             const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
             const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
-            const outstanding = fee.amount - totalPaid;
 
             let statusHTML = '';
             if (totalPaid >= fee.amount) {
@@ -1495,16 +1493,15 @@ Thank you for your payment!
     renderSchoolFeesReports() {
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
-        const dateStr = this.getLocalDateStr();
-        const roster = Store.get(`roster_${dateStr}`) || [];
+        const classes = Store.get('classes') || [];
 
         let totalExpected = 0;
         let totalCollected = 0;
 
         const allStudents = [];
-        roster.forEach(cls => {
+        classes.forEach(cls => {
             cls.students.forEach(student => {
-                allStudents.push({ ...student, className: cls.className });
+                allStudents.push({ ...student, className: cls.name });
             });
         });
 
