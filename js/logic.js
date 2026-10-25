@@ -484,7 +484,6 @@ const UI = {
         });
     },
     
-    // UPDATED: Now adds the student to BOTH the daily roster AND the master classes list
     addStudentForToday() {
         const nameInput = document.getElementById('new-student-name');
         const name = nameInput.value.trim();
@@ -494,11 +493,9 @@ const UI = {
         const roster = Store.get(`roster_${dateStr}`);
         const cls = roster.find(c => c.classId === this.currentClassId);
         
-        // Get the master classes list
         const masterClasses = Store.get('classes') || [];
         const masterClass = masterClasses.find(c => c.id === this.currentClassId);
         
-        // Create the new student
         const newStudent = { 
             id: `student_${Date.now()}`, 
             name: name, 
@@ -507,17 +504,11 @@ const UI = {
             time: null 
         };
         
-        // Add to today's feeding roster
         cls.students.push(newStudent);
         Store.set(`roster_${dateStr}`, roster);
         
-        // ALSO add to master classes list (permanent enrollment)
         if (masterClass) {
-            masterClass.students.push({
-                id: newStudent.id,
-                name: newStudent.name,
-                fee: newStudent.fee
-            });
+            masterClass.students.push({ id: newStudent.id, name: newStudent.name, fee: newStudent.fee });
             Store.set('classes', masterClasses);
         }
         
@@ -527,7 +518,12 @@ const UI = {
     },
 
     openAdminSettings() { this.navigateToModule('admin-settings'); },
-    goBackFromSettings() { this.closeSidebar(); history.back(); },
+    
+    // FIXED: Explicitly navigate to dashboard instead of relying on history.back()
+    goBackFromSettings() { 
+        this.closeSidebar(); 
+        this.navigateToModule('feeding-fee'); 
+    },
 
     renderAdminSettings() {
         const cashierData = Store.get('cashier_user');
@@ -1097,6 +1093,7 @@ const UI = {
     },
 
     renderPaymentStudentList(classId) {
+        // Always fetch fresh data to prevent idle tab issues
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
@@ -1334,6 +1331,9 @@ const UI = {
         document.getElementById('ledger-class-select').value = '';
         document.getElementById('school-fees-ledger-list').style.display = 'none';
         document.getElementById('school-fees-ledger-list').innerHTML = '';
+        document.getElementById('ledger-search-container').style.display = 'none';
+        document.getElementById('ledger-student-search').value = '';
+        
         const classes = Store.get('classes') || [];
         const select = document.getElementById('ledger-class-select');
         select.innerHTML = '<option value="">-- Select a Class --</option>';
@@ -1343,8 +1343,20 @@ const UI = {
     onLedgerClassChange() {
         const classId = document.getElementById('ledger-class-select').value;
         const listContainer = document.getElementById('school-fees-ledger-list');
-        if (!classId) { listContainer.style.display = 'none'; return; }
+        const searchContainer = document.getElementById('ledger-search-container');
+        const searchInput = document.getElementById('ledger-student-search');
+        
+        if (!classId) { 
+            listContainer.style.display = 'none'; 
+            searchContainer.style.display = 'none';
+            searchInput.value = '';
+            return; 
+        }
 
+        searchContainer.style.display = 'block';
+        searchInput.value = ''; // Clear search when class changes
+
+        // Always fetch fresh data to prevent idle tab issues
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
@@ -1385,7 +1397,8 @@ const UI = {
             }
 
             const outstandingColor = totalOutstanding > 0 ? 'var(--color-danger)' : 'var(--color-accent)';
-            html += `<details class="report-accordion" style="margin-bottom: 1rem;">
+            // Added data-student-name for the new search filter
+            html += `<details class="report-accordion ledger-student-row" data-student-name="${student.name.toLowerCase()}" style="margin-bottom: 1rem;">
                 <summary class="report-summary" style="padding: 1rem;">
                     <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                         <strong>${student.name}</strong>
@@ -1401,6 +1414,16 @@ const UI = {
 
         listContainer.innerHTML = html;
         listContainer.style.display = 'block';
+    },
+
+    // NEW: Filter function for the Student Ledger search bar
+    filterLedgerStudents() {
+        const query = document.getElementById('ledger-student-search').value.trim().toLowerCase();
+        const rows = document.querySelectorAll('.ledger-student-row');
+        rows.forEach(row => {
+            const name = row.getAttribute('data-student-name');
+            row.style.display = (name && name.includes(query)) ? 'block' : 'none';
+        });
     },
 
     initializeReportsView() {

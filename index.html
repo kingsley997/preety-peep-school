@@ -8,9 +8,10 @@
     <link rel="icon" type="image/png" sizes="16x16" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" href="images/alpha-logo.png">
-    <link rel="icon" type="image/png" href="images/alpha-logo.png?v=2">
-    <link rel="apple-touch-icon" href="images/alpha-logo.png?v=2">
+    <link rel="icon" type="image/png" href="images/alpha-logo.png?v=3">
+    <link rel="apple-touch-icon" href="images/alpha-logo.png?v=3">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <link rel="stylesheet" href="css/style.css">
@@ -237,7 +238,7 @@
                 <div id="school-fees-setup-list" class="toiletries-grid"></div>
             </div>
 
-            <!-- Tab 2: Record Payment (ENHANCED) -->
+            <!-- Tab 2: Record Payment -->
             <div id="school-fees-payment-view" style="display: none;">
                 <div class="form-group">
                     <label>1. Select Class</label>
@@ -255,7 +256,7 @@
                 <div id="school-fees-payment-details" style="display: none;"></div>
             </div>
 
-            <!-- Tab 3: Student Ledger (ENHANCED) -->
+            <!-- Tab 3: Student Ledger (ENHANCED WITH SEARCH) -->
             <div id="school-fees-ledger-view" style="display: none;">
                 <div class="form-group">
                     <label>Select Class to View Ledgers</label>
@@ -263,10 +264,13 @@
                         <option value="">-- Select a Class --</option>
                     </select>
                 </div>
+                <div id="ledger-search-container" style="display: none; margin-bottom: 1rem;">
+                    <input type="text" id="ledger-student-search" class="form-input" placeholder="🔍 Search student name in this class..." oninput="UI.filterLedgerStudents()">
+                </div>
                 <div id="school-fees-ledger-list" class="student-list-container" style="display: none; max-height: 600px; overflow-y: auto;"></div>
             </div>
 
-            <!-- Tab 4: Reports (ENHANCED: Debtors List) -->
+            <!-- Tab 4: Reports -->
             <div id="school-fees-reports-view" style="display: none;">
                 <div class="stats-grid" style="margin-bottom: 2rem;">
                     <div class="stat-card"><p class="stat-label">Total Expected</p><h3 class="stat-value" id="fees-stat-expected">GHS 0.00</h3></div>
@@ -394,7 +398,7 @@
         <!-- SCREEN: Admin Settings -->
         <div id="admin-settings-screen" style="display: none;">
             <div class="portal-header">
-                <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back</button>
+                <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
                 <div class="portal-title"><h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1><p class="text-muted">Manage Fees, Staff & Reports</p></div>
                 <button class="btn btn-primary" onclick="UI.logout()">Log Out</button>
             </div>
