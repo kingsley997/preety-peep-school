@@ -165,11 +165,20 @@ const UI = {
 
     handlePopState(event) {
         const state = event.state || {};
-        let screenId = state.screen || 'login-screen';
+        let screenId = state.screen || 'dashboard-screen';
+        
+        // 🛡️ CRITICAL MOBILE FIX: Prevent swiping back to login screen if the user is still authenticated
+        if (screenId === 'login-screen' && Store.get('current_session')) {
+            screenId = 'dashboard-screen';
+            history.replaceState({ screen: 'dashboard-screen' }, '', '#dashboard-screen');
+        }
+        
         if (state.classId) this.currentClassId = state.classId;
         this.navigateTo(screenId, false);
-        if (screenId === 'dashboard-screen') this.renderDashboard();
-        else if (screenId === 'class-portal-screen') {
+
+        if (screenId === 'dashboard-screen') {
+            this.renderDashboard();
+        } else if (screenId === 'class-portal-screen') {
             const query = document.getElementById('student-search') ? document.getElementById('student-search').value : '';
             this.renderClassPortal(this.currentClassId, query);
         } else if (screenId === 'admin-settings-screen') {
@@ -189,8 +198,9 @@ const UI = {
             document.getElementById('admin-settings-btn').style.display = session.role === 'admin' ? 'inline-flex' : 'none';
             const hash = window.location.hash.replace('#', '');
             let targetScreen = 'dashboard-screen';
-            if (hash === 'admin-settings-screen') targetScreen = 'admin-settings-screen';
-            else if (hash === 'class-portal-screen') {
+            if (hash === 'admin-settings-screen') {
+                targetScreen = 'admin-settings-screen';
+            } else if (hash === 'class-portal-screen') {
                 const savedClassId = sessionStorage.getItem('currentClassId');
                 if (savedClassId) {
                     this.currentClassId = savedClassId;
@@ -250,7 +260,9 @@ const UI = {
             Store.set('current_session', this.currentSession);
             document.getElementById('user-display-name').textContent = username;
             document.getElementById('admin-settings-btn').style.display = role === 'admin' ? 'inline-flex' : 'none';
-            this.navigateTo('dashboard-screen');
+            
+            // 🛡️ FIX: Push to history so mobile swipe-back has a proper starting point
+            this.navigateTo('dashboard-screen', true);
             this.renderDashboard(); 
         } else { errorMsg.style.display = 'block'; }
     },
@@ -517,9 +529,28 @@ const UI = {
         this.renderClassPortal(this.currentClassId, '');
     },
 
-    openAdminSettings() { this.navigateToModule('admin-settings'); },
+    openAdminSettings() { 
+        this.closeSidebar();
+        const screens = ['dashboard-screen', 'school-fees-screen', 'assessment-screen', 'toiletries-screen', 'class-portal-screen', 'admin-settings-screen'];
+        screens.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        
+        document.getElementById('admin-settings-screen').style.display = 'block';
+        this.renderAdminSettings();
+        this.renderReportsList();
+        
+        const links = document.querySelectorAll('.sidebar-link');
+        links.forEach(link => link.classList.remove('active'));
+        if (links[4]) links[4].classList.add('active');
+        
+        this.currentScreen = 'admin-settings-screen';
+        
+        // 🛡️ FIX: Push state so mobile swipe-back has a proper history step to pop
+        history.pushState({ screen: 'admin-settings-screen' }, '', '#admin-settings-screen');
+    },
     
-    // FIXED: Explicitly navigate to dashboard instead of relying on history.back()
     goBackFromSettings() { 
         this.closeSidebar(); 
         this.navigateToModule('feeding-fee'); 
@@ -1093,7 +1124,6 @@ const UI = {
     },
 
     renderPaymentStudentList(classId) {
-        // Always fetch fresh data to prevent idle tab issues
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
@@ -1354,9 +1384,8 @@ const UI = {
         }
 
         searchContainer.style.display = 'block';
-        searchInput.value = ''; // Clear search when class changes
+        searchInput.value = '';
 
-        // Always fetch fresh data to prevent idle tab issues
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
@@ -1397,7 +1426,6 @@ const UI = {
             }
 
             const outstandingColor = totalOutstanding > 0 ? 'var(--color-danger)' : 'var(--color-accent)';
-            // Added data-student-name for the new search filter
             html += `<details class="report-accordion ledger-student-row" data-student-name="${student.name.toLowerCase()}" style="margin-bottom: 1rem;">
                 <summary class="report-summary" style="padding: 1rem;">
                     <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
@@ -1416,7 +1444,6 @@ const UI = {
         listContainer.style.display = 'block';
     },
 
-    // NEW: Filter function for the Student Ledger search bar
     filterLedgerStudents() {
         const query = document.getElementById('ledger-student-search').value.trim().toLowerCase();
         const rows = document.querySelectorAll('.ledger-student-row');
