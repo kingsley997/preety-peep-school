@@ -656,9 +656,6 @@ const UI = {
         alert("✅ Report downloaded to your device!");
     },
 
-    // ==========================================
-    // TOILETRIES MODULE FUNCTIONS
-    // ==========================================
     switchToiletriesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
@@ -954,9 +951,6 @@ const UI = {
         document.body.removeChild(textArea);
     },
 
-    // ==========================================
-    // SCHOOL FEES MODULE FUNCTIONS (ULTIMATE WORKFLOW)
-    // ==========================================
     switchSchoolFeesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-fees-${tabName}`).classList.add('active');
@@ -1290,7 +1284,7 @@ const UI = {
         Store.set('student_fee_payments', payments);
         this.closeRecordPaymentModal();
         this.showPaymentReceipt(studentId, classId, Math.round(amountGhs * 100) - remainingAmount, paymentDetails, method, note, dateStr, timeStr);
-        this.initializePaymentView(); // FIX: Resets the view so it doesn't get "stuck"
+        this.initializePaymentView();
     },
 
     showPaymentReceipt(studentId, classId, totalAmountPesewas, paymentDetails, method, note, dateStr, timeStr) {
