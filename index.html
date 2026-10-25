@@ -297,78 +297,74 @@
             </div>
         </div>
 
-        <!-- SCREEN: Toiletries (FULLY FUNCTIONAL) -->
+        <!-- SCREEN: Toiletries (Parent Compliance Checklist) -->
         <div id="toiletries-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
                     <div>
                         <h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;">🧴 Toiletries</h1>
-                        <p class="text-muted">Inventory & Distribution</p>
+                        <p class="text-muted">Parent Compliance Tracker</p>
                     </div>
                 </div>
             </div>
 
             <!-- Toiletries Sub-Tabs -->
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem;">
-                <button class="tab-btn active" onclick="UI.switchToiletriesTab('inventory')" id="tab-inventory">📦 Inventory</button>
-                <button class="tab-btn" onclick="UI.switchToiletriesTab('distribute')" id="tab-distribute">📤 Distribute</button>
-                <button class="tab-btn" onclick="UI.switchToiletriesTab('reports')" id="tab-reports">📊 Reports</button>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
+                <button class="tab-btn active" onclick="UI.switchToiletriesTab('required')" id="tab-required">📋 Required Items</button>
+                <button class="tab-btn" onclick="UI.switchToiletriesTab('checklist')" id="tab-checklist">✅ Checklist</button>
+                <button class="tab-btn" onclick="UI.switchToiletriesTab('compliance')" id="tab-compliance">📊 Compliance</button>
             </div>
 
-            <!-- Tab 1: Inventory -->
-            <div id="toiletries-inventory-view">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="color: var(--color-primary); margin: 0;">Current Stock</h3>
-                    <button class="btn btn-accent" onclick="UI.showAddToiletryModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add Item</button>
+            <!-- Tab 1: Required Items (Admin sets what parents must bring) -->
+            <div id="toiletries-required-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h3 style="color: var(--color-primary); margin: 0;">Items Parents Must Bring</h3>
+                    <button class="btn btn-accent" onclick="UI.showAddToiletryModal()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">+ Add Required Item</button>
                 </div>
-                <div id="toiletries-inventory-list" class="toiletries-grid"></div>
+                <div id="toiletries-required-list" class="toiletries-grid"></div>
             </div>
 
-            <!-- Tab 2: Distribute -->
-            <div id="toiletries-distribute-view" style="display: none;">
+            <!-- Tab 2: Daily Checklist (Teacher checks off what each student brought) -->
+            <div id="toiletries-checklist-view" style="display: none;">
                 <div class="form-group">
-                    <label>Select Class for Distribution</label>
-                    <select id="toiletry-distribute-class" class="form-select" onchange="UI.renderToiletriesDistribution()">
+                    <label>Select Class for Today's Checklist</label>
+                    <select id="toiletry-checklist-class" class="form-select" onchange="UI.renderToiletriesChecklist()">
                         <option value="">-- Select a Class --</option>
                     </select>
                 </div>
-                <div id="toiletries-distribute-list" class="student-list-container" style="margin-top: 1rem; display: none;">
+                <div id="toiletries-checklist-list" class="student-list-container" style="margin-top: 1rem; display: none;">
                     <!-- Dynamically populated -->
                 </div>
-                <button id="save-distribution-btn" class="btn btn-primary btn-full" style="margin-top: 1.5rem; display: none;" onclick="UI.saveToiletriesDistribution()">
-                    ✅ Save Today's Distribution
+                <button id="save-checklist-btn" class="btn btn-primary btn-full" style="margin-top: 1.5rem; display: none;" onclick="UI.saveToiletriesChecklist()">
+                    ✅ Save Today's Checklist
                 </button>
             </div>
 
-            <!-- Tab 3: Reports -->
-            <div id="toiletries-reports-view" style="display: none;">
-                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Recent Distributions</h3>
-                <div id="toiletries-reports-list" class="settings-container">
-                    <p style="color: var(--color-text-muted); text-align: center;">No distributions recorded yet.</p>
+            <!-- Tab 3: Compliance Report (Shows who is missing items) -->
+            <div id="toiletries-compliance-view" style="display: none;">
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Compliance Reports</h3>
+                <div id="toiletries-compliance-list">
+                    <p style="color: var(--color-text-muted); text-align: center;">No checklists recorded yet.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Add/Restock Toiletry Modal -->
+        <!-- Add Required Toiletry Modal -->
         <div id="toiletry-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
             <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
-                <h3 id="toiletry-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add New Item</h3>
+                <h3 id="toiletry-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Required Item</h3>
                 <div class="form-group">
                     <label>Item Name</label>
-                    <input type="text" id="toiletry-name" class="form-input" placeholder="e.g., Liquid Soap">
+                    <input type="text" id="toiletry-name" class="form-input" placeholder="e.g., Bathing Soap">
                 </div>
                 <div class="form-group">
-                    <label>Unit (e.g., bars, packs, bottles)</label>
-                    <input type="text" id="toiletry-unit" class="form-input" placeholder="e.g., bars">
+                    <label>Unit</label>
+                    <input type="text" id="toiletry-unit" class="form-input" placeholder="e.g., bars, packs, bottles">
                 </div>
                 <div class="form-group">
-                    <label>Current Stock</label>
-                    <input type="number" id="toiletry-stock" class="form-input" placeholder="0" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Low Stock Alert At</label>
-                    <input type="number" id="toiletry-min-stock" class="form-input" placeholder="10" min="1">
+                    <label>Quantity Required Per Student</label>
+                    <input type="number" id="toiletry-required" class="form-input" placeholder="1" min="1">
                 </div>
                 <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                     <button onclick="UI.closeToiletryModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
