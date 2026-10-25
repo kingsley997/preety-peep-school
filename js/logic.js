@@ -77,7 +77,6 @@ const UI = {
         this.pendingConfirmCallback = null;
     },
 
-    // NEW: Factory Reset Functions
     showFactoryResetModal() {
         document.getElementById('factory-reset-input').value = '';
         document.getElementById('factory-reset-modal').style.display = 'flex';
@@ -90,7 +89,6 @@ const UI = {
     confirmFactoryReset() {
         const input = document.getElementById('factory-reset-input').value.trim().toUpperCase();
         if (input === 'RESET') {
-            // Wipe all data
             localStorage.clear();
             sessionStorage.clear();
             alert("System has been factory reset. Reloading...");
@@ -100,6 +98,57 @@ const UI = {
             document.getElementById('factory-reset-input').value = '';
             document.getElementById('factory-reset-input').focus();
         }
+    },
+
+    // ==========================================
+    // NEW: Sidebar Navigation Functions
+    // ==========================================
+    openSidebar() {
+        document.getElementById('sidebar').classList.add('active');
+        document.getElementById('sidebar-overlay').classList.add('active');
+    },
+
+    closeSidebar() {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    },
+
+    navigateToModule(moduleName) {
+        this.closeSidebar();
+        
+        // Hide all main screens
+        const screens = ['dashboard-screen', 'school-fees-screen', 'assessment-screen', 'toiletries-screen', 'class-portal-screen', 'admin-settings-screen'];
+        screens.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        
+        // Update active sidebar link
+        const links = document.querySelectorAll('.sidebar-link');
+        links.forEach(link => link.classList.remove('active'));
+        
+        // Show target screen and update active link
+        if (moduleName === 'feeding-fee') {
+            document.getElementById('dashboard-screen').style.display = 'block';
+            this.renderDashboard();
+            if (links[0]) links[0].classList.add('active');
+        } else if (moduleName === 'school-fees') {
+            document.getElementById('school-fees-screen').style.display = 'block';
+            if (links[1]) links[1].classList.add('active');
+        } else if (moduleName === 'assessment') {
+            document.getElementById('assessment-screen').style.display = 'block';
+            if (links[2]) links[2].classList.add('active');
+        } else if (moduleName === 'toiletries') {
+            document.getElementById('toiletries-screen').style.display = 'block';
+            if (links[3]) links[3].classList.add('active');
+        } else if (moduleName === 'admin-settings') {
+            document.getElementById('admin-settings-screen').style.display = 'block';
+            this.renderAdminSettings();
+            this.renderReportsList();
+            if (links[4]) links[4].classList.add('active');
+        }
+        
+        this.currentScreen = moduleName === 'feeding-fee' ? 'dashboard-screen' : moduleName + '-screen';
     },
 
     navigateTo(screenId, pushHistory = true) {
@@ -170,13 +219,17 @@ const UI = {
             
             this.navigateTo(targetScreen, false);
             
+            const links = document.querySelectorAll('.sidebar-link');
+            
             if (targetScreen === 'dashboard-screen') {
                 this.renderDashboard();
+                if (links[0]) links[0].classList.add('active');
             } else if (targetScreen === 'class-portal-screen') {
                 this.renderClassPortal(this.currentClassId, '');
             } else if (targetScreen === 'admin-settings-screen') {
                 this.renderAdminSettings();
                 this.renderReportsList();
+                if (links[4]) links[4].classList.add('active');
             }
         } else { 
             this.navigateTo('login-screen');
@@ -226,6 +279,7 @@ const UI = {
     },
 
     logout() { 
+        this.closeSidebar(); // Ensure sidebar closes on logout
         Store.set('current_session', null); 
         sessionStorage.removeItem('currentClassId');
         location.reload(); 
@@ -408,7 +462,6 @@ const UI = {
 
                 let badgeHTML = '', actionHTML = '';
                 
-                // Unpaid students see Collect, Absent, AND Free buttons
                 if (student.status === 'unpaid') {
                     badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
                     actionHTML = `
@@ -507,12 +560,13 @@ const UI = {
     },
 
     openAdminSettings() {
-        this.navigateTo('admin-settings-screen');
-        this.renderAdminSettings();
-        this.renderReportsList();
+        this.navigateToModule('admin-settings');
     },
 
-    goBackFromSettings() { history.back(); },
+    goBackFromSettings() { 
+        this.closeSidebar();
+        history.back(); 
+    },
 
     renderAdminSettings() {
         const cashierData = Store.get('cashier_user');

@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alpha Tech | School Feeding Management</title>
+    <title>Alpha Tech | School Management System</title>
     
     <!-- COMPREHENSIVE FAVICON & MOBILE APP ICONS -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/alpha-logo.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" href="images/alpha-logo.png">
-    
-    <!-- Cache-busting version (forces mobile browsers to fetch new icon) -->
     <link rel="icon" type="image/png" href="images/alpha-logo.png?v=2">
     <link rel="apple-touch-icon" href="images/alpha-logo.png?v=2">
     
-    <!-- Mobile-specific meta tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
@@ -35,6 +32,42 @@
             <img src="images/alpha-logo.png" alt="Alpha Tech Logo" class="splash-logo alpha-logo">
             <p class="powered-by">Powered by <span class="gold-text">Alpha Tech</span></p>
         </div>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="UI.closeSidebar()"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>Navigation</h3>
+            <button class="sidebar-close-btn" onclick="UI.closeSidebar()">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link active" onclick="UI.navigateToModule('feeding-fee'); return false;">
+                <span class="sidebar-icon">💰</span>
+                <span class="sidebar-text">Feeding Fee</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="UI.navigateToModule('school-fees'); return false;">
+                <span class="sidebar-icon">🎓</span>
+                <span class="sidebar-text">School Fees</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="UI.navigateToModule('assessment'); return false;">
+                <span class="sidebar-icon">📝</span>
+                <span class="sidebar-text">Assessment</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="UI.navigateToModule('toiletries'); return false;">
+                <span class="sidebar-icon">🧴</span>
+                <span class="sidebar-text">Toiletries</span>
+            </a>
+            <div class="sidebar-divider"></div>
+            <a href="#" class="sidebar-link" onclick="UI.openAdminSettings(); return false;">
+                <span class="sidebar-icon">⚙️</span>
+                <span class="sidebar-text">Settings</span>
+            </a>
+            <a href="#" class="sidebar-link" onclick="UI.logout(); return false;">
+                <span class="sidebar-icon">🚪</span>
+                <span class="sidebar-text">Log Out</span>
+            </a>
+        </nav>
     </div>
 
     <!-- MAIN APP -->
@@ -79,19 +112,13 @@
             </div>
         </div>
 
-        <!-- SCREEN: Normal Login (NEW STUNNING HERO DESIGN) -->
+        <!-- SCREEN: Normal Login -->
         <div id="login-screen" style="display: none;">
-            <!-- Stunning Hero Header -->
             <div class="login-hero">
-                <!-- Animated Background Pattern -->
                 <div class="hero-pattern"></div>
-                
-                <!-- Floating Particles -->
                 <div class="hero-particles">
                     <span></span><span></span><span></span><span></span><span></span>
                 </div>
-
-                <!-- Hero Content -->
                 <div class="hero-content">
                     <div class="hero-logos">
                         <div class="logo-wrapper school-logo-wrapper">
@@ -102,18 +129,16 @@
                             <img src="images/alpha-logo.png" alt="Alpha Tech" class="hero-logo">
                         </div>
                     </div>
-                    
                     <h1 class="hero-title">PREETY PEEP SCHOOL</h1>
                     <div class="hero-tagline">
                         <span class="tagline-line"></span>
-                        <span class="tagline-text">Smart Feeding Management</span>
+                        <span class="tagline-text">School Management System</span>
                         <span class="tagline-line"></span>
                     </div>
                     <p class="hero-subtitle">Powered by Alpha Tech</p>
                 </div>
             </div>
 
-            <!-- Login Form Card (Overlaps the hero slightly) -->
             <div class="auth-container login-form-card">
                 <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back 👋</h2>
                 <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Sign in to access the system</p>
@@ -143,8 +168,7 @@
                     🔐 Forgot Password? (Admin Recovery)
                 </button>
 
-                <!-- Factory Reset Link -->
-                <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7; transition: opacity 0.2s;">
+                <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7;">
                     Lost recovery phrase? Reset System
                 </a>
             </div>
@@ -155,7 +179,6 @@
             <h2>🔐 Account Recovery</h2>
             <p>Enter your 6-word recovery phrase to reset your Admin account.</p>
             
-            <!-- Step 1: Verify Phrase -->
             <div id="recovery-step-1">
                 <div class="form-group">
                     <label>Your Recovery Phrase</label>
@@ -169,7 +192,6 @@
                 </p>
             </div>
 
-            <!-- Step 2: Create New Credentials -->
             <div id="recovery-step-2" style="display: none;">
                 <div class="recovery-box" style="background: #d1fae5; border-color: #10b981;">
                     <div style="color: #065f46; font-weight: 700; margin-bottom: 0.5rem;">✅ Phrase Verified!</div>
@@ -197,17 +219,20 @@
             </div>
         </div>
 
-        <!-- SCREEN: Main Dashboard -->
+        <!-- SCREEN: Main Dashboard (Feeding Fee) -->
         <div id="dashboard-screen" style="display: none;">
             <div class="dashboard-header">
-                <div>
-                    <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
-                        Good Morning, <span id="user-display-name">Admin</span>
-                    </h1>
-                    <p class="text-muted" id="current-date">Loading date...</p>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
+                    <div>
+                        <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
+                            Good Morning, <span id="user-display-name">Admin</span>
+                        </h1>
+                        <p class="text-muted" id="current-date">Loading date...</p>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 1rem;">
-                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">⚙️ Admin Settings</button>
+                    <button id="admin-settings-btn" class="btn btn-primary" style="display: none;" onclick="UI.openAdminSettings()">⚙️ Settings</button>
                 </div>
             </div>
 
@@ -228,6 +253,69 @@
 
             <h2 style="font-size: 1.2rem; color: var(--color-primary); margin: 2rem 0 1rem 0;">Classes</h2>
             <div class="class-grid" id="class-grid-container"></div>
+        </div>
+
+        <!-- SCREEN: School Fees (Placeholder) -->
+        <div id="school-fees-screen" style="display: none;">
+            <div class="dashboard-header">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
+                    <div>
+                        <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
+                            🎓 School Fees
+                        </h1>
+                        <p class="text-muted">Term-based fee management</p>
+                    </div>
+                </div>
+            </div>
+            <div class="placeholder-card">
+                <div class="placeholder-icon">🎓</div>
+                <h2>School Fees Module</h2>
+                <p>Coming soon: Term-based tuition, books, and uniform fee tracking with installment support.</p>
+                <button class="btn btn-primary" onclick="UI.navigateToModule('feeding-fee')">← Back to Feeding Fee</button>
+            </div>
+        </div>
+
+        <!-- SCREEN: Assessment (Placeholder) -->
+        <div id="assessment-screen" style="display: none;">
+            <div class="dashboard-header">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
+                    <div>
+                        <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
+                            📝 Assessment
+                        </h1>
+                        <p class="text-muted">Exam and class records</p>
+                    </div>
+                </div>
+            </div>
+            <div class="placeholder-card">
+                <div class="placeholder-icon">📝</div>
+                <h2>Assessment Module</h2>
+                <p>Coming soon: Record exam scores, generate report cards, and track student performance.</p>
+                <button class="btn btn-primary" onclick="UI.navigateToModule('feeding-fee')">← Back to Feeding Fee</button>
+            </div>
+        </div>
+
+        <!-- SCREEN: Toiletries (Placeholder) -->
+        <div id="toiletries-screen" style="display: none;">
+            <div class="dashboard-header">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
+                    <div>
+                        <h1 style="font-size: 1.8rem; color: var(--color-primary); margin-bottom: 0.25rem;">
+                            🧴 Toiletries
+                        </h1>
+                        <p class="text-muted">Inventory and distribution</p>
+                    </div>
+                </div>
+            </div>
+            <div class="placeholder-card">
+                <div class="placeholder-icon">🧴</div>
+                <h2>Toiletries Module</h2>
+                <p>Coming soon: Track soap, tissue, and hygiene product inventory and distribution.</p>
+                <button class="btn btn-primary" onclick="UI.navigateToModule('feeding-fee')">← Back to Feeding Fee</button>
+            </div>
         </div>
 
         <!-- SCREEN: Class Portal -->
@@ -270,7 +358,7 @@
         <!-- SCREEN: Admin Settings -->
         <div id="admin-settings-screen" style="display: none;">
             <div class="portal-header">
-                <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
+                <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back</button>
                 <div class="portal-title">
                     <h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1>
                     <p class="text-muted">Manage Fees, Staff & Reports</p>
@@ -322,7 +410,7 @@
             </div>
         </div>
 
-        <!-- Custom Confirm Modal (Replaces native browser popups) -->
+        <!-- Custom Confirm Modal -->
         <div id="confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
             <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 400px; width: 90%; box-shadow: var(--shadow-lg); text-align: center;">
                 <p id="confirm-message" style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--color-text-main); font-weight: 500;">Are you sure?</p>
