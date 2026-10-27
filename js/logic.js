@@ -54,7 +54,7 @@ const UI = {
 
     togglePassword(inputId, btn) {
         const input = document.getElementById(inputId);
-        if (input.type === "password") { input.type = "text"; btn.textContent = ""; } 
+        if (input.type === "password") { input.type = "text"; btn.textContent = "🙈"; } 
         else { input.type = "password"; btn.textContent = "👁️"; }
     },
 
@@ -94,7 +94,7 @@ const UI = {
             alert("System has been factory reset. Reloading...");
             location.reload();
         } else {
-            alert("️ You must type exactly RESET to confirm.");
+            alert("⚠️ You must type exactly RESET to confirm.");
             document.getElementById('factory-reset-input').value = '';
             document.getElementById('factory-reset-input').focus();
         }
@@ -428,7 +428,7 @@ const UI = {
                     badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
                     actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>
                                   <button class="btn-icon btn-absent" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
-                                  <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying"></button>`; // FIXED: Added 🆓 emoji
+                                  <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying">🆓</button>`;
                 } else if (student.status === 'paid') {
                     badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
                     actionHTML = `<button class="btn-icon btn-undo" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo Payment">↩️</button>`;
@@ -489,12 +489,11 @@ const UI = {
         });
     },
     
-    // UPDATED: Now captures Gender
     addStudentForToday() {
         const nameInput = document.getElementById('new-student-name');
         const genderInput = document.getElementById('new-student-gender');
         const name = nameInput.value.trim();
-        const gender = genderInput.value;
+        const gender = genderInput ? genderInput.value : 'boy';
         if (!name) return alert("Please enter a student name.");
         
         const dateStr = this.getLocalDateStr();
@@ -507,7 +506,7 @@ const UI = {
         const newStudent = { 
             id: `student_${Date.now()}`, 
             name: name, 
-            gender: gender, // NEW: Save gender
+            gender: gender,
             fee: cls.fee, 
             status: 'unpaid', 
             time: null 
@@ -689,7 +688,7 @@ const UI = {
             const successful = document.execCommand('copy');
             if (successful) alert("✅ Summary copied! You can now paste it into WhatsApp.");
             else alert("⚠️ Copy failed. Please select the text manually and copy.");
-        } catch (err) { alert("️ Your browser doesn't support auto-copy. Please select the text manually."); }
+        } catch (err) { alert("⚠️ Your browser doesn't support auto-copy. Please select the text manually."); }
         document.body.removeChild(textArea);
     },
 
@@ -844,7 +843,7 @@ const UI = {
                 if (savedStudent && savedStudent.items.length === required.length) {
                     statusBadge = `<span style="color: var(--color-accent); font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem;">✅ Complete</span>`;
                 } else if (savedStudent && savedStudent.items.length > 0) {
-                    statusBadge = `<span style="color: #f59e0b; font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem;">️ Partial</span>`;
+                    statusBadge = `<span style="color: #f59e0b; font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem;">⚠️ Partial</span>`;
                 }
             }
 
@@ -961,7 +960,7 @@ const UI = {
                         <thead><tr><th>Student</th><th>Status</th></tr></thead>
                         <tbody>${tableRows}</tbody>
                     </table>
-                    ${missingList.length > 0 ? `<button class="btn-copy-missing" onclick="UI.copyMissingList(${recIndex})"> Copy Missing List for WhatsApp</button>` : ''}
+                    ${missingList.length > 0 ? `<button class="btn-copy-missing" onclick="UI.copyMissingList(${recIndex})">📋 Copy Missing List for WhatsApp</button>` : ''}
                 </div>
             </details>`;
         });
@@ -970,7 +969,7 @@ const UI = {
 
     _generateMissingListText(record, missingList) {
         if (missingList.length === 0) return '';
-        let text = ` TOILETRIES REMINDER - ${record.className}\nDate: ${record.date}\n\nDear Parents,\n\nThe following students are missing required toiletry items. Please send them to school as soon as possible:\n\n`;
+        let text = `🧴 TOILETRIES REMINDER - ${record.className}\nDate: ${record.date}\n\nDear Parents,\n\nThe following students are missing required toiletry items. Please send them to school as soon as possible:\n\n`;
         missingList.forEach(s => { text += `• ${s.name} - Missing: ${s.missing.join(', ')}\n`; });
         text += `\nThank you for your cooperation.\nPreety Peep School`;
         return text;
@@ -1370,7 +1369,7 @@ const UI = {
                 const outstanding = Math.max(0, fee.amount - paidForFee);
                 totalPaid += paidForFee;
                 totalOutstanding += outstanding;
-                const status = outstanding === 0 && paidForFee > 0 ? '✅' : (paidForFee > 0 ? '⚠️' : '');
+                const status = outstanding === 0 && paidForFee > 0 ? '✅' : (paidForFee > 0 ? '⚠️' : '❌');
                 feeBreakdownHtml += `<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); font-size: 0.9rem;">
                     <span>${status} ${fee.name}</span>
                     <span style="font-weight: 600;">GHS ${(paidForFee / 100).toFixed(2)} / GHS ${(fee.amount / 100).toFixed(2)}</span>
@@ -1554,7 +1553,6 @@ const UI = {
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
         let subjects = Store.get('assessment_subjects') || [];
-        // Hardcoded SBA components as requested
         const sbaComponents = [
             { name: 'Class Test 1', maxScore: 20 },
             { name: 'Group Work', maxScore: 10 },
@@ -1631,8 +1629,8 @@ const UI = {
 
         const scores = Store.get('assessment_scores') || [];
 
-        // Sort: Boys first (A-Z), then Girls (A-Z)
-        const boys = cls.students.filter(s => s.gender === 'boy').sort((a, b) => a.name.localeCompare(b.name));
+        // FIXED: Handle legacy students without a gender property
+        const boys = cls.students.filter(s => !s.gender || s.gender === 'boy').sort((a, b) => a.name.localeCompare(b.name));
         const girls = cls.students.filter(s => s.gender === 'girl').sort((a, b) => a.name.localeCompare(b.name));
         const sortedStudents = [...boys, ...girls];
 
@@ -1644,11 +1642,10 @@ const UI = {
 
         let html = `<table class="cumulative-table"><thead><tr><th>Assessment Component</th><th>Max</th>`;
         sortedStudents.forEach(student => {
-            html += `<th>${student.name}<br><span style="font-size:0.7rem; font-weight:normal;">${student.gender === 'boy' ? '👦' : '👧'}</span></th>`;
+            html += `<th>${student.name}<br><span style="font-size:0.7rem; font-weight:normal;">${!student.gender || student.gender === 'boy' ? '👦' : '👧'}</span></th>`;
         });
         html += `</tr></thead><tbody>`;
 
-        // Helper to get existing score
         const getScore = (studentId, component) => {
             const s = scores.find(sc => sc.studentId === studentId && sc.subjectId === subjectId && sc.component === component);
             return s ? s.score : '';
