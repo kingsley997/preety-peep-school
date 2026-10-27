@@ -10,8 +10,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/alpha-logo.png">
     <link rel="apple-touch-icon" href="images/alpha-logo.png">
-    <link rel="icon" type="image/png" href="images/alpha-logo.png?v=3">
-    <link rel="apple-touch-icon" href="images/alpha-logo.png?v=3">
+    <link rel="icon" type="image/png" href="images/alpha-logo.png?v=4">
+    <link rel="apple-touch-icon" href="images/alpha-logo.png?v=4">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -81,7 +81,7 @@
                     <label>Create Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="setup-password" class="form-input" placeholder="Make it strong">
-                        <button type="button" class="eye-btn" onclick="UI.togglePassword('setup-password', this)">👁️</button>
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('setup-password', this)">️</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -126,7 +126,7 @@
                 </div>
             </div>
             <div class="auth-container login-form-card">
-                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back </h2>
+                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back 👋</h2>
                 <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Sign in to access the system</p>
                 <div class="form-group">
                     <label>Select Role</label>
@@ -148,7 +148,7 @@
                 </div>
                 <button class="btn btn-primary btn-full" onclick="UI.handleLogin()">Log In</button>
                 <p id="login-error" style="color: var(--color-danger); margin-top: 1rem; font-size: 0.9rem; display: none;">Invalid username or password.</p>
-                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()"> Forgot Password? (Admin Recovery)</button>
+                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()">🔐 Forgot Password? (Admin Recovery)</button>
                 <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7;">Lost recovery phrase? Reset System</a>
             </div>
         </div>
@@ -187,7 +187,7 @@
                         <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-confirm', this)">👁️</button>
                     </div>
                 </div>
-                <button class="btn btn-accent btn-full" onclick="UI.resetAdminPassword()">🔓 Reset Admin Account</button>
+                <button class="btn btn-accent btn-full" onclick="UI.resetAdminPassword()"> Reset Admin Account</button>
             </div>
         </div>
 
@@ -228,8 +228,8 @@
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
                 <button class="tab-btn active" onclick="UI.switchSchoolFeesTab('setup')" id="tab-fees-setup">💰 Fee Setup</button>
                 <button class="tab-btn" onclick="UI.switchSchoolFeesTab('payment')" id="tab-fees-payment">💵 Record Payment</button>
-                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('ledger')" id="tab-fees-ledger">📋 Student Ledger</button>
-                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('reports')" id="tab-fees-reports">📊 Reports</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('ledger')" id="tab-fees-ledger"> Student Ledger</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('reports')" id="tab-fees-reports"> Reports</button>
             </div>
             <div id="school-fees-setup-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -241,7 +241,7 @@
             <div id="school-fees-payment-view" style="display: none;">
                 <div class="form-group"><label>1. Select Class</label><select id="payment-class-select" class="form-select" onchange="UI.onPaymentClassChange()"><option value="">-- Select a Class First --</option></select></div>
                 <div id="payment-student-list-container" style="display: none;">
-                    <div class="form-group"><label>2. Search or Select Student (Alphabetical)</label><input type="text" id="school-fees-student-search" class="form-input" placeholder=" Type to filter..." oninput="UI.filterPaymentStudents()"></div>
+                    <div class="form-group"><label>2. Search or Select Student (Alphabetical)</label><input type="text" id="school-fees-student-search" class="form-input" placeholder="🔍 Type to filter..." oninput="UI.filterPaymentStudents()"></div>
                     <div id="school-fees-student-list" class="student-list-container" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem;"></div>
                 </div>
                 <div id="school-fees-payment-details" style="display: none;"></div>
@@ -262,7 +262,7 @@
             </div>
         </div>
 
-        <!-- SCREEN: Assessment (FULLY FUNCTIONAL) -->
+        <!-- SCREEN: Assessment (CUMULATIVE RECORD FORMAT) -->
         <div id="assessment-screen" style="display: none;">
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
@@ -293,7 +293,7 @@
                 <div id="assessment-subjects-list" class="toiletries-grid"></div>
             </div>
 
-            <!-- Tab 2: Enter Scores -->
+            <!-- Tab 2: Enter Scores (Cumulative Record Format) -->
             <div id="assessment-scores-view" style="display: none;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div class="form-group">
@@ -308,21 +308,16 @@
                             <option value="">-- Select Subject --</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>3. Assessment Type</label>
-                        <select id="assess-type-select" class="form-select" onchange="UI.onAssessTypeChange()">
-                            <option value="sba">SBA (Test/Class Exercise)</option>
-                            <option value="exam">Examination</option>
-                        </select>
-                    </div>
                 </div>
 
-                <div id="assess-score-entry-container" style="display: none;">
-                    <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
-                        <strong>Max Score:</strong> <span id="assess-max-score-display">50</span> points
+                <div id="assess-cumulative-record-container" style="display: none;">
+                    <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.9rem;">
+                        <strong>📊 Cumulative Record Book:</strong> Enter raw scores. The system auto-calculates Totals, 50% conversions, Overall, and Positions.
                     </div>
-                    <div id="assess-student-scores-list" class="student-list-container" style="max-height: 500px; overflow-y: auto;"></div>
-                    <button class="btn btn-primary btn-full" style="margin-top: 1rem;" onclick="UI.saveAssessmentScores()">💾 Save Scores</button>
+                    <!-- The Table will be injected here by JS -->
+                    <div id="cumulative-record-table-wrapper" style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);"></div>
+                    
+                    <button class="btn btn-primary btn-full" style="margin-top: 1rem;" onclick="UI.saveCumulativeScores()">💾 Save All Scores</button>
                 </div>
             </div>
 
@@ -351,13 +346,13 @@
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
-                    <div><h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;">🧴 Toiletries</h1><p class="text-muted">Parent Compliance Tracker</p></div>
+                    <div><h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;"> Toiletries</h1><p class="text-muted">Parent Compliance Tracker</p></div>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
                 <button class="tab-btn active" onclick="UI.switchToiletriesTab('required')" id="tab-required">📋 Required Items</button>
                 <button class="tab-btn" onclick="UI.switchToiletriesTab('checklist')" id="tab-checklist">✅ Checklist</button>
-                <button class="tab-btn" onclick="UI.switchToiletriesTab('compliance')" id="tab-compliance">📊 Compliance</button>
+                <button class="tab-btn" onclick="UI.switchToiletriesTab('compliance')" id="tab-compliance"> Compliance</button>
             </div>
             <div id="toiletries-required-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -383,7 +378,7 @@
             </div>
         </div>
 
-        <!-- SCREEN: Class Portal -->
+        <!-- SCREEN: Class Portal (UPDATED WITH GENDER DROPDOWN) -->
         <div id="class-portal-screen" style="display: none;">
             <div class="portal-header">
                 <button class="btn btn-primary" onclick="UI.goBackToDashboard()" style="padding: 0.5rem 1rem;">← Back</button>
@@ -398,11 +393,18 @@
                 </div>
             </div>
             <div style="margin: 1.5rem 0; text-align: right;"><button class="btn btn-accent" onclick="UI.finishDayAndSave()">✅ Finish Day & Save Report</button></div>
-            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
-                <input type="text" id="new-student-name" class="form-input" placeholder="Add new student for today..." style="max-width: 300px;">
-                <button class="btn btn-accent" onclick="UI.addStudentForToday()">+ Add Student</button>
+            
+            <!-- UPDATED: Added Gender Dropdown for Cumulative Record Sorting -->
+            <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input type="text" id="new-student-name" class="form-input" placeholder="Student Name..." style="flex: 2; min-width: 150px;">
+                <select id="new-student-gender" class="form-select" style="flex: 1; min-width: 100px;">
+                    <option value="boy">Boy</option>
+                    <option value="girl">Girl</option>
+                </select>
+                <button class="btn btn-accent" onclick="UI.addStudentForToday()" style="flex: 1; min-width: 120px;">+ Add Student</button>
             </div>
-            <div style="margin-bottom: 1rem;"><input type="text" id="student-search" class="form-input" placeholder=" Search student name..." oninput="UI.filterStudents()"></div>
+
+            <div style="margin-bottom: 1rem;"><input type="text" id="student-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterStudents()"></div>
             <div class="student-list-container" id="student-list-container"></div>
         </div>
 
@@ -410,7 +412,7 @@
         <div id="admin-settings-screen" style="display: none;">
             <div class="portal-header">
                 <button class="btn btn-primary" onclick="UI.goBackFromSettings()" style="padding: 0.5rem 1rem;">← Back to Dashboard</button>
-                <div class="portal-title"><h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">️ Admin Settings</h1><p class="text-muted">Manage Fees, Staff & Reports</p></div>
+                <div class="portal-title"><h1 style="font-size: 1.5rem; color: var(--color-primary); margin: 0;">⚙️ Admin Settings</h1><p class="text-muted">Manage Fees, Staff & Reports</p></div>
                 <button class="btn btn-primary" onclick="UI.logout()">Log Out</button>
             </div>
             <div class="settings-container" style="margin-bottom: 2rem;">
@@ -428,10 +430,10 @@
             <div class="settings-container" style="margin-bottom: 2rem;">
                 <h3 style="color: var(--color-primary); margin-bottom: 1rem;">💰 Class Fee Management</h3>
                 <div id="settings-list-container"></div>
-                <button class="btn btn-accent" style="margin-top: 1.5rem;" onclick="UI.saveAdminFees()">💾 Save Fee Changes</button>
+                <button class="btn btn-accent" style="margin-top: 1.5rem;" onclick="UI.saveAdminFees()"> Save Fee Changes</button>
             </div>
             <div class="settings-container">
-                <h3 style="color: var(--color-primary); margin-bottom: 1rem;"> Saved Daily Reports</h3>
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">📊 Saved Daily Reports</h3>
                 <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Click a report to view and copy the daily summary.</p>
                 <div id="reports-list-container"></div>
             </div>
@@ -455,7 +457,7 @@
         <!-- Record Payment Modal -->
         <div id="record-payment-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;"></div>
 
-        <!-- Add Subject Modal (NEW) -->
+        <!-- Add Subject Modal -->
         <div id="subject-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10001; justify-content: center; align-items: center;">
             <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
                 <h3 id="subject-modal-title" style="color: var(--color-primary); margin-bottom: 1rem;">Add Subject</h3>

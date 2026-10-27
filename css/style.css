@@ -2292,3 +2292,79 @@ body {
         padding: 0.5rem;
     }
 }
+/* ============================================
+   CUMULATIVE RECORD TABLE STYLES
+   ============================================ */
+.cumulative-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 600px; /* Ensures scroll on mobile */
+}
+
+.cumulative-table th, .cumulative-table td {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.cumulative-table th {
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+/* Sticky first column for Component Names */
+.cumulative-table td:first-child, .cumulative-table th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 2;
+    text-align: left;
+    font-weight: 600;
+    min-width: 140px;
+    border-right: 2px solid var(--color-border);
+}
+
+.cumulative-table th:first-child {
+    background: var(--color-primary);
+    z-index: 3;
+}
+
+/* Input styling inside table */
+.score-raw-input {
+    width: 50px;
+    padding: 0.25rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.score-raw-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: #f0f9ff;
+}
+
+/* Calculated cells styling */
+.cell-calculated {
+    font-weight: 700;
+    color: var(--color-primary);
+    background: #f8fafc;
+}
+
+.cell-position {
+    font-weight: 800;
+    color: var(--color-accent);
+    font-size: 1rem;
+}
+
+.row-total-sba { background: #eff6ff; }
+.row-sba-50 { background: #dbeafe; font-weight: 700; }
+.row-exam-50 { background: #dbeafe; font-weight: 700; }
+.row-overall { background: #f0fdf4; font-weight: 800; font-size: 0.95rem; }
+.row-position { background: #fef3c7; }

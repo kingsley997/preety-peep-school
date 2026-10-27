@@ -94,7 +94,7 @@ const UI = {
             alert("System has been factory reset. Reloading...");
             location.reload();
         } else {
-            alert("⚠️ You must type exactly RESET to confirm.");
+            alert("️ You must type exactly RESET to confirm.");
             document.getElementById('factory-reset-input').value = '';
             document.getElementById('factory-reset-input').focus();
         }
@@ -167,19 +167,14 @@ const UI = {
     handlePopState(event) {
         const state = event.state || {};
         let screenId = state.screen || 'dashboard-screen';
-        
-        // 🛡️ CRITICAL MOBILE FIX: Prevent swiping back to login screen if the user is still authenticated
         if (screenId === 'login-screen' && Store.get('current_session')) {
             screenId = 'dashboard-screen';
             history.replaceState({ screen: 'dashboard-screen' }, '', '#dashboard-screen');
         }
-        
         if (state.classId) this.currentClassId = state.classId;
         this.navigateTo(screenId, false);
-
-        if (screenId === 'dashboard-screen') {
-            this.renderDashboard();
-        } else if (screenId === 'class-portal-screen') {
+        if (screenId === 'dashboard-screen') this.renderDashboard();
+        else if (screenId === 'class-portal-screen') {
             const query = document.getElementById('student-search') ? document.getElementById('student-search').value : '';
             this.renderClassPortal(this.currentClassId, query);
         } else if (screenId === 'admin-settings-screen') {
@@ -199,9 +194,8 @@ const UI = {
             document.getElementById('admin-settings-btn').style.display = session.role === 'admin' ? 'inline-flex' : 'none';
             const hash = window.location.hash.replace('#', '');
             let targetScreen = 'dashboard-screen';
-            if (hash === 'admin-settings-screen') {
-                targetScreen = 'admin-settings-screen';
-            } else if (hash === 'class-portal-screen') {
+            if (hash === 'admin-settings-screen') targetScreen = 'admin-settings-screen';
+            else if (hash === 'class-portal-screen') {
                 const savedClassId = sessionStorage.getItem('currentClassId');
                 if (savedClassId) {
                     this.currentClassId = savedClassId;
@@ -261,8 +255,6 @@ const UI = {
             Store.set('current_session', this.currentSession);
             document.getElementById('user-display-name').textContent = username;
             document.getElementById('admin-settings-btn').style.display = role === 'admin' ? 'inline-flex' : 'none';
-            
-            // 🛡️ FIX: Push to history so mobile swipe-back has a proper starting point
             this.navigateTo('dashboard-screen', true);
             this.renderDashboard(); 
         } else { errorMsg.style.display = 'block'; }
@@ -436,7 +428,7 @@ const UI = {
                     badgeHTML = `<span class="status-badge status-unpaid">Unpaid</span>`;
                     actionHTML = `<button class="btn-collect" onclick="UI.collectFee('${classId}', '${student.id}')">Collect GHS ${(cls.fee / 100).toFixed(2)}</button>
                                   <button class="btn-icon btn-absent" onclick="UI.markAbsent('${classId}', '${student.id}')" title="Mark Absent">🚫</button>
-                                  <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying"></button>`;
+                                  <button class="btn-icon btn-exempt" onclick="UI.markNotPaying('${classId}', '${student.id}')" title="Mark Not Paying"></button>`; // FIXED: Added 🆓 emoji
                 } else if (student.status === 'paid') {
                     badgeHTML = `<span class="status-badge status-paid">Paid ${student.time || ''}</span>`;
                     actionHTML = `<button class="btn-icon btn-undo" onclick="UI.undoPayment('${classId}', '${student.id}')" title="Undo Payment">↩️</button>`;
@@ -497,9 +489,12 @@ const UI = {
         });
     },
     
+    // UPDATED: Now captures Gender
     addStudentForToday() {
         const nameInput = document.getElementById('new-student-name');
+        const genderInput = document.getElementById('new-student-gender');
         const name = nameInput.value.trim();
+        const gender = genderInput.value;
         if (!name) return alert("Please enter a student name.");
         
         const dateStr = this.getLocalDateStr();
@@ -512,6 +507,7 @@ const UI = {
         const newStudent = { 
             id: `student_${Date.now()}`, 
             name: name, 
+            gender: gender, // NEW: Save gender
             fee: cls.fee, 
             status: 'unpaid', 
             time: null 
@@ -521,7 +517,7 @@ const UI = {
         Store.set(`roster_${dateStr}`, roster);
         
         if (masterClass) {
-            masterClass.students.push({ id: newStudent.id, name: newStudent.name, fee: newStudent.fee });
+            masterClass.students.push({ id: newStudent.id, name: newStudent.name, gender: newStudent.gender, fee: newStudent.fee });
             Store.set('classes', masterClasses);
         }
         
@@ -537,18 +533,13 @@ const UI = {
             const el = document.getElementById(id);
             if (el) el.style.display = 'none';
         });
-        
         document.getElementById('admin-settings-screen').style.display = 'block';
         this.renderAdminSettings();
         this.renderReportsList();
-        
         const links = document.querySelectorAll('.sidebar-link');
         links.forEach(link => link.classList.remove('active'));
         if (links[4]) links[4].classList.add('active');
-        
         this.currentScreen = 'admin-settings-screen';
-        
-        // 🛡️ FIX: Push state so mobile swipe-back has a proper history step to pop
         history.pushState({ screen: 'admin-settings-screen' }, '', '#admin-settings-screen');
     },
     
@@ -698,7 +689,7 @@ const UI = {
             const successful = document.execCommand('copy');
             if (successful) alert("✅ Summary copied! You can now paste it into WhatsApp.");
             else alert("⚠️ Copy failed. Please select the text manually and copy.");
-        } catch (err) { alert("⚠️ Your browser doesn't support auto-copy. Please select the text manually."); }
+        } catch (err) { alert("️ Your browser doesn't support auto-copy. Please select the text manually."); }
         document.body.removeChild(textArea);
     },
 
@@ -853,7 +844,7 @@ const UI = {
                 if (savedStudent && savedStudent.items.length === required.length) {
                     statusBadge = `<span style="color: var(--color-accent); font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem;">✅ Complete</span>`;
                 } else if (savedStudent && savedStudent.items.length > 0) {
-                    statusBadge = `<span style="color: #f59e0b; font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem;">⚠️ Partial</span>`;
+                    statusBadge = `<span style="color: #f59e0b; font-size: 0.8rem; font-weight: 700; margin-left: 0.5rem;">️ Partial</span>`;
                 }
             }
 
@@ -970,7 +961,7 @@ const UI = {
                         <thead><tr><th>Student</th><th>Status</th></tr></thead>
                         <tbody>${tableRows}</tbody>
                     </table>
-                    ${missingList.length > 0 ? `<button class="btn-copy-missing" onclick="UI.copyMissingList(${recIndex})">📋 Copy Missing List for WhatsApp</button>` : ''}
+                    ${missingList.length > 0 ? `<button class="btn-copy-missing" onclick="UI.copyMissingList(${recIndex})"> Copy Missing List for WhatsApp</button>` : ''}
                 </div>
             </details>`;
         });
@@ -979,7 +970,7 @@ const UI = {
 
     _generateMissingListText(record, missingList) {
         if (missingList.length === 0) return '';
-        let text = `🧴 TOILETRIES REMINDER - ${record.className}\nDate: ${record.date}\n\nDear Parents,\n\nThe following students are missing required toiletry items. Please send them to school as soon as possible:\n\n`;
+        let text = ` TOILETRIES REMINDER - ${record.className}\nDate: ${record.date}\n\nDear Parents,\n\nThe following students are missing required toiletry items. Please send them to school as soon as possible:\n\n`;
         missingList.forEach(s => { text += `• ${s.name} - Missing: ${s.missing.join(', ')}\n`; });
         text += `\nThank you for your cooperation.\nPreety Peep School`;
         return text;
@@ -1017,12 +1008,10 @@ const UI = {
     switchSchoolFeesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-fees-${tabName}`).classList.add('active');
-        
         document.getElementById('school-fees-setup-view').style.display = tabName === 'setup' ? 'block' : 'none';
         document.getElementById('school-fees-payment-view').style.display = tabName === 'payment' ? 'block' : 'none';
         document.getElementById('school-fees-ledger-view').style.display = tabName === 'ledger' ? 'block' : 'none';
         document.getElementById('school-fees-reports-view').style.display = tabName === 'reports' ? 'block' : 'none';
-        
         if (tabName === 'setup') this.renderFeeTypesSetup();
         if (tabName === 'payment') this.initializePaymentView();
         if (tabName === 'ledger') this.initializeLedgerView();
@@ -1079,17 +1068,14 @@ const UI = {
         const editId = document.getElementById('fee-type-modal').dataset.editId;
         if (!name) return alert("Please enter a fee name.");
         if (isNaN(amountGhs) || amountGhs < 0) return alert("Please enter a valid amount.");
-
         const amountPesewas = Math.round(amountGhs * 100);
         let feeTypes = Store.get('school_fee_types') || [];
-
         if (editId) {
             const index = feeTypes.findIndex(f => f.id === editId);
             if (index !== -1) { feeTypes[index].name = name; feeTypes[index].amount = amountPesewas; }
         } else {
             feeTypes.push({ id: 'fee_' + Date.now(), name, amount: amountPesewas });
         }
-
         Store.set('school_fee_types', feeTypes);
         this.closeFeeTypeModal();
         this.renderFeeTypesSetup();
@@ -1110,7 +1096,6 @@ const UI = {
         document.getElementById('school-fees-student-search').value = '';
         document.getElementById('school-fees-student-list').innerHTML = '';
         document.getElementById('school-fees-payment-details').style.display = 'none';
-        
         const classes = Store.get('classes') || [];
         const select = document.getElementById('payment-class-select');
         select.innerHTML = '<option value="">-- Select a Class First --</option>';
@@ -1134,15 +1119,12 @@ const UI = {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
-
         const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
         const listContainer = document.getElementById('school-fees-student-list');
-        
         if (sortedStudents.length === 0) {
             listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--color-text-muted);">No students in this class.</div>';
             return;
         }
-
         let html = '';
         sortedStudents.forEach(student => {
             html += `<div class="student-search-result" data-name="${student.name.toLowerCase()}" onclick="UI.selectStudentForPayment('${student.id}', '${classId}')">
@@ -1167,7 +1149,6 @@ const UI = {
         if (!cls) return;
         const student = cls.students.find(s => s.id === studentId);
         if (!student) return;
-
         document.getElementById('school-fees-student-list').style.display = 'none';
         this.renderPaymentDetails(student, cls);
     },
@@ -1176,13 +1157,11 @@ const UI = {
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
         let totalExpected = 0, totalPaid = 0;
-        
         feeTypes.forEach(fee => {
             totalExpected += fee.amount;
             const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
             studentPayments.forEach(p => { totalPaid += p.amount; });
         });
-
         const totalOutstanding = totalExpected - totalPaid;
         let html = `
             <div class="payment-student-card">
@@ -1218,17 +1197,14 @@ const UI = {
         if (!cls) return;
         const student = cls.students.find(s => s.id === studentId);
         if (!student) return;
-
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
         let feesHtml = '', totalOutstanding = 0;
-
         feeTypes.forEach(fee => {
             const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === fee.id);
             const totalPaidForFee = studentPayments.reduce((sum, p) => sum + p.amount, 0);
             const outstanding = Math.max(0, fee.amount - totalPaidForFee);
             totalOutstanding += outstanding;
-
             if (outstanding > 0) {
                 feesHtml += `<label class="fee-checkbox-item" style="cursor: pointer;" onclick="UI.updatePaymentAmount('${studentId}')">
                     <div class="fee-checkbox-left">
@@ -1239,9 +1215,7 @@ const UI = {
                 </label>`;
             }
         });
-
         if (feesHtml === '') feesHtml = '<p style="text-align: center; color: var(--color-accent); font-weight: 700;">✅ This student has fully paid all fees!</p>';
-
         const modal = document.getElementById('record-payment-modal');
         modal.innerHTML = `
             <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;">
@@ -1306,29 +1280,23 @@ const UI = {
     confirmRecordPayment(studentId, classId) {
         const checkboxes = document.querySelectorAll('.fee-checkbox-input:checked');
         if (checkboxes.length === 0) return alert("Please select at least one fee to pay.");
-
         const amountGhs = parseFloat(document.getElementById('payment-amount-input').value);
         if (isNaN(amountGhs) || amountGhs <= 0) return alert("Please enter a valid payment amount greater than 0.");
-
         const method = document.getElementById('payment-method').value;
         const note = document.getElementById('payment-note').value.trim();
         const dateStr = this.getLocalDateStr();
         const timeStr = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
         const payments = Store.get('student_fee_payments') || [];
         const feeTypes = Store.get('school_fee_types') || [];
         let remainingAmount = Math.round(amountGhs * 100);
         const paymentDetails = [];
-
         checkboxes.forEach(cb => {
             const feeId = cb.value;
             const fee = feeTypes.find(f => f.id === feeId);
             if (!fee) return;
-
             const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === feeId);
             const totalPaidForFee = studentPayments.reduce((sum, p) => sum + p.amount, 0);
             const outstanding = Math.max(0, fee.amount - totalPaidForFee);
-
             if (outstanding > 0 && remainingAmount > 0) {
                 const amountToPay = Math.min(remainingAmount, outstanding);
                 payments.push({
@@ -1341,9 +1309,7 @@ const UI = {
                 paymentDetails.push(`${fee.name}: GHS ${(amountToPay / 100).toFixed(2)}`);
             }
         });
-
         if (remainingAmount > 0) alert(`⚠️ Warning: The amount entered (GHS ${amountGhs.toFixed(2)}) is greater than the outstanding balance of the selected fees. The excess will not be recorded.`);
-
         Store.set('student_fee_payments', payments);
         this.closeRecordPaymentModal();
         this.showPaymentReceipt(studentId, classId, Math.round(amountGhs * 100) - remainingAmount, paymentDetails, method, note, dateStr, timeStr);
@@ -1356,9 +1322,7 @@ const UI = {
         if (!cls) return;
         const student = cls.students.find(s => s.id === studentId);
         if (!student) return;
-
         const receiptText = `🧾 PAYMENT RECEIPT\n========================\nPreety Peep School\nDate: ${dateStr} | Time: ${timeStr}\n\nStudent: ${student.name}\nClass: ${cls.name}\n\nPayment Details:\n${paymentDetails.join('\n')}\n\nTotal Amount Paid: GHS ${(totalAmountPesewas / 100).toFixed(2)}\nPayment Method: ${method}\n${note ? `Note: ${note}` : ''}\n\nReceived by: ${this.currentSession ? this.currentSession.username : 'Unknown'}\n========================\nThank you for your payment!`.trim();
-
         document.getElementById('report-content').textContent = receiptText;
         this.currentReportText = receiptText;
         document.getElementById('report-modal').style.display = 'flex';
@@ -1370,7 +1334,6 @@ const UI = {
         document.getElementById('school-fees-ledger-list').innerHTML = '';
         document.getElementById('ledger-search-container').style.display = 'none';
         document.getElementById('ledger-student-search').value = '';
-        
         const classes = Store.get('classes') || [];
         const select = document.getElementById('ledger-class-select');
         select.innerHTML = '<option value="">-- Select a Class --</option>';
@@ -1382,30 +1345,24 @@ const UI = {
         const listContainer = document.getElementById('school-fees-ledger-list');
         const searchContainer = document.getElementById('ledger-search-container');
         const searchInput = document.getElementById('ledger-student-search');
-        
         if (!classId) { 
             listContainer.style.display = 'none'; 
             searchContainer.style.display = 'none';
             searchInput.value = '';
             return; 
         }
-
         searchContainer.style.display = 'block';
         searchInput.value = '';
-
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
-
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
         const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
         let html = '';
-
         sortedStudents.forEach(student => {
             let totalExpected = 0, totalPaid = 0, totalOutstanding = 0;
             let feeBreakdownHtml = '';
-
             feeTypes.forEach(fee => {
                 totalExpected += fee.amount;
                 const studentPayments = payments.filter(p => p.studentId === student.id && p.feeId === fee.id);
@@ -1413,14 +1370,12 @@ const UI = {
                 const outstanding = Math.max(0, fee.amount - paidForFee);
                 totalPaid += paidForFee;
                 totalOutstanding += outstanding;
-
-                const status = outstanding === 0 && paidForFee > 0 ? '✅' : (paidForFee > 0 ? '⚠️' : '❌');
+                const status = outstanding === 0 && paidForFee > 0 ? '✅' : (paidForFee > 0 ? '⚠️' : '');
                 feeBreakdownHtml += `<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); font-size: 0.9rem;">
                     <span>${status} ${fee.name}</span>
                     <span style="font-weight: 600;">GHS ${(paidForFee / 100).toFixed(2)} / GHS ${(fee.amount / 100).toFixed(2)}</span>
                 </div>`;
             });
-
             const studentPayments = payments.filter(p => p.studentId === student.id).sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
             let historyHtml = '';
             if (studentPayments.length > 0) {
@@ -1431,7 +1386,6 @@ const UI = {
                 });
                 historyHtml += '</div>';
             }
-
             const outstandingColor = totalOutstanding > 0 ? 'var(--color-danger)' : 'var(--color-accent)';
             html += `<details class="report-accordion ledger-student-row" data-student-name="${student.name.toLowerCase()}" style="margin-bottom: 1rem;">
                 <summary class="report-summary" style="padding: 1rem;">
@@ -1446,7 +1400,6 @@ const UI = {
                 </div>
             </details>`;
         });
-
         listContainer.innerHTML = html;
         listContainer.style.display = 'block';
     },
@@ -1463,16 +1416,13 @@ const UI = {
     initializeReportsView() {
         document.getElementById('report-class-select').value = '';
         document.getElementById('school-fees-reports-list').innerHTML = '<p style="color: var(--color-text-muted); text-align: center;">Select a class above to view students with outstanding balances.</p>';
-        
         const classes = Store.get('classes') || [];
         const select = document.getElementById('report-class-select');
         select.innerHTML = '<option value="">-- Select a Class to View Debtors --</option>';
         classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
-
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
         let totalExpected = 0, totalCollected = 0;
-        
         classes.forEach(cls => {
             cls.students.forEach(student => {
                 feeTypes.forEach(fee => {
@@ -1482,7 +1432,6 @@ const UI = {
                 });
             });
         });
-
         document.getElementById('fees-stat-expected').textContent = `GHS ${(totalExpected / 100).toFixed(2)}`;
         document.getElementById('fees-stat-collected').textContent = `GHS ${(totalCollected / 100).toFixed(2)}`;
         document.getElementById('fees-stat-outstanding').textContent = `GHS ${((totalExpected - totalCollected) / 100).toFixed(2)}`;
@@ -1495,14 +1444,11 @@ const UI = {
             container.innerHTML = '<p style="color: var(--color-text-muted); text-align: center;">Select a class above to view students with outstanding balances.</p>';
             return;
         }
-
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
-
         const feeTypes = Store.get('school_fee_types') || [];
         const payments = Store.get('student_fee_payments') || [];
-        
         const debtors = cls.students.map(student => {
             let studentExpected = 0, studentPaid = 0;
             feeTypes.forEach(fee => {
@@ -1512,12 +1458,10 @@ const UI = {
             });
             return { ...student, expected: studentExpected, paid: studentPaid, outstanding: studentExpected - studentPaid };
         }).filter(s => s.outstanding > 0).sort((a, b) => a.name.localeCompare(b.name));
-
         if (debtors.length === 0) {
             container.innerHTML = '<p style="color: var(--color-accent); text-align: center; font-weight: 700; padding: 2rem;">🎉 Excellent! All students in this class have fully paid.</p>';
             return;
         }
-
         let html = '';
         debtors.forEach(s => {
             html += `<div class="settings-row">
@@ -1532,16 +1476,14 @@ const UI = {
     },
 
     // ==========================================
-    // ASSESSMENT MODULE FUNCTIONS
+    // ASSESSMENT MODULE FUNCTIONS (CUMULATIVE RECORD FORMAT)
     // ==========================================
     switchAssessmentTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-assess-${tabName}`).classList.add('active');
-        
         document.getElementById('assessment-setup-view').style.display = tabName === 'setup' ? 'block' : 'none';
         document.getElementById('assessment-scores-view').style.display = tabName === 'scores' ? 'block' : 'none';
         document.getElementById('assessment-reports-view').style.display = tabName === 'reports' ? 'block' : 'none';
-        
         if (tabName === 'setup') this.renderAssessmentSubjects();
         if (tabName === 'scores') this.initializeScoreEntry();
         if (tabName === 'reports') this.initializeReportCards();
@@ -1550,24 +1492,17 @@ const UI = {
     renderAssessmentSubjects() {
         const subjects = Store.get('assessment_subjects') || [];
         const container = document.getElementById('assessment-subjects-list');
-        
         if (subjects.length === 0) {
             container.innerHTML = '<p style="color: var(--color-text-muted); text-align: center; padding: 2rem;">No subjects added yet. Click "+ Add Subject" to start.</p>';
             return;
         }
-
         let html = '';
         subjects.forEach(subject => {
-            const sbaTotal = subject.sbaComponents.reduce((sum, comp) => sum + comp.maxScore, 0);
             html += `
                 <div class="subject-card">
                     <div class="subject-header">
                         <span class="subject-name">${subject.name}</span>
                         <span class="subject-class">${subject.className}</span>
-                    </div>
-                    <div class="subject-breakdown">
-                        <strong>SBA:</strong> ${sbaTotal} pts (${subject.sbaComponents.map(c => c.name).join(', ')}) | 
-                        <strong>Exam:</strong> ${subject.examMaxScore} pts
                     </div>
                     <div class="subject-actions">
                         <button class="btn-edit-subject" onclick="UI.editSubject('${subject.id}')">✏️ Edit</button>
@@ -1582,47 +1517,21 @@ const UI = {
     showAddSubjectModal() {
         document.getElementById('subject-modal-title').textContent = 'Add Subject';
         document.getElementById('subject-name').value = '';
-        document.getElementById('subject-class-select').value = '';
-        document.getElementById('exam-max-score').value = '50';
-        document.getElementById('sba-components-list').innerHTML = `
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="text" class="form-input sba-component-name" placeholder="Component name (e.g., Test 1)" style="flex: 1;">
-                <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1">
-                <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
-            </div>
-        `;
         document.getElementById('subject-modal').dataset.editId = '';
-        
         const classes = Store.get('classes') || [];
         const select = document.getElementById('subject-class-select');
         select.innerHTML = '<option value="">-- Select Class --</option>';
         classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
-        
         document.getElementById('subject-modal').style.display = 'flex';
-    },
-
-    addSBAComponent() {
-        const list = document.getElementById('sba-components-list');
-        const div = document.createElement('div');
-        div.style.cssText = 'display: flex; gap: 0.5rem; align-items: center;';
-        div.innerHTML = `
-            <input type="text" class="form-input sba-component-name" placeholder="Component name" style="flex: 1;">
-            <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1">
-            <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
-        `;
-        list.appendChild(div);
     },
 
     editSubject(subjectId) {
         const subjects = Store.get('assessment_subjects') || [];
         const subject = subjects.find(s => s.id === subjectId);
         if (!subject) return;
-
         document.getElementById('subject-modal-title').textContent = 'Edit Subject';
         document.getElementById('subject-name').value = subject.name;
-        document.getElementById('exam-max-score').value = subject.examMaxScore;
         document.getElementById('subject-modal').dataset.editId = subjectId;
-
         const classes = Store.get('classes') || [];
         const select = document.getElementById('subject-class-select');
         select.innerHTML = '<option value="">-- Select Class --</option>';
@@ -1630,52 +1539,29 @@ const UI = {
             const selected = cls.id === subject.classId ? 'selected' : '';
             select.innerHTML += `<option value="${cls.id}" ${selected}>${cls.name}</option>`; 
         });
-
-        const sbaList = document.getElementById('sba-components-list');
-        sbaList.innerHTML = '';
-        subject.sbaComponents.forEach(comp => {
-            const div = document.createElement('div');
-            div.style.cssText = 'display: flex; gap: 0.5rem; align-items: center;';
-            div.innerHTML = `
-                <input type="text" class="form-input sba-component-name" placeholder="Component name" style="flex: 1;" value="${comp.name}">
-                <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1" value="${comp.maxScore}">
-                <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
-            `;
-            sbaList.appendChild(div);
-        });
-
         document.getElementById('subject-modal').style.display = 'flex';
     },
 
-    closeSubjectModal() {
-        document.getElementById('subject-modal').style.display = 'none';
-    },
+    closeSubjectModal() { document.getElementById('subject-modal').style.display = 'none'; },
 
     saveSubject() {
         const name = document.getElementById('subject-name').value.trim();
         const classId = document.getElementById('subject-class-select').value;
-        const examMaxScore = parseInt(document.getElementById('exam-max-score').value) || 50;
         const editId = document.getElementById('subject-modal').dataset.editId;
-
         if (!name) return alert("Please enter a subject name.");
         if (!classId) return alert("Please select a class.");
-
-        const sbaComponents = [];
-        document.querySelectorAll('#sba-components-list > div').forEach(div => {
-            const compName = div.querySelector('.sba-component-name').value.trim();
-            const compMax = parseInt(div.querySelector('.sba-component-max').value) || 0;
-            if (compName && compMax > 0) {
-                sbaComponents.push({ name: compName, maxScore: compMax });
-            }
-        });
-
-        if (sbaComponents.length === 0) return alert("Please add at least one SBA component.");
-
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
-
         let subjects = Store.get('assessment_subjects') || [];
+        // Hardcoded SBA components as requested
+        const sbaComponents = [
+            { name: 'Class Test 1', maxScore: 20 },
+            { name: 'Group Work', maxScore: 10 },
+            { name: 'Class Test 2', maxScore: 20 },
+            { name: 'Project Work', maxScore: 10 }
+        ];
+        const examMaxScore = 100;
 
         if (editId) {
             const index = subjects.findIndex(s => s.id === editId);
@@ -1683,16 +1569,8 @@ const UI = {
                 subjects[index] = { ...subjects[index], name, classId, className: cls.name, sbaComponents, examMaxScore };
             }
         } else {
-            subjects.push({
-                id: 'subj_' + Date.now(),
-                name,
-                classId,
-                className: cls.name,
-                sbaComponents,
-                examMaxScore
-            });
+            subjects.push({ id: 'subj_' + Date.now(), name, classId, className: cls.name, sbaComponents, examMaxScore });
         }
-
         Store.set('assessment_subjects', subjects);
         this.closeSubjectModal();
         this.renderAssessmentSubjects();
@@ -1710,9 +1588,8 @@ const UI = {
     initializeScoreEntry() {
         document.getElementById('assess-class-select').value = '';
         document.getElementById('assess-subject-select').value = '';
-        document.getElementById('assess-type-select').value = 'sba';
-        document.getElementById('assess-score-entry-container').style.display = 'none';
-        document.getElementById('assess-max-score-display').textContent = '50';
+        document.getElementById('assess-cumulative-record-container').style.display = 'none';
+        document.getElementById('cumulative-record-table-wrapper').innerHTML = '';
 
         const classes = Store.get('classes') || [];
         const select = document.getElementById('assess-class-select');
@@ -1723,15 +1600,11 @@ const UI = {
     onAssessClassChange() {
         const classId = document.getElementById('assess-class-select').value;
         const subjectSelect = document.getElementById('assess-subject-select');
-        
         subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
-        document.getElementById('assess-score-entry-container').style.display = 'none';
-
+        document.getElementById('assess-cumulative-record-container').style.display = 'none';
         if (!classId) return;
-
         const subjects = Store.get('assessment_subjects') || [];
         const classSubjects = subjects.filter(s => s.classId === classId);
-        
         classSubjects.forEach(subj => {
             subjectSelect.innerHTML += `<option value="${subj.id}">${subj.name}</option>`;
         });
@@ -1739,116 +1612,188 @@ const UI = {
 
     onAssessSubjectChange() {
         const subjectId = document.getElementById('assess-subject-select').value;
-        document.getElementById('assess-score-entry-container').style.display = 'none';
-        
-        if (!subjectId) return;
-        
-        this.renderScoreEntryForm();
-    },
-
-    onAssessTypeChange() {
-        const subjectId = document.getElementById('assess-subject-select').value;
-        if (subjectId) {
-            this.renderScoreEntryForm();
+        const classId = document.getElementById('assess-class-select').value;
+        if (subjectId && classId) {
+            this.renderCumulativeRecord(classId, subjectId);
+        } else {
+            document.getElementById('assess-cumulative-record-container').style.display = 'none';
         }
     },
 
-    renderScoreEntryForm() {
-        const subjectId = document.getElementById('assess-subject-select').value;
-        const assessmentType = document.getElementById('assess-type-select').value;
-        const classId = document.getElementById('assess-class-select').value;
-        
-        if (!subjectId || !classId) return;
+    renderCumulativeRecord(classId, subjectId) {
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
 
         const subjects = Store.get('assessment_subjects') || [];
         const subject = subjects.find(s => s.id === subjectId);
         if (!subject) return;
 
-        const classes = Store.get('classes') || [];
-        const cls = classes.find(c => c.id === classId);
-        if (!cls) return;
-
         const scores = Store.get('assessment_scores') || [];
 
-        let maxScore = 50;
-        if (assessmentType === 'sba') {
-            maxScore = subject.sbaComponents[0]?.maxScore || 50;
-        } else {
-            maxScore = subject.examMaxScore;
+        // Sort: Boys first (A-Z), then Girls (A-Z)
+        const boys = cls.students.filter(s => s.gender === 'boy').sort((a, b) => a.name.localeCompare(b.name));
+        const girls = cls.students.filter(s => s.gender === 'girl').sort((a, b) => a.name.localeCompare(b.name));
+        const sortedStudents = [...boys, ...girls];
+
+        if (sortedStudents.length === 0) {
+            document.getElementById('cumulative-record-table-wrapper').innerHTML = '<p style="padding: 1rem; text-align: center;">No students in this class.</p>';
+            document.getElementById('assess-cumulative-record-container').style.display = 'block';
+            return;
         }
 
-        document.getElementById('assess-max-score-display').textContent = maxScore;
-
-        const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
-        const container = document.getElementById('assess-student-scores-list');
-
-        let html = '';
+        let html = `<table class="cumulative-table"><thead><tr><th>Assessment Component</th><th>Max</th>`;
         sortedStudents.forEach(student => {
-            const existingScore = scores.find(s => 
-                s.studentId === student.id && 
-                s.subjectId === subjectId && 
-                s.assessmentType === assessmentType
-            );
-            const currentScore = existingScore ? existingScore.score : '';
-
-            html += `
-                <div class="score-entry-row">
-                    <span class="score-student-name">${student.name}</span>
-                    <div class="score-input-wrapper">
-                        <input type="number" class="score-input" 
-                               data-student-id="${student.id}" 
-                               data-subject-id="${subjectId}" 
-                               data-assessment-type="${assessmentType}"
-                               value="${currentScore}" 
-                               min="0" 
-                               max="${maxScore}" 
-                               placeholder="0">
-                        <span class="score-max">/ ${maxScore}</span>
-                    </div>
-                </div>
-            `;
+            html += `<th>${student.name}<br><span style="font-size:0.7rem; font-weight:normal;">${student.gender === 'boy' ? '👦' : '👧'}</span></th>`;
         });
+        html += `</tr></thead><tbody>`;
 
-        container.innerHTML = html;
-        document.getElementById('assess-score-entry-container').style.display = 'block';
+        // Helper to get existing score
+        const getScore = (studentId, component) => {
+            const s = scores.find(sc => sc.studentId === studentId && sc.subjectId === subjectId && sc.component === component);
+            return s ? s.score : '';
+        };
+
+        // Row 1: Class Test 1 (Max 20)
+        html += `<tr><td>Class Test 1</td><td>20</td>`;
+        sortedStudents.forEach(s => {
+            html += `<td><input type="number" class="score-raw-input" id="ct1-${s.id}" data-student="${s.id}" data-comp="ct1" max="20" value="${getScore(s.id, 'ct1')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
+        });
+        html += `</tr>`;
+
+        // Row 2: Group Work (Max 10)
+        html += `<tr><td>Group Work</td><td>10</td>`;
+        sortedStudents.forEach(s => {
+            html += `<td><input type="number" class="score-raw-input" id="gw-${s.id}" data-student="${s.id}" data-comp="gw" max="10" value="${getScore(s.id, 'gw')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
+        });
+        html += `</tr>`;
+
+        // Row 3: Class Test 2 (Max 20)
+        html += `<tr><td>Class Test 2</td><td>20</td>`;
+        sortedStudents.forEach(s => {
+            html += `<td><input type="number" class="score-raw-input" id="ct2-${s.id}" data-student="${s.id}" data-comp="ct2" max="20" value="${getScore(s.id, 'ct2')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
+        });
+        html += `</tr>`;
+
+        // Row 4: Project Work (Max 10)
+        html += `<tr><td>Project Work</td><td>10</td>`;
+        sortedStudents.forEach(s => {
+            html += `<td><input type="number" class="score-raw-input" id="pw-${s.id}" data-student="${s.id}" data-comp="pw" max="10" value="${getScore(s.id, 'pw')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
+        });
+        html += `</tr>`;
+
+        // Row 5: Total SBA (Max 60) - Auto
+        html += `<tr class="row-total-sba"><td>Total SBA</td><td>60</td>`;
+        sortedStudents.forEach(s => { html += `<td id="cell-total-sba-${s.id}" class="cell-calculated">0</td>`; });
+        html += `</tr>`;
+
+        // Row 6: SBA 50% (Max 50) - Auto
+        html += `<tr class="row-sba-50"><td>SBA (50%)</td><td>50</td>`;
+        sortedStudents.forEach(s => { html += `<td id="cell-sba50-${s.id}" class="cell-calculated">0</td>`; });
+        html += `</tr>`;
+
+        // Row 7: Exam Score (Max 100)
+        html += `<tr><td>Exam Score</td><td>100</td>`;
+        sortedStudents.forEach(s => {
+            html += `<td><input type="number" class="score-raw-input" id="exam-${s.id}" data-student="${s.id}" data-comp="exam" max="100" value="${getScore(s.id, 'exam')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
+        });
+        html += `</tr>`;
+
+        // Row 8: Exam 50% (Max 50) - Auto
+        html += `<tr class="row-exam-50"><td>Exam (50%)</td><td>50</td>`;
+        sortedStudents.forEach(s => { html += `<td id="cell-exam50-${s.id}" class="cell-calculated">0</td>`; });
+        html += `</tr>`;
+
+        // Row 9: Overall Score (Max 100) - Auto
+        html += `<tr class="row-overall"><td>Overall Score</td><td>100</td>`;
+        sortedStudents.forEach(s => { html += `<td id="cell-overall-${s.id}" class="cell-calculated">0</td>`; });
+        html += `</tr>`;
+
+        // Row 10: Position - Auto
+        html += `<tr class="row-position"><td>Position</td><td>-</td>`;
+        sortedStudents.forEach(s => { html += `<td id="cell-position-${s.id}" class="cell-position">-</td>`; });
+        html += `</tr>`;
+
+        html += `</tbody></table>`;
+
+        document.getElementById('cumulative-record-table-wrapper').innerHTML = html;
+        document.getElementById('assess-cumulative-record-container').style.display = 'block';
+        
+        // Initial calculation
+        this.calculateStudentRow(subjectId);
     },
 
-    saveAssessmentScores() {
-        const inputs = document.querySelectorAll('.score-input');
-        const scores = Store.get('assessment_scores') || [];
-        let savedCount = 0;
+    calculateStudentRow(subjectId) {
+        const inputs = document.querySelectorAll('.score-raw-input');
+        const studentScores = {};
 
+        // 1. Gather all raw inputs
         inputs.forEach(input => {
-            const studentId = input.dataset.studentId;
-            const subjectId = input.dataset.subjectId;
-            const assessmentType = input.dataset.assessmentType;
-            const score = parseFloat(input.value);
+            const studentId = input.dataset.student;
+            const comp = input.dataset.comp;
+            let val = parseFloat(input.value);
+            if (isNaN(val) || val < 0) val = 0;
+            
+            // Enforce max limits
+            const max = parseInt(input.getAttribute('max'));
+            if (val > max) { val = max; input.value = max; }
 
-            if (isNaN(score) || score < 0) return;
-
-            const existingIndex = scores.findIndex(s => 
-                s.studentId === studentId && 
-                s.subjectId === subjectId && 
-                s.assessmentType === assessmentType
-            );
-
-            if (existingIndex !== -1) {
-                scores[existingIndex].score = score;
-            } else {
-                scores.push({
-                    id: 'score_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    studentId,
-                    subjectId,
-                    assessmentType,
-                    score,
-                    date: this.getLocalDateStr()
-                });
-            }
-            savedCount++;
+            if (!studentScores[studentId]) studentScores[studentId] = { ct1: 0, gw: 0, ct2: 0, pw: 0, exam: 0 };
+            studentScores[studentId][comp] = val;
         });
 
-        Store.set('assessment_scores', scores);
-        alert(`✅ Saved ${savedCount} score(s) successfully!`);
+        // 2. Calculate per student
+        let studentOverallScores = [];
+        for (const [studentId, scores] of Object.entries(studentScores)) {
+            const totalSBA = scores.ct1 + scores.gw + scores.ct2 + scores.pw;
+            const sba50 = (totalSBA / 60) * 50;
+            const exam50 = (scores.exam / 100) * 50;
+            const overall = sba50 + exam50;
+
+            document.getElementById(`cell-total-sba-${studentId}`).textContent = totalSBA;
+            document.getElementById(`cell-sba50-${studentId}`).textContent = sba50.toFixed(1);
+            document.getElementById(`cell-exam50-${studentId}`).textContent = exam50.toFixed(1);
+            document.getElementById(`cell-overall-${studentId}`).textContent = overall.toFixed(1);
+            
+            studentOverallScores.push({ studentId, overall });
+        }
+
+        // 3. Calculate Positions
+        studentOverallScores.sort((a, b) => b.overall - a.overall);
+        let currentRank = 1;
+        for (let i = 0; i < studentOverallScores.length; i++) {
+            if (i > 0 && studentOverallScores[i].overall < studentOverallScores[i-1].overall) {
+                currentRank = i + 1;
+            }
+            const suffix = currentRank === 1 ? 'st' : currentRank === 2 ? 'nd' : currentRank === 3 ? 'rd' : 'th';
+            document.getElementById(`cell-position-${studentOverallScores[i].studentId}`).textContent = `${currentRank}${suffix}`;
+        }
+    },
+
+    saveCumulativeScores() {
+        const inputs = document.querySelectorAll('.score-raw-input');
+        const scores = Store.get('assessment_scores') || [];
+        const subjectId = document.getElementById('assess-subject-select').value;
+        let savedCount = 0;
+
+        // Clear existing scores for this subject to avoid duplicates
+        const filteredScores = scores.filter(s => s.subjectId !== subjectId);
+
+        inputs.forEach(input => {
+            const studentId = input.dataset.student;
+            const comp = input.dataset.comp;
+            const score = parseFloat(input.value);
+            if (!isNaN(score) && score >= 0) {
+                filteredScores.push({
+                    id: 'score_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    studentId, subjectId, component: comp, score
+                });
+                savedCount++;
+            }
+        });
+
+        Store.set('assessment_scores', filteredScores);
+        alert(`✅ Saved ${savedCount} score entries successfully!`);
     },
 
     initializeReportCards() {
@@ -1856,7 +1801,6 @@ const UI = {
         document.getElementById('report-student-select-group').style.display = 'none';
         document.getElementById('report-student-select').innerHTML = '<option value="">-- Select Student --</option>';
         document.getElementById('report-card-preview').style.display = 'none';
-
         const classes = Store.get('classes') || [];
         const select = document.getElementById('report-class-select');
         select.innerHTML = '<option value="">-- Select Class --</option>';
@@ -1868,21 +1812,13 @@ const UI = {
         const studentSelect = document.getElementById('report-student-select');
         const studentGroup = document.getElementById('report-student-select-group');
         const preview = document.getElementById('report-card-preview');
-
         preview.style.display = 'none';
         studentSelect.innerHTML = '<option value="">-- Select Student --</option>';
-
-        if (!classId) {
-            studentGroup.style.display = 'none';
-            return;
-        }
-
+        if (!classId) { studentGroup.style.display = 'none'; return; }
         studentGroup.style.display = 'block';
-
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
-
         const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
         sortedStudents.forEach(student => {
             studentSelect.innerHTML += `<option value="${student.id}">${student.name}</option>`;
@@ -1892,12 +1828,10 @@ const UI = {
     onReportStudentChange() {
         const studentId = document.getElementById('report-student-select').value;
         const classId = document.getElementById('report-class-select').value;
-
         if (!studentId || !classId) {
             document.getElementById('report-card-preview').style.display = 'none';
             return;
         }
-
         this.generateReportCard(studentId, classId);
     },
 
@@ -1905,7 +1839,6 @@ const UI = {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
-
         const student = cls.students.find(s => s.id === studentId);
         if (!student) return;
 
@@ -1913,51 +1846,47 @@ const UI = {
         const scores = Store.get('assessment_scores') || [];
         const classSubjects = subjects.filter(s => s.classId === classId);
 
-        let totalSBA = 0, totalExam = 0, totalOverall = 0;
         let subjectRows = '';
+        let totalOverall = 0;
 
         classSubjects.forEach(subject => {
-            const sbaComponents = subject.sbaComponents;
-            let sbaScore = 0;
-            let sbaMax = 0;
+            const studentScores = scores.filter(s => s.studentId === studentId && s.subjectId === subject.id);
+            
+            const ct1 = studentScores.find(s => s.component === 'ct1')?.score || 0;
+            const gw = studentScores.find(s => s.component === 'gw')?.score || 0;
+            const ct2 = studentScores.find(s => s.component === 'ct2')?.score || 0;
+            const pw = studentScores.find(s => s.component === 'pw')?.score || 0;
+            const exam = studentScores.find(s => s.component === 'exam')?.score || 0;
 
-            sbaComponents.forEach(comp => {
-                const score = scores.find(s => 
-                    s.studentId === studentId && 
-                    s.subjectId === subject.id && 
-                    s.assessmentType === 'sba' &&
-                    s.componentName === comp.name
-                );
-                if (score) sbaScore += score.score;
-                sbaMax += comp.maxScore;
-            });
-
-            const examScoreObj = scores.find(s => 
-                s.studentId === studentId && 
-                s.subjectId === subject.id && 
-                s.assessmentType === 'exam'
-            );
-            const examScore = examScoreObj ? examScoreObj.score : 0;
-            const examMax = subject.examMaxScore;
-
-            const sbaPercentage = sbaMax > 0 ? (sbaScore / sbaMax) * 50 : 0;
-            const examPercentage = examMax > 0 ? (examScore / examMax) * 50 : 0;
-            const overall = sbaPercentage + examPercentage;
+            const totalSBA = ct1 + gw + ct2 + pw;
+            const sba50 = (totalSBA / 60) * 50;
+            const exam50 = (exam / 100) * 50;
+            const overall = sba50 + exam50;
+            totalOverall += overall;
 
             const grade = this.calculateGrade(overall);
             const remark = this.getRemark(grade);
 
-            totalSBA += sbaPercentage;
-            totalExam += examPercentage;
-            totalOverall += overall;
+            // Calculate position for this subject
+            const allStudentOveralls = cls.students.map(s => {
+                const sScores = scores.filter(sc => sc.studentId === s.id && sc.subjectId === subject.id);
+                const sTotalSBA = (sScores.find(x=>x.component==='ct1')?.score||0) + (sScores.find(x=>x.component==='gw')?.score||0) + (sScores.find(x=>x.component==='ct2')?.score||0) + (sScores.find(x=>x.component==='pw')?.score||0);
+                const sExam = sScores.find(x=>x.component==='exam')?.score || 0;
+                return ((sTotalSBA/60)*50) + ((sExam/100)*50);
+            }).sort((a,b) => b-a);
+            
+            const position = allStudentOveralls.indexOf(overall) + 1;
+            const suffix = position === 1 ? 'st' : position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
 
             subjectRows += `
                 <tr>
                     <td><strong>${subject.name}</strong></td>
-                    <td>${sbaPercentage.toFixed(1)}</td>
-                    <td>${examPercentage.toFixed(1)}</td>
+                    <td>${sba50.toFixed(1)}</td>
+                    <td>${exam50.toFixed(1)}</td>
+                    <td class="grade-${grade}">${overall.toFixed(1)}</td>
                     <td class="grade-${grade}">${grade}</td>
                     <td>${remark}</td>
+                    <td>${position}${suffix}</td>
                 </tr>
             `;
         });
@@ -1971,76 +1900,28 @@ const UI = {
                     <div class="report-school-name">PREETY PEEP SCHOOL</div>
                     <div class="report-school-info">Learner's Assessment Report</div>
                 </div>
-
                 <div class="report-student-info">
-                    <div class="report-info-item">
-                        <span class="report-info-label">Student Name</span>
-                        <span class="report-info-value">${student.name}</span>
-                    </div>
-                    <div class="report-info-item">
-                        <span class="report-info-label">Class</span>
-                        <span class="report-info-value">${cls.name}</span>
-                    </div>
-                    <div class="report-info-item">
-                        <span class="report-info-label">Term</span>
-                        <span class="report-info-value">1st Term, 2026</span>
-                    </div>
-                    <div class="report-info-item">
-                        <span class="report-info-label">Date</span>
-                        <span class="report-info-value">${this.getLocalDateStr()}</span>
-                    </div>
+                    <div class="report-info-item"><span class="report-info-label">Student Name</span><span class="report-info-value">${student.name}</span></div>
+                    <div class="report-info-item"><span class="report-info-label">Class</span><span class="report-info-value">${cls.name}</span></div>
+                    <div class="report-info-item"><span class="report-info-label">Term</span><span class="report-info-value">1st Term, 2026</span></div>
+                    <div class="report-info-item"><span class="report-info-label">Date</span><span class="report-info-value">${this.getLocalDateStr()}</span></div>
                 </div>
-
                 <table class="report-subjects-table">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>SBA (50%)</th>
-                            <th>Exam (50%)</th>
-                            <th>Grade</th>
-                            <th>Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${subjectRows}
-                    </tbody>
+                    <thead><tr><th>Subject</th><th>SBA (50%)</th><th>Exam (50%)</th><th>Total (100)</th><th>Grade</th><th>Remark</th><th>Pos</th></tr></thead>
+                    <tbody>${subjectRows}</tbody>
                 </table>
-
                 <div class="report-summary">
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Total SBA Score</div>
-                        <div class="report-summary-value">${totalSBA.toFixed(1)} / ${classSubjects.length * 50}</div>
-                    </div>
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Total Exam Score</div>
-                        <div class="report-summary-value">${totalExam.toFixed(1)} / ${classSubjects.length * 50}</div>
-                    </div>
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Overall Average</div>
-                        <div class="report-summary-value">${average.toFixed(1)}%</div>
-                    </div>
-                    <div class="report-summary-item">
-                        <div class="report-summary-label">Overall Grade</div>
-                        <div class="report-summary-value grade-${overallGrade}">Grade ${overallGrade}</div>
-                    </div>
+                    <div class="report-summary-item"><div class="report-summary-label">Overall Average</div><div class="report-summary-value">${average.toFixed(1)}%</div></div>
+                    <div class="report-summary-item"><div class="report-summary-label">Overall Grade</div><div class="report-summary-value grade-${overallGrade}">Grade ${overallGrade}</div></div>
                 </div>
-
                 <div class="report-remarks">
                     <div class="report-remarks-title">Teacher's Remarks</div>
-                    <div class="report-remarks-item">
-                        <div class="report-remarks-label">Class Teacher's Comment</div>
-                        <div class="report-remarks-text" contenteditable="true">Enter comment here...</div>
-                    </div>
-                    <div class="report-remarks-item">
-                        <div class="report-remarks-label">Head Teacher's Comment</div>
-                        <div class="report-remarks-text" contenteditable="true">Enter comment here...</div>
-                    </div>
+                    <div class="report-remarks-item"><div class="report-remarks-label">Class Teacher's Comment</div><div class="report-remarks-text" contenteditable="true">Enter comment here...</div></div>
+                    <div class="report-remarks-item"><div class="report-remarks-label">Head Teacher's Comment</div><div class="report-remarks-text" contenteditable="true">Enter comment here...</div></div>
                 </div>
-
                 <button class="btn-print-report" onclick="window.print()">🖨️ Print Report Card</button>
             </div>
         `;
-
         document.getElementById('report-card-preview').innerHTML = html;
         document.getElementById('report-card-preview').style.display = 'block';
     },
@@ -2058,17 +1939,7 @@ const UI = {
     },
 
     getRemark(grade) {
-        const remarks = {
-            1: 'Excellent',
-            2: 'Very Good',
-            3: 'Good',
-            4: 'Credit',
-            5: 'Pass',
-            6: 'Pass',
-            7: 'Weak Pass',
-            8: 'Weak',
-            9: 'Very Weak'
-        };
+        const remarks = { 1: 'Excellent', 2: 'Very Good', 3: 'Good', 4: 'Credit', 5: 'Pass', 6: 'Pass', 7: 'Weak Pass', 8: 'Weak', 9: 'Very Weak' };
         return remarks[grade] || 'N/A';
     }
 };
