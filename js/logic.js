@@ -1794,28 +1794,38 @@ const UI = {
     },
 
     initializeReportCards() {
-        document.getElementById('report-class-select').value = '';
-        document.getElementById('report-student-select-group').style.display = 'none';
-        document.getElementById('report-student-select').innerHTML = '<option value="">-- Select Student --</option>';
-        document.getElementById('report-card-preview').style.display = 'none';
+        // FIXED: Use unique IDs for Assessment Report Cards
+        document.getElementById('assess-report-class-select').value = '';
+        document.getElementById('assess-report-student-select-group').style.display = 'none';
+        document.getElementById('assess-report-student-select').innerHTML = '<option value="">-- Select Student --</option>';
+        document.getElementById('assess-report-card-preview').style.display = 'none';
+        
         const classes = Store.get('classes') || [];
-        const select = document.getElementById('report-class-select');
+        const select = document.getElementById('assess-report-class-select');
         select.innerHTML = '<option value="">-- Select Class --</option>';
         classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
     },
 
     onReportClassChange() {
-        const classId = document.getElementById('report-class-select').value;
-        const studentSelect = document.getElementById('report-student-select');
-        const studentGroup = document.getElementById('report-student-select-group');
-        const preview = document.getElementById('report-card-preview');
+        // FIXED: Use unique IDs for Assessment Report Cards
+        const classId = document.getElementById('assess-report-class-select').value;
+        const studentSelect = document.getElementById('assess-report-student-select');
+        const studentGroup = document.getElementById('assess-report-student-select-group');
+        const preview = document.getElementById('assess-report-card-preview');
+        
         preview.style.display = 'none';
         studentSelect.innerHTML = '<option value="">-- Select Student --</option>';
-        if (!classId) { studentGroup.style.display = 'none'; return; }
+        
+        if (!classId) { 
+            studentGroup.style.display = 'none'; 
+            return; 
+        }
+        
         studentGroup.style.display = 'block';
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
+        
         const sortedStudents = [...cls.students].sort((a, b) => a.name.localeCompare(b.name));
         sortedStudents.forEach(student => {
             studentSelect.innerHTML += `<option value="${student.id}">${student.name}</option>`;
@@ -1823,10 +1833,12 @@ const UI = {
     },
 
     onReportStudentChange() {
-        const studentId = document.getElementById('report-student-select').value;
-        const classId = document.getElementById('report-class-select').value;
+        // FIXED: Use unique IDs for Assessment Report Cards
+        const studentId = document.getElementById('assess-report-student-select').value;
+        const classId = document.getElementById('assess-report-class-select').value;
+        
         if (!studentId || !classId) {
-            document.getElementById('report-card-preview').style.display = 'none';
+            document.getElementById('assess-report-card-preview').style.display = 'none';
             return;
         }
         this.generateReportCard(studentId, classId);
@@ -1919,8 +1931,10 @@ const UI = {
                 <button class="btn-print-report" onclick="window.print()">🖨️ Print Report Card</button>
             </div>
         `;
-        document.getElementById('report-card-preview').innerHTML = html;
-        document.getElementById('report-card-preview').style.display = 'block';
+        
+        // FIXED: Use unique ID for Assessment Report Card preview
+        document.getElementById('assess-report-card-preview').innerHTML = html;
+        document.getElementById('assess-report-card-preview').style.display = 'block';
     },
 
     calculateGrade(score) {

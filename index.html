@@ -81,7 +81,7 @@
                     <label>Create Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="setup-password" class="form-input" placeholder="Make it strong">
-                        <button type="button" class="eye-btn" onclick="UI.togglePassword('setup-password', this)">️</button>
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('setup-password', this)">👁️</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -126,7 +126,7 @@
                 </div>
             </div>
             <div class="auth-container login-form-card">
-                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back 👋</h2>
+                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back </h2>
                 <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Sign in to access the system</p>
                 <div class="form-group">
                     <label>Select Role</label>
@@ -148,7 +148,7 @@
                 </div>
                 <button class="btn btn-primary btn-full" onclick="UI.handleLogin()">Log In</button>
                 <p id="login-error" style="color: var(--color-danger); margin-top: 1rem; font-size: 0.9rem; display: none;">Invalid username or password.</p>
-                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()">🔐 Forgot Password? (Admin Recovery)</button>
+                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()"> Forgot Password? (Admin Recovery)</button>
                 <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7;">Lost recovery phrase? Reset System</a>
             </div>
         </div>
@@ -177,7 +177,7 @@
                     <label>New Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="new-admin-password" class="form-input" placeholder="Make it strong">
-                        <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-password', this)">👁️</button>
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-password', this)">️</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -187,7 +187,7 @@
                         <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-confirm', this)">👁️</button>
                     </div>
                 </div>
-                <button class="btn btn-accent btn-full" onclick="UI.resetAdminPassword()"> Reset Admin Account</button>
+                <button class="btn btn-accent btn-full" onclick="UI.resetAdminPassword()">🔓 Reset Admin Account</button>
             </div>
         </div>
 
@@ -228,8 +228,8 @@
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
                 <button class="tab-btn active" onclick="UI.switchSchoolFeesTab('setup')" id="tab-fees-setup">💰 Fee Setup</button>
                 <button class="tab-btn" onclick="UI.switchSchoolFeesTab('payment')" id="tab-fees-payment">💵 Record Payment</button>
-                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('ledger')" id="tab-fees-ledger"> Student Ledger</button>
-                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('reports')" id="tab-fees-reports"> Reports</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('ledger')" id="tab-fees-ledger">📋 Student Ledger</button>
+                <button class="tab-btn" onclick="UI.switchSchoolFeesTab('reports')" id="tab-fees-reports">📊 Reports</button>
             </div>
             <div id="school-fees-setup-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -276,7 +276,7 @@
 
             <!-- Assessment Sub-Tabs -->
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
-                <button class="tab-btn active" onclick="UI.switchAssessmentTab('setup')" id="tab-assess-setup">⚙️ Subject Setup</button>
+                <button class="tab-btn active" onclick="UI.switchAssessmentTab('setup')" id="tab-assess-setup">️ Subject Setup</button>
                 <button class="tab-btn" onclick="UI.switchAssessmentTab('scores')" id="tab-assess-scores">✏️ Enter Scores</button>
                 <button class="tab-btn" onclick="UI.switchAssessmentTab('reports')" id="tab-assess-reports">📄 Report Cards</button>
             </div>
@@ -312,7 +312,7 @@
 
                 <div id="assess-cumulative-record-container" style="display: none;">
                     <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.9rem;">
-                        <strong>📊 Cumulative Record Book:</strong> Enter raw scores. The system auto-calculates Totals, 50% conversions, Overall, and Positions.
+                        <strong> Cumulative Record Book:</strong> Enter raw scores. The system auto-calculates Totals, 50% conversions, Overall, and Positions.
                     </div>
                     <!-- The Table will be injected here by JS -->
                     <div id="cumulative-record-table-wrapper" style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);"></div>
@@ -321,23 +321,23 @@
                 </div>
             </div>
 
-            <!-- Tab 3: Report Cards -->
+            <!-- Tab 3: Report Cards (FIXED: Unique IDs to prevent conflict with School Fees) -->
             <div id="assessment-reports-view" style="display: none;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div class="form-group">
                         <label>Select Class</label>
-                        <select id="report-class-select" class="form-select" onchange="UI.onReportClassChange()">
+                        <select id="assess-report-class-select" class="form-select" onchange="UI.onReportClassChange()">
                             <option value="">-- Select Class --</option>
                         </select>
                     </div>
-                    <div class="form-group" id="report-student-select-group" style="display: none;">
+                    <div class="form-group" id="assess-report-student-select-group" style="display: none;">
                         <label>Select Student</label>
-                        <select id="report-student-select" class="form-select" onchange="UI.onReportStudentChange()">
+                        <select id="assess-report-student-select" class="form-select" onchange="UI.onReportStudentChange()">
                             <option value="">-- Select Student --</option>
                         </select>
                     </div>
                 </div>
-                <div id="report-card-preview" style="display: none;"></div>
+                <div id="assess-report-card-preview" style="display: none;"></div>
             </div>
         </div>
 
@@ -346,13 +346,13 @@
             <div class="dashboard-header">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button class="hamburger-btn" onclick="UI.openSidebar()" title="Open Menu">☰</button>
-                    <div><h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;"> Toiletries</h1><p class="text-muted">Parent Compliance Tracker</p></div>
+                    <div><h1 style="font-size: 1.5rem; color: var(--color-primary); margin-bottom: 0.25rem;">🧴 Toiletries</h1><p class="text-muted">Parent Compliance Tracker</p></div>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
                 <button class="tab-btn active" onclick="UI.switchToiletriesTab('required')" id="tab-required">📋 Required Items</button>
                 <button class="tab-btn" onclick="UI.switchToiletriesTab('checklist')" id="tab-checklist">✅ Checklist</button>
-                <button class="tab-btn" onclick="UI.switchToiletriesTab('compliance')" id="tab-compliance"> Compliance</button>
+                <button class="tab-btn" onclick="UI.switchToiletriesTab('compliance')" id="tab-compliance">📊 Compliance</button>
             </div>
             <div id="toiletries-required-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -367,7 +367,7 @@
                     <select id="toiletry-checklist-class" class="form-select" onchange="UI.renderToiletriesChecklist()"><option value="">-- Select a Class --</option></select>
                 </div>
                 <div style="margin-bottom: 1rem; display: none;" id="toiletry-search-container">
-                    <input type="text" id="toiletry-checklist-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterToiletriesChecklist()">
+                    <input type="text" id="toiletry-checklist-search" class="form-input" placeholder=" Search student name..." oninput="UI.filterToiletriesChecklist()">
                 </div>
                 <div id="toiletries-checklist-list" class="student-list-container" style="margin-top: 1rem; display: none;"></div>
                 <button id="save-checklist-btn" class="btn btn-primary btn-full" style="margin-top: 1.5rem; display: none;" onclick="UI.saveToiletriesChecklist()">✅ Save Today's Checklist</button>
@@ -516,7 +516,7 @@
                 </div>
                 <div id="report-content" style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; border: 1px solid var(--color-border); max-height: 300px; overflow-y: auto;"></div>
                 <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" style="flex: 1;" onclick="UI.downloadReport()">⬇️ Download</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="UI.downloadReport()">️ Download</button>
                     <button class="btn btn-accent" style="flex: 1;" onclick="UI.copyReportText()">📋 Copy</button>
                 </div>
             </div>
