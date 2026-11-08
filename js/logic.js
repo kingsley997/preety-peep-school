@@ -1629,7 +1629,6 @@ const UI = {
 
         const scores = Store.get('assessment_scores') || [];
 
-        // FIXED: Handle legacy students without a gender property
         const boys = cls.students.filter(s => !s.gender || s.gender === 'boy').sort((a, b) => a.name.localeCompare(b.name));
         const girls = cls.students.filter(s => s.gender === 'girl').sort((a, b) => a.name.localeCompare(b.name));
         const sortedStudents = [...boys, ...girls];
@@ -1651,62 +1650,52 @@ const UI = {
             return s ? s.score : '';
         };
 
-        // Row 1: Class Test 1 (Max 20)
         html += `<tr><td>Class Test 1</td><td>20</td>`;
         sortedStudents.forEach(s => {
             html += `<td><input type="number" class="score-raw-input" id="ct1-${s.id}" data-student="${s.id}" data-comp="ct1" max="20" value="${getScore(s.id, 'ct1')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
         });
         html += `</tr>`;
 
-        // Row 2: Group Work (Max 10)
         html += `<tr><td>Group Work</td><td>10</td>`;
         sortedStudents.forEach(s => {
             html += `<td><input type="number" class="score-raw-input" id="gw-${s.id}" data-student="${s.id}" data-comp="gw" max="10" value="${getScore(s.id, 'gw')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
         });
         html += `</tr>`;
 
-        // Row 3: Class Test 2 (Max 20)
         html += `<tr><td>Class Test 2</td><td>20</td>`;
         sortedStudents.forEach(s => {
             html += `<td><input type="number" class="score-raw-input" id="ct2-${s.id}" data-student="${s.id}" data-comp="ct2" max="20" value="${getScore(s.id, 'ct2')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
         });
         html += `</tr>`;
 
-        // Row 4: Project Work (Max 10)
         html += `<tr><td>Project Work</td><td>10</td>`;
         sortedStudents.forEach(s => {
             html += `<td><input type="number" class="score-raw-input" id="pw-${s.id}" data-student="${s.id}" data-comp="pw" max="10" value="${getScore(s.id, 'pw')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
         });
         html += `</tr>`;
 
-        // Row 5: Total SBA (Max 60) - Auto
         html += `<tr class="row-total-sba"><td>Total SBA</td><td>60</td>`;
         sortedStudents.forEach(s => { html += `<td id="cell-total-sba-${s.id}" class="cell-calculated">0</td>`; });
         html += `</tr>`;
 
-        // Row 6: SBA 50% (Max 50) - Auto
         html += `<tr class="row-sba-50"><td>SBA (50%)</td><td>50</td>`;
         sortedStudents.forEach(s => { html += `<td id="cell-sba50-${s.id}" class="cell-calculated">0</td>`; });
         html += `</tr>`;
 
-        // Row 7: Exam Score (Max 100)
         html += `<tr><td>Exam Score</td><td>100</td>`;
         sortedStudents.forEach(s => {
             html += `<td><input type="number" class="score-raw-input" id="exam-${s.id}" data-student="${s.id}" data-comp="exam" max="100" value="${getScore(s.id, 'exam')}" oninput="UI.calculateStudentRow('${subjectId}')"></td>`;
         });
         html += `</tr>`;
 
-        // Row 8: Exam 50% (Max 50) - Auto
         html += `<tr class="row-exam-50"><td>Exam (50%)</td><td>50</td>`;
         sortedStudents.forEach(s => { html += `<td id="cell-exam50-${s.id}" class="cell-calculated">0</td>`; });
         html += `</tr>`;
 
-        // Row 9: Overall Score (Max 100) - Auto
         html += `<tr class="row-overall"><td>Overall Score</td><td>100</td>`;
         sortedStudents.forEach(s => { html += `<td id="cell-overall-${s.id}" class="cell-calculated">0</td>`; });
         html += `</tr>`;
 
-        // Row 10: Position - Auto
         html += `<tr class="row-position"><td>Position</td><td>-</td>`;
         sortedStudents.forEach(s => { html += `<td id="cell-position-${s.id}" class="cell-position">-</td>`; });
         html += `</tr>`;
@@ -1716,7 +1705,6 @@ const UI = {
         document.getElementById('cumulative-record-table-wrapper').innerHTML = html;
         document.getElementById('assess-cumulative-record-container').style.display = 'block';
         
-        // Initial calculation
         this.calculateStudentRow(subjectId);
     },
 
@@ -1724,14 +1712,12 @@ const UI = {
         const inputs = document.querySelectorAll('.score-raw-input');
         const studentScores = {};
 
-        // 1. Gather all raw inputs
         inputs.forEach(input => {
             const studentId = input.dataset.student;
             const comp = input.dataset.comp;
             let val = parseFloat(input.value);
             if (isNaN(val) || val < 0) val = 0;
             
-            // Enforce max limits
             const max = parseInt(input.getAttribute('max'));
             if (val > max) { val = max; input.value = max; }
 
@@ -1739,7 +1725,6 @@ const UI = {
             studentScores[studentId][comp] = val;
         });
 
-        // 2. Calculate per student
         let studentOverallScores = [];
         for (const [studentId, scores] of Object.entries(studentScores)) {
             const totalSBA = scores.ct1 + scores.gw + scores.ct2 + scores.pw;
@@ -1755,7 +1740,6 @@ const UI = {
             studentOverallScores.push({ studentId, overall });
         }
 
-        // 3. Calculate Positions
         studentOverallScores.sort((a, b) => b.overall - a.overall);
         let currentRank = 1;
         for (let i = 0; i < studentOverallScores.length; i++) {
@@ -1773,7 +1757,6 @@ const UI = {
         const subjectId = document.getElementById('assess-subject-select').value;
         let savedCount = 0;
 
-        // Clear existing scores for this subject to avoid duplicates
         const filteredScores = scores.filter(s => s.subjectId !== subjectId);
 
         inputs.forEach(input => {
@@ -1794,7 +1777,6 @@ const UI = {
     },
 
     initializeReportCards() {
-        // FIXED: Use unique IDs for Assessment Report Cards
         document.getElementById('assess-report-class-select').value = '';
         document.getElementById('assess-report-student-select-group').style.display = 'none';
         document.getElementById('assess-report-student-select').innerHTML = '<option value="">-- Select Student --</option>';
@@ -1807,7 +1789,6 @@ const UI = {
     },
 
     onReportClassChange() {
-        // FIXED: Use unique IDs for Assessment Report Cards
         const classId = document.getElementById('assess-report-class-select').value;
         const studentSelect = document.getElementById('assess-report-student-select');
         const studentGroup = document.getElementById('assess-report-student-select-group');
@@ -1833,7 +1814,6 @@ const UI = {
     },
 
     onReportStudentChange() {
-        // FIXED: Use unique IDs for Assessment Report Cards
         const studentId = document.getElementById('assess-report-student-select').value;
         const classId = document.getElementById('assess-report-class-select').value;
         
@@ -1855,9 +1835,41 @@ const UI = {
         const scores = Store.get('assessment_scores') || [];
         const classSubjects = subjects.filter(s => s.classId === classId);
 
-        let subjectRows = '';
-        let totalOverall = 0;
+        // 1. Calculate Overall Class Position for ALL students first
+        const studentTotals = cls.students.map(s => {
+            let studentTotalScore = 0;
+            classSubjects.forEach(subject => {
+                const sScores = scores.filter(sc => sc.studentId === s.id && sc.subjectId === subject.id);
+                const ct1 = sScores.find(x => x.component === 'ct1')?.score || 0;
+                const gw = sScores.find(x => x.component === 'gw')?.score || 0;
+                const ct2 = sScores.find(x => x.component === 'ct2')?.score || 0;
+                const pw = sScores.find(x => x.component === 'pw')?.score || 0;
+                const exam = sScores.find(x => x.component === 'exam')?.score || 0;
+                
+                const sTotalSBA = ct1 + gw + ct2 + pw;
+                const sSba50 = (sTotalSBA / 60) * 50;
+                const sExam50 = (exam / 100) * 50;
+                studentTotalScore += (sSba50 + sExam50);
+            });
+            return { id: s.id, name: s.name, totalScore: studentTotalScore };
+        });
 
+        // Sort by total score descending
+        studentTotals.sort((a, b) => b.totalScore - a.totalScore);
+
+        // Find current student's rank
+        let overallPosition = 1;
+        for (let i = 0; i < studentTotals.length; i++) {
+            if (studentTotals[i].id === studentId) {
+                overallPosition = i + 1;
+                break;
+            }
+        }
+        const suffix = overallPosition === 1 ? 'st' : overallPosition === 2 ? 'nd' : overallPosition === 3 ? 'rd' : 'th';
+        const positionString = `${overallPosition}${suffix}`;
+
+        // 2. Generate Subject Rows for the current student
+        let subjectRows = '';
         classSubjects.forEach(subject => {
             const studentScores = scores.filter(s => s.studentId === studentId && s.subjectId === subject.id);
             
@@ -1871,12 +1883,11 @@ const UI = {
             const sba50 = (totalSBA / 60) * 50;
             const exam50 = (exam / 100) * 50;
             const overall = sba50 + exam50;
-            totalOverall += overall;
 
             const grade = this.calculateGrade(overall);
             const remark = this.getRemark(grade);
 
-            // Calculate position for this subject
+            // Calculate position for this specific subject
             const allStudentOveralls = cls.students.map(s => {
                 const sScores = scores.filter(sc => sc.studentId === s.id && sc.subjectId === subject.id);
                 const sTotalSBA = (sScores.find(x=>x.component==='ct1')?.score||0) + (sScores.find(x=>x.component==='gw')?.score||0) + (sScores.find(x=>x.component==='ct2')?.score||0) + (sScores.find(x=>x.component==='pw')?.score||0);
@@ -1884,57 +1895,174 @@ const UI = {
                 return ((sTotalSBA/60)*50) + ((sExam/100)*50);
             }).sort((a,b) => b-a);
             
-            const position = allStudentOveralls.indexOf(overall) + 1;
-            const suffix = position === 1 ? 'st' : position === 2 ? 'nd' : position === 3 ? 'rd' : 'th';
+            const pos = allStudentOveralls.indexOf(overall) + 1;
+            const posSuffix = pos === 1 ? 'st' : pos === 2 ? 'nd' : pos === 3 ? 'rd' : 'th';
 
             subjectRows += `
                 <tr>
-                    <td><strong>${subject.name}</strong></td>
+                    <td>${subject.name}</td>
                     <td>${sba50.toFixed(1)}</td>
                     <td>${exam50.toFixed(1)}</td>
-                    <td class="grade-${grade}">${overall.toFixed(1)}</td>
-                    <td class="grade-${grade}">${grade}</td>
+                    <td>${overall.toFixed(1)}</td>
+                    <td>${grade}</td>
                     <td>${remark}</td>
-                    <td>${position}${suffix}</td>
+                    <td>${pos}${posSuffix}</td>
                 </tr>
             `;
         });
 
-        const average = classSubjects.length > 0 ? totalOverall / classSubjects.length : 0;
-        const overallGrade = this.calculateGrade(average);
-
+        // 3. Build the optimized A4 HTML structure with FORCED single underline and tight spacing
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
+                    <img src="images/school-logo.png" alt="School Logo" class="report-logo">
                     <div class="report-school-name">PREETY PEEP SCHOOL</div>
-                    <div class="report-school-info">Learner's Assessment Report</div>
+                    <div class="report-school-info" contenteditable="true">DISTRICT: [Enter District]</div>
+                    <div class="report-school-info" contenteditable="true">REGION: [Enter Region]</div>
+                    <!-- FORCED 1px underline with minimal margins -->
+                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 2px 0 4px 0; padding-bottom: 2px; font-size: 1.1rem; font-weight: 800; text-align: center;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
-                <div class="report-student-info">
-                    <div class="report-info-item"><span class="report-info-label">Student Name</span><span class="report-info-value">${student.name}</span></div>
-                    <div class="report-info-item"><span class="report-info-label">Class</span><span class="report-info-value">${cls.name}</span></div>
-                    <div class="report-info-item"><span class="report-info-label">Term</span><span class="report-info-value">1st Term, 2026</span></div>
-                    <div class="report-info-item"><span class="report-info-label">Date</span><span class="report-info-value">${this.getLocalDateStr()}</span></div>
+
+                <!-- FORCED tight gap (0.2rem) to save vertical space -->
+                <div class="report-student-info-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.2rem; margin-bottom: 0.5rem;">
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Name of Learner:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${student.name}</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Class:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${cls.name}</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Position:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${positionString}</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">No. on Roll:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${cls.students.length}</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Year:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">2026</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Term:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">1st Term</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Date:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${this.getLocalDateStr()}</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Next Term Begins:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">[Enter Date]</span></div>
                 </div>
+
                 <table class="report-subjects-table">
-                    <thead><tr><th>Subject</th><th>SBA (50%)</th><th>Exam (50%)</th><th>Total (100)</th><th>Grade</th><th>Remark</th><th>Pos</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th style="font-weight: 800; color: #000000;">SUBJECT</th>
+                            <th style="font-weight: 800; color: #000000;">SBA (50%)</th>
+                            <th style="font-weight: 800; color: #000000;">EXAM (50%)</th>
+                            <th style="font-weight: 800; color: #000000;">TOTAL (100)</th>
+                            <th style="font-weight: 800; color: #000000;">GRADE</th>
+                            <th style="font-weight: 800; color: #000000;">REMARK</th>
+                            <th style="font-weight: 800; color: #000000;">POS</th>
+                        </tr>
+                    </thead>
                     <tbody>${subjectRows}</tbody>
                 </table>
-                <div class="report-summary">
-                    <div class="report-summary-item"><div class="report-summary-label">Overall Average</div><div class="report-summary-value">${average.toFixed(1)}%</div></div>
-                    <div class="report-summary-item"><div class="report-summary-label">Overall Grade</div><div class="report-summary-value grade-${overallGrade}">Grade ${overallGrade}</div></div>
+
+                <div class="report-bottom-section" style="margin-top: 5px;">
+                    <!-- FORCED tight gap (0.2rem) to save vertical space -->
+                    <div class="report-remarks-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.2rem;">
+                        <div class="report-remarks-item">
+                            <div class="report-remarks-label">ATTENDANCE</div>
+                            <div class="report-remarks-text" contenteditable="true">Days Present: ___ / ___</div>
+                        </div>
+                        <div class="report-remarks-item">
+                            <div class="report-remarks-label">TALENTS & INTEREST</div>
+                            <div class="report-remarks-text" contenteditable="true">[Enter talents]</div>
+                        </div>
+                        <div class="report-remarks-item">
+                            <div class="report-remarks-label">CONDUCT</div>
+                            <select class="report-select">
+                                <option>Excellent</option>
+                                <option>Very Good</option>
+                                <option selected>Good</option>
+                                <option>Fair</option>
+                                <option>Needs Improvement</option>
+                            </select>
+                        </div>
+                        <div class="report-remarks-item">
+                            <div class="report-remarks-label">NEXT TERM'S FEES</div>
+                            <div class="report-remarks-text" contenteditable="true">GHS [Enter Amount]</div>
+                        </div>
+                        <div class="report-remarks-item" style="grid-column: span 2;">
+                            <div class="report-remarks-label">CLASS TEACHER'S REMARK</div>
+                            <div class="report-remarks-text" contenteditable="true">[Enter class teacher's remark]</div>
+                        </div>
+                        <div class="report-remarks-item" style="grid-column: span 2;">
+                            <div class="report-remarks-label">HEADTEACHER'S REMARK</div>
+                            <div class="report-remarks-text" contenteditable="true">[Enter headteacher's remark]</div>
+                        </div>
+                        
+                        <div class="report-remarks-item">
+                            <div class="report-remarks-label">ARREARS</div>
+                            <div class="report-remarks-text" contenteditable="true">GHS [Enter Arrears]</div>
+                        </div>
+                        <div class="report-remarks-item">
+                            <div class="report-remarks-label">TOTAL</div>
+                            <div class="report-remarks-text" contenteditable="true">GHS [Enter Total]</div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-signature-section">
+                        <div class="report-signature-box">
+                            <div class="signature-line"></div>
+                            <div class="report-info-label">HEADTEACHER'S SIGNATURE & STAMP</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="report-remarks">
-                    <div class="report-remarks-title">Teacher's Remarks</div>
-                    <div class="report-remarks-item"><div class="report-remarks-label">Class Teacher's Comment</div><div class="report-remarks-text" contenteditable="true">Enter comment here...</div></div>
-                    <div class="report-remarks-item"><div class="report-remarks-label">Head Teacher's Comment</div><div class="report-remarks-text" contenteditable="true">Enter comment here...</div></div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 10px;">
+                    <button class="btn-print-report" style="flex: 1;" onclick="UI.downloadReportCard('${student.id}', '${classId}')">⬇️ Download Report</button>
+                    <button class="btn-print-report" style="flex: 1;" onclick="window.print()">🖨️ Print Report Card</button>
                 </div>
-                <button class="btn-print-report" onclick="window.print()">🖨️ Print Report Card</button>
             </div>
         `;
-        
-        // FIXED: Use unique ID for Assessment Report Card preview
+
         document.getElementById('assess-report-card-preview').innerHTML = html;
         document.getElementById('assess-report-card-preview').style.display = 'block';
+    },
+
+    downloadReportCard(studentId, classId) {
+        const classes = Store.get('classes') || [];
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
+        const student = cls.students.find(s => s.id === studentId);
+        if (!student) return;
+
+        const reportCardElement = document.querySelector('#assess-report-card-preview .report-card');
+        if (!reportCardElement) {
+            alert("Please generate the report card first before downloading.");
+            return;
+        }
+
+        const clone = reportCardElement.cloneNode(true);
+        const buttonContainer = clone.querySelector('div[style*="display: flex"]');
+        if (buttonContainer) buttonContainer.remove();
+
+        clone.style.cssText = `
+            width: 210mm; 
+            min-height: 297mm; 
+            padding: 15mm; 
+            background: white; 
+            position: absolute; 
+            left: -9999px; 
+            top: 0;
+            box-shadow: none;
+            border: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        `;
+        
+        const editables = clone.querySelectorAll('[contenteditable="true"]');
+        editables.forEach(el => el.removeAttribute('contenteditable'));
+
+        document.body.appendChild(clone);
+
+        const opt = {
+            margin:       0,
+            filename:     `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(clone).save().then(() => {
+            document.body.removeChild(clone);
+        }).catch(err => {
+            console.error("PDF generation error:", err);
+            document.body.removeChild(clone);
+            alert("Error generating PDF. Please check your internet connection for the PDF library.");
+        });
     },
 
     calculateGrade(score) {

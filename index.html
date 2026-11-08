@@ -126,7 +126,7 @@
                 </div>
             </div>
             <div class="auth-container login-form-card">
-                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back </h2>
+                <h2 style="color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">Welcome Back 👋</h2>
                 <p style="color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Sign in to access the system</p>
                 <div class="form-group">
                     <label>Select Role</label>
@@ -148,7 +148,7 @@
                 </div>
                 <button class="btn btn-primary btn-full" onclick="UI.handleLogin()">Log In</button>
                 <p id="login-error" style="color: var(--color-danger); margin-top: 1rem; font-size: 0.9rem; display: none;">Invalid username or password.</p>
-                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()"> Forgot Password? (Admin Recovery)</button>
+                <button id="forgot-password-link" class="btn btn-full" style="margin-top: 1rem; background-color: #f1f5f9; color: var(--color-primary); border: 2px solid var(--color-primary); display: none;" onclick="UI.showForgotPassword()">🔐 Forgot Password? (Admin Recovery)</button>
                 <a href="#" onclick="UI.showFactoryResetModal(); return false;" style="font-size: 0.8rem; color: var(--color-text-muted); text-decoration: none; margin-top: 1.5rem; display: inline-block; opacity: 0.7;">Lost recovery phrase? Reset System</a>
             </div>
         </div>
@@ -177,7 +177,7 @@
                     <label>New Password</label>
                     <div class="password-wrapper">
                         <input type="password" id="new-admin-password" class="form-input" placeholder="Make it strong">
-                        <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-password', this)">️</button>
+                        <button type="button" class="eye-btn" onclick="UI.togglePassword('new-admin-password', this)">👁️</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -276,7 +276,7 @@
 
             <!-- Assessment Sub-Tabs -->
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); padding-bottom: 0.5rem; overflow-x: auto;">
-                <button class="tab-btn active" onclick="UI.switchAssessmentTab('setup')" id="tab-assess-setup">️ Subject Setup</button>
+                <button class="tab-btn active" onclick="UI.switchAssessmentTab('setup')" id="tab-assess-setup">⚙️ Subject Setup</button>
                 <button class="tab-btn" onclick="UI.switchAssessmentTab('scores')" id="tab-assess-scores">✏️ Enter Scores</button>
                 <button class="tab-btn" onclick="UI.switchAssessmentTab('reports')" id="tab-assess-reports">📄 Report Cards</button>
             </div>
@@ -312,16 +312,14 @@
 
                 <div id="assess-cumulative-record-container" style="display: none;">
                     <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.9rem;">
-                        <strong> Cumulative Record Book:</strong> Enter raw scores. The system auto-calculates Totals, 50% conversions, Overall, and Positions.
+                        <strong>📊 Cumulative Record Book:</strong> Enter raw scores. The system auto-calculates Totals, 50% conversions, Overall, and Positions.
                     </div>
-                    <!-- The Table will be injected here by JS -->
                     <div id="cumulative-record-table-wrapper" style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);"></div>
-                    
                     <button class="btn btn-primary btn-full" style="margin-top: 1rem;" onclick="UI.saveCumulativeScores()">💾 Save All Scores</button>
                 </div>
             </div>
 
-            <!-- Tab 3: Report Cards (FIXED: Unique IDs to prevent conflict with School Fees) -->
+            <!-- Tab 3: Report Cards -->
             <div id="assessment-reports-view" style="display: none;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div class="form-group">
@@ -367,7 +365,7 @@
                     <select id="toiletry-checklist-class" class="form-select" onchange="UI.renderToiletriesChecklist()"><option value="">-- Select a Class --</option></select>
                 </div>
                 <div style="margin-bottom: 1rem; display: none;" id="toiletry-search-container">
-                    <input type="text" id="toiletry-checklist-search" class="form-input" placeholder=" Search student name..." oninput="UI.filterToiletriesChecklist()">
+                    <input type="text" id="toiletry-checklist-search" class="form-input" placeholder="🔍 Search student name..." oninput="UI.filterToiletriesChecklist()">
                 </div>
                 <div id="toiletries-checklist-list" class="student-list-container" style="margin-top: 1rem; display: none;"></div>
                 <button id="save-checklist-btn" class="btn btn-primary btn-full" style="margin-top: 1.5rem; display: none;" onclick="UI.saveToiletriesChecklist()">✅ Save Today's Checklist</button>
@@ -378,7 +376,7 @@
             </div>
         </div>
 
-        <!-- SCREEN: Class Portal (UPDATED WITH GENDER DROPDOWN) -->
+        <!-- SCREEN: Class Portal -->
         <div id="class-portal-screen" style="display: none;">
             <div class="portal-header">
                 <button class="btn btn-primary" onclick="UI.goBackToDashboard()" style="padding: 0.5rem 1rem;">← Back</button>
@@ -394,7 +392,6 @@
             </div>
             <div style="margin: 1.5rem 0; text-align: right;"><button class="btn btn-accent" onclick="UI.finishDayAndSave()">✅ Finish Day & Save Report</button></div>
             
-            <!-- UPDATED: Added Gender Dropdown for Cumulative Record Sorting -->
             <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 <input type="text" id="new-student-name" class="form-input" placeholder="Student Name..." style="flex: 2; min-width: 150px;">
                 <select id="new-student-gender" class="form-select" style="flex: 1; min-width: 100px;">
@@ -430,7 +427,7 @@
             <div class="settings-container" style="margin-bottom: 2rem;">
                 <h3 style="color: var(--color-primary); margin-bottom: 1rem;">💰 Class Fee Management</h3>
                 <div id="settings-list-container"></div>
-                <button class="btn btn-accent" style="margin-top: 1.5rem;" onclick="UI.saveAdminFees()"> Save Fee Changes</button>
+                <button class="btn btn-accent" style="margin-top: 1.5rem;" onclick="UI.saveAdminFees()">💾 Save Fee Changes</button>
             </div>
             <div class="settings-container">
                 <h3 style="color: var(--color-primary); margin-bottom: 1rem;">📊 Saved Daily Reports</h3>
@@ -516,7 +513,7 @@
                 </div>
                 <div id="report-content" style="background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); font-family: monospace; font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; border: 1px solid var(--color-border); max-height: 300px; overflow-y: auto;"></div>
                 <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" style="flex: 1;" onclick="UI.downloadReport()">️ Download</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="UI.downloadReport()">⬇️ Download</button>
                     <button class="btn btn-accent" style="flex: 1;" onclick="UI.copyReportText()">📋 Copy</button>
                 </div>
             </div>
@@ -549,6 +546,9 @@
 
     </main>
 
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <script src="js/store.js"></script>
     <script src="js/seed.js"></script>
     <script src="js/logic.js"></script>
