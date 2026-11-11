@@ -39,6 +39,16 @@ const Auth = {
     }
 };
 
+// Helper function to determine Department based on Class Name
+function getDepartment(className) {
+    const name = className.toLowerCase();
+    if (name.includes('kg') || name.includes('nursery') || name.includes('creche') || name.includes('pre')) return 'Pre-School';
+    if (name.includes('basic 1') || name.includes('basic 2') || name.includes('basic 3') || name.includes('lower')) return 'Lower Primary';
+    if (name.includes('basic 4') || name.includes('basic 5') || name.includes('basic 6') || name.includes('upper')) return 'Upper Primary';
+    if (name.includes('jhs') || name.includes('basic 7') || name.includes('basic 8') || name.includes('basic 9')) return 'JHS';
+    return 'General';
+}
+
 const UI = {
     currentRecoveryPhrase: [],
     currentClassId: null,
@@ -1167,7 +1177,7 @@ const UI = {
                 <div class="payment-student-header">
                     <div>
                         <div class="payment-student-name">${student.name}</div>
-                        <div class="payment-student-class">${cls.name}</div>
+                        <div class="payment-student-class">${cls.name} (${getDepartment(cls.name)})</div>
                     </div>
                     <button class="btn" style="background: #f1f5f9; color: var(--color-text-main);" onclick="UI.resetPaymentView('${cls.id}')">↩️ Change Student</button>
                 </div>
@@ -1221,6 +1231,7 @@ const UI = {
                 <h3 style="color: var(--color-primary); margin-bottom: 1rem;">Record Payment for ${student.name}</h3>
                 <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
                     <strong>Class:</strong> ${cls.name} <br>
+                    <strong>Department:</strong> ${getDepartment(cls.name)} <br>
                     <strong>Total Outstanding:</strong> <span style="color: var(--color-danger); font-weight: 700;">GHS ${(totalOutstanding / 100).toFixed(2)}</span>
                 </div>
                 <div style="margin-bottom: 1.5rem;">
@@ -1315,16 +1326,107 @@ const UI = {
         this.initializePaymentView();
     },
 
+    // UPDATED: Generates a professional HTML receipt with a PDF download button
     showPaymentReceipt(studentId, classId, totalAmountPesewas, paymentDetails, method, note, dateStr, timeStr) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
         if (!cls) return;
         const student = cls.students.find(s => s.id === studentId);
         if (!student) return;
-        const receiptText = `🧾 PAYMENT RECEIPT\n========================\nPreety Peep School\nDate: ${dateStr} | Time: ${timeStr}\n\nStudent: ${student.name}\nClass: ${cls.name}\n\nPayment Details:\n${paymentDetails.join('\n')}\n\nTotal Amount Paid: GHS ${(totalAmountPesewas / 100).toFixed(2)}\nPayment Method: ${method}\n${note ? `Note: ${note}` : ''}\n\nReceived by: ${this.currentSession ? this.currentSession.username : 'Unknown'}\n========================\nThank you for your payment!`.trim();
-        document.getElementById('report-content').textContent = receiptText;
-        this.currentReportText = receiptText;
+
+        const department = getDepartment(cls.name);
+        const officer = this.currentSession ? this.currentSession.username : 'Unknown';
+        const receiptId = 'RCT-' + Date.now().toString().slice(-6);
+
+        const html = `
+            <div id="fee-receipt-content" style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); font-family: 'Segoe UI', sans-serif;">
+                <div style="text-align: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    <img src="images/school-logo.png" alt="Logo" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 0.5rem;">
+                    <h2 style="color: var(--color-primary); margin: 0; font-size: 1.5rem;">PREETY PEEP SCHOOL</h2>
+                    <p style="color: var(--color-text-muted); margin: 5px 0 0 0; font-size: 0.9rem;">Official Fee Receipt</p>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                    <div><strong>Receipt #:</strong> ${receiptId}</div>
+                    <div><strong>Date:</strong> ${dateStr}</div>
+                </div>
+
+                <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                    <div style="margin-bottom: 0.5rem;"><strong>Student:</strong> ${student.name}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Class:</strong> ${cls.name}</div>
+                    <div style="margin-bottom: 0.5rem;"><strong>Department:</strong> ${department}</div>
+                    <div><strong>Payment Method:</strong> ${method}</div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <strong style="display: block; margin-bottom: 0.5rem;">Fees Paid:</strong>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        ${paymentDetails.map(d => `<li style="padding: 0.5rem 0; border-bottom: 1px dashed var(--color-border); display: flex; justify-content: space-between;"><span>${d.split(':')[0]}</span><span style="font-weight: 700;">${d.split(':')[1]}</span></li>`).join('')}
+                    </ul>
+                </div>
+
+                <div style="background: var(--color-primary); color: white; padding: 1rem; border-radius: var(--radius-md); text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Total Amount Paid</div>
+                    <div style="font-size: 1.5rem; font-weight: 800;">GHS ${(totalAmountPesewas / 100).toFixed(2)}</div>
+                </div>
+
+                <div style="text-align: center; font-size: 0.85rem; color: var(--color-text-muted); border-top: 1px solid var(--color-border); padding-top: 1rem;">
+                    <p>Received by: <strong>${officer}</strong></p>
+                    <p style="margin-top: 0.5rem;">This is a computer-generated receipt and cannot be altered.</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="UI.closeReportModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Close</button>
+                    <button onclick="UI.downloadFeeReceipt('${receiptId}')" class="btn btn-primary" style="flex: 1;">📄 Download PDF</button>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('report-content').innerHTML = html;
         document.getElementById('report-modal').style.display = 'flex';
+    },
+
+    // NEW: Function to download the fee receipt as a locked PDF
+    downloadFeeReceipt(receiptId) {
+        const element = document.getElementById('fee-receipt-content');
+        if (!element) return;
+
+        // Clone the receipt
+        const clone = element.cloneNode(true);
+        
+        // Remove buttons from the clone
+        const buttons = clone.querySelectorAll('button');
+        buttons.forEach(btn => btn.remove());
+
+        // Style for PDF
+        clone.style.cssText = `
+            width: 210mm; 
+            padding: 20mm; 
+            background: white; 
+            position: fixed; 
+            top: 100%; 
+            left: 0; 
+            z-index: -1; 
+            font-family: 'Segoe UI', sans-serif;
+        `;
+
+        document.body.appendChild(clone);
+
+        const opt = {
+            margin: 0,
+            filename: `Fee_Receipt_${receiptId}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(clone).save().then(() => {
+            document.body.removeChild(clone);
+        }).catch(err => {
+            console.error("PDF error:", err);
+            document.body.removeChild(clone);
+            alert("Error generating PDF.");
+        });
     },
 
     initializeLedgerView() {
@@ -1336,7 +1438,7 @@ const UI = {
         const classes = Store.get('classes') || [];
         const select = document.getElementById('ledger-class-select');
         select.innerHTML = '<option value="">-- Select a Class --</option>';
-        classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name}</option>`; });
+        classes.forEach(cls => { select.innerHTML += `<option value="${cls.id}">${cls.name} (${getDepartment(cls.name)})</option>`; });
     },
 
     onLedgerClassChange() {
@@ -1911,7 +2013,7 @@ const UI = {
             `;
         });
 
-        // 3. Build the optimized A4 HTML structure with FORCED single underline and tight spacing
+        // 3. Build the optimized A4 HTML structure
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
@@ -1919,15 +2021,14 @@ const UI = {
                     <div class="report-school-name">PREETY PEEP SCHOOL</div>
                     <div class="report-school-info" contenteditable="true">DISTRICT: [Enter District]</div>
                     <div class="report-school-info" contenteditable="true">REGION: [Enter Region]</div>
-                    <!-- FORCED 1px underline with minimal margins -->
-                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 2px 0 4px 0; padding-bottom: 2px; font-size: 1.1rem; font-weight: 800; text-align: center;">LEARNER'S ASSESSMENT REPORT</div>
+                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 5px 0; padding-bottom: 5px;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
 
-                <!-- FORCED tight gap (0.2rem) to save vertical space -->
-                <div class="report-student-info-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.2rem; margin-bottom: 0.5rem;">
+                <div class="report-student-info-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
                     <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Name of Learner:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${student.name}</span></div>
                     <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Class:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${cls.name}</span></div>
                     <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Position:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${positionString}</span></div>
+                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Department:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${getDepartment(cls.name)}</span></div>
                     <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">No. on Roll:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${cls.students.length}</span></div>
                     <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Year:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">2026</span></div>
                     <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Term:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">1st Term</span></div>
@@ -1950,9 +2051,8 @@ const UI = {
                     <tbody>${subjectRows}</tbody>
                 </table>
 
-                <div class="report-bottom-section" style="margin-top: 5px;">
-                    <!-- FORCED tight gap (0.2rem) to save vertical space -->
-                    <div class="report-remarks-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.2rem;">
+                <div class="report-bottom-section" style="margin-top: 10px;">
+                    <div class="report-remarks-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                         <div class="report-remarks-item">
                             <div class="report-remarks-label">ATTENDANCE</div>
                             <div class="report-remarks-text" contenteditable="true">Days Present: ___ / ___</div>
@@ -2002,7 +2102,7 @@ const UI = {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; margin-top: 10px;">
+                <div style="display: flex; gap: 1rem; margin-top: 20px;">
                     <button class="btn-print-report" style="flex: 1;" onclick="UI.downloadReportCard('${student.id}', '${classId}')">⬇️ Download Report</button>
                     <button class="btn-print-report" style="flex: 1;" onclick="window.print()">🖨️ Print Report Card</button>
                 </div>
@@ -2013,6 +2113,7 @@ const UI = {
         document.getElementById('assess-report-card-preview').style.display = 'block';
     },
 
+    // FIXED: Robust PDF generation that prevents blank pages
     downloadReportCard(studentId, classId) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -2030,14 +2131,16 @@ const UI = {
         const buttonContainer = clone.querySelector('div[style*="display: flex"]');
         if (buttonContainer) buttonContainer.remove();
 
+        // FIXED: Use fixed positioning below the fold instead of negative left
         clone.style.cssText = `
             width: 210mm; 
             min-height: 297mm; 
             padding: 15mm; 
             background: white; 
-            position: absolute; 
-            left: -9999px; 
-            top: 0;
+            position: fixed; 
+            top: 100%; 
+            left: 0; 
+            z-index: -1; 
             box-shadow: none;
             border: none;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -2048,20 +2151,44 @@ const UI = {
 
         document.body.appendChild(clone);
 
-        const opt = {
-            margin:       0,
-            filename:     `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        // Wait for images to load before generating PDF
+        const images = clone.querySelectorAll('img');
+        const imagePromises = Array.from(images).map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+        });
 
-        html2pdf().set(opt).from(clone).save().then(() => {
-            document.body.removeChild(clone);
-        }).catch(err => {
-            console.error("PDF generation error:", err);
-            document.body.removeChild(clone);
-            alert("Error generating PDF. Please check your internet connection for the PDF library.");
+        Promise.all(imagePromises).then(() => {
+            const opt = {
+                margin: 0,
+                filename: `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(clone).save().then(() => {
+                document.body.removeChild(clone);
+            }).catch(err => {
+                console.error("PDF generation error:", err);
+                document.body.removeChild(clone);
+                alert("Error generating PDF.");
+            });
+        }).catch(() => {
+            // If image fails, still try to generate
+            const opt = {
+                margin: 0,
+                filename: `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(clone).save().then(() => {
+                document.body.removeChild(clone);
+            });
         });
     },
 
