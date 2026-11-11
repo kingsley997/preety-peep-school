@@ -49,6 +49,61 @@ function getDepartment(className) {
     return 'General';
 }
 
+// ==========================================
+// BULLETPROOF PDF GENERATOR (Fixes Blank PDFs)
+// ==========================================
+function generateSecurePDF(element, filename) {
+    const clone = element.cloneNode(true);
+    
+    // 1. Remove buttons from the clone so they don't appear in the PDF
+    const buttons = clone.querySelectorAll('button');
+    buttons.forEach(b => b.remove());
+
+    // 2. Remove contenteditable attributes so text locks in place
+    const editables = clone.querySelectorAll('[contenteditable="true"]');
+    editables.forEach(el => el.removeAttribute('contenteditable'));
+
+    // 3. Create a Temporary Full-Screen Overlay
+    // This forces the browser to fully render the element, preventing blank PDFs
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+        background: white; z-index: 99999; overflow-y: auto; 
+        display: flex; justify-content: center; align-items: flex-start; padding: 20px;
+    `;
+    
+    // 4. Style the clone for perfect A4 rendering
+    clone.style.cssText = `
+        width: 210mm; min-height: 297mm; padding: 15mm; 
+        background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        position: relative;
+    `;
+    
+    overlay.appendChild(clone);
+    document.body.appendChild(overlay);
+
+    // 5. PDF Configuration
+    const opt = {
+        margin: 0,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, scrollY: 0, windowWidth: 1000 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // 6. Wait 600ms for the browser to fully paint the overlay and load images, then generate
+    setTimeout(() => {
+        html2pdf().set(opt).from(clone).save().then(() => {
+            document.body.removeChild(overlay);
+        }).catch(err => {
+            console.error("PDF Error:", err);
+            document.body.removeChild(overlay);
+            alert("Error generating PDF. Please try again.");
+        });
+    }, 600);
+}
+
 const UI = {
     currentRecoveryPhrase: [],
     currentClassId: null,
@@ -1326,7 +1381,7 @@ const UI = {
         this.initializePaymentView();
     },
 
-    // UPDATED: Generates a professional HTML receipt with a PDF download button
+    // UPDATED: Generates a professional HTML receipt with a STRICT PDF download button
     showPaymentReceipt(studentId, classId, totalAmountPesewas, paymentDetails, method, note, dateStr, timeStr) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -1386,47 +1441,11 @@ const UI = {
         document.getElementById('report-modal').style.display = 'flex';
     },
 
-    // NEW: Function to download the fee receipt as a locked PDF
+    // UPDATED: Uses the Bulletproof PDF Generator
     downloadFeeReceipt(receiptId) {
         const element = document.getElementById('fee-receipt-content');
         if (!element) return;
-
-        // Clone the receipt
-        const clone = element.cloneNode(true);
-        
-        // Remove buttons from the clone
-        const buttons = clone.querySelectorAll('button');
-        buttons.forEach(btn => btn.remove());
-
-        // Style for PDF
-        clone.style.cssText = `
-            width: 210mm; 
-            padding: 20mm; 
-            background: white; 
-            position: fixed; 
-            top: 100%; 
-            left: 0; 
-            z-index: -1; 
-            font-family: 'Segoe UI', sans-serif;
-        `;
-
-        document.body.appendChild(clone);
-
-        const opt = {
-            margin: 0,
-            filename: `Fee_Receipt_${receiptId}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(clone).save().then(() => {
-            document.body.removeChild(clone);
-        }).catch(err => {
-            console.error("PDF error:", err);
-            document.body.removeChild(clone);
-            alert("Error generating PDF.");
-        });
+        generateSecurePDF(element, `Fee_Receipt_${receiptId}.pdf`);
     },
 
     initializeLedgerView() {
@@ -2113,7 +2132,7 @@ const UI = {
         document.getElementById('assess-report-card-preview').style.display = 'block';
     },
 
-    // FIXED: Robust PDF generation that prevents blank pages
+    // FIXED: Uses the Bulletproof PDF Generator to prevent blank pages
     downloadReportCard(studentId, classId) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -2127,69 +2146,7 @@ const UI = {
             return;
         }
 
-        const clone = reportCardElement.cloneNode(true);
-        const buttonContainer = clone.querySelector('div[style*="display: flex"]');
-        if (buttonContainer) buttonContainer.remove();
-
-        // FIXED: Use fixed positioning below the fold instead of negative left
-        clone.style.cssText = `
-            width: 210mm; 
-            min-height: 297mm; 
-            padding: 15mm; 
-            background: white; 
-            position: fixed; 
-            top: 100%; 
-            left: 0; 
-            z-index: -1; 
-            box-shadow: none;
-            border: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        `;
-        
-        const editables = clone.querySelectorAll('[contenteditable="true"]');
-        editables.forEach(el => el.removeAttribute('contenteditable'));
-
-        document.body.appendChild(clone);
-
-        // Wait for images to load before generating PDF
-        const images = clone.querySelectorAll('img');
-        const imagePromises = Array.from(images).map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-            });
-        });
-
-        Promise.all(imagePromises).then(() => {
-            const opt = {
-                margin: 0,
-                filename: `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(clone).save().then(() => {
-                document.body.removeChild(clone);
-            }).catch(err => {
-                console.error("PDF generation error:", err);
-                document.body.removeChild(clone);
-                alert("Error generating PDF.");
-            });
-        }).catch(() => {
-            // If image fails, still try to generate
-            const opt = {
-                margin: 0,
-                filename: `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(clone).save().then(() => {
-                document.body.removeChild(clone);
-            });
-        });
+        generateSecurePDF(reportCardElement, `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`);
     },
 
     calculateGrade(score) {
