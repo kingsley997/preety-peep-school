@@ -1,4 +1,4 @@
-/* css/style.css - COMPLETE STYLESHEET */
+/* css/style.css - COMPLETE MOBILE-OPTIMIZED STYLESHEET */
 
 /* 1. VARIABLES */
 :root {
@@ -36,7 +36,7 @@ body {
   flex-direction: column;
 }
 
-.container { max-width: 1200px; margin: 0 auto; padding: 2rem; width: 100%; }
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; width: 100%; }
 .text-center { text-align: center; }
 .text-muted { color: var(--color-text-muted); }
 
@@ -52,17 +52,17 @@ body {
 }
 .splash-screen.active { display: flex; opacity: 1; }
 .splash-logo {
-    max-width: 250px; max-height: 250px; object-fit: contain; margin-bottom: 2rem;
+    max-width: 200px; max-height: 200px; object-fit: contain; margin-bottom: 2rem;
     animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
-.alpha-logo { max-width: 320px; }
+.alpha-logo { max-width: 250px; }
 .school-name {
-    font-family: var(--font-family); color: #1e1b4b; font-size: 1.5rem;
+    font-family: var(--font-family); color: #1e1b4b; font-size: 1.25rem;
     letter-spacing: 2px; font-weight: 700; margin-top: 1rem;
     animation: fadeUp 0.8s ease 0.3s forwards; opacity: 0;
 }
 .powered-by {
-    color: #94a3b8; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase;
+    color: #94a3b8; font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase;
     margin-top: 1rem; animation: fadeUp 0.8s ease 0.3s forwards; opacity: 0;
 }
 .gold-text { color: #d4af37; font-weight: 700; }
@@ -81,10 +81,10 @@ body {
 /* 4. AUTH / LOGIN STYLES */
 .auth-container {
     max-width: 420px; margin: 5vh auto; background: var(--color-surface);
-    padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
     text-align: center; border: 1px solid var(--color-border);
 }
-.auth-container h2 { color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.75rem; font-weight: 700; }
+.auth-container h2 { color: var(--color-primary); margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700; }
 .auth-container p { color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.95rem; }
 .form-group { margin-bottom: 1.5rem; text-align: left; }
 .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--color-text-main); margin-bottom: 0.5rem; }
@@ -125,7 +125,6 @@ body {
 }
 .checkbox-group input { margin-top: 0.25rem; width: 18px; height: 18px; cursor: pointer; }
 
-/* Password Toggle Styles */
 .password-wrapper { position: relative; }
 .password-wrapper .form-input { padding-right: 45px; }
 .eye-btn {
@@ -363,7 +362,7 @@ body {
 .report-accordion[open] .report-summary::after { transform: rotate(180deg); }
 .report-body { padding: 1rem; background: white; overflow-x: auto; }
 
-.compliance-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.compliance-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 500px; }
 .compliance-table th {
     padding: 0.5rem; text-align: left; border-bottom: 2px solid var(--color-border);
     color: var(--color-text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;
@@ -478,13 +477,13 @@ body {
 .ledger-payment-amount { font-weight: 700; color: var(--color-accent); }
 
 /* ============================================
-   11. CUMULATIVE RECORD TABLE STYLES (RESTORED)
+   11. CUMULATIVE RECORD TABLE STYLES
    ============================================ */
 .cumulative-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85rem;
-    min-width: 600px; /* Ensures scroll on mobile */
+    min-width: 600px; /* Ensures horizontal scroll on mobile instead of squishing */
     margin-bottom: 1.5rem;
     background: white;
     border-radius: var(--radius-md);
@@ -508,7 +507,6 @@ body {
     z-index: 10;
 }
 
-/* Sticky first column for Component Names */
 .cumulative-table td:first-child, .cumulative-table th:first-child {
     position: sticky;
     left: 0;
@@ -526,7 +524,6 @@ body {
     z-index: 12;
 }
 
-/* Input styling inside table */
 .score-raw-input {
     width: 60px;
     padding: 0.4rem;
@@ -543,7 +540,6 @@ body {
     background: #f0f9ff;
 }
 
-/* Calculated cells styling */
 .cell-calculated {
     font-weight: 700;
     color: var(--color-primary);
@@ -592,22 +588,23 @@ body {
 .score-input:focus { outline: none; border-color: var(--color-primary); }
 .score-max { color: var(--color-text-muted); font-size: 0.85rem; }
 
-/* REPORT CARD STYLES - PERFECTLY CENTERED ON ONE LINE */
+/* REPORT CARD STYLES - RESPONSIVE FOR MOBILE, A4 FOR PRINT */
 .report-card {
     position: relative;
     background: white;
     border: 2px solid var(--color-primary);
     border-radius: var(--radius-lg);
-    padding: 2rem;
-    max-width: 210mm;
-    min-height: 297mm;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     box-shadow: var(--shadow-lg);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: auto; /* Allows horizontal scroll for tables on mobile */
 }
 
 .report-card-header {
-    text-align: center; /* Ensures inline-block children are centered */
+    text-align: center;
 }
 
 .report-logo {
@@ -615,16 +612,15 @@ body {
 }
 
 .report-school-name {
-    font-size: 1.8rem; font-weight: 800; color: var(--color-primary);
+    font-size: 1.5rem; font-weight: 800; color: var(--color-primary);
     text-align: center; margin-bottom: 5px; text-transform: uppercase;
 }
 
-/* FIXED: inline-block keeps them on the SAME line, centered perfectly */
 .report-school-info {
     display: inline-block !important;
     text-align: center;
     margin: 0 15px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--color-text-main);
     font-weight: 600;
     border-bottom: 1px dotted #999;
@@ -638,9 +634,8 @@ body {
     background: #f0f9ff;
 }
 
-/* FIXED: Single 1px line with tight spacing */
 .report-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
     text-align: center;
     text-transform: uppercase;
@@ -656,7 +651,7 @@ body {
     padding: 2px 5px;
     outline: none;
     display: inline-block;
-    min-width: 100px;
+    min-width: 80px;
 }
 
 .report-info-value:focus, .report-remarks-text:focus {
@@ -666,10 +661,10 @@ body {
 
 .report-student-info-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.2rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
 }
 
 .report-info-label {
@@ -684,6 +679,7 @@ body {
     border-collapse: collapse;
     margin-bottom: 20px;
     font-size: 0.9rem;
+    min-width: 600px; /* Forces scroll on mobile instead of breaking */
 }
 
 .report-subjects-table th, .report-subjects-table td {
@@ -712,7 +708,7 @@ body {
 .grade-9 { color: #991b1b; font-weight: 700; }
 
 .report-summary {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;
 }
 .report-summary-item {
     padding: 1rem; background: var(--color-bg); border-radius: var(--radius-md); border-left: 4px solid var(--color-accent);
@@ -720,7 +716,7 @@ body {
 .report-summary-label {
     font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
 }
-.report-summary-value { font-size: 1.25rem; font-weight: 700; color: var(--color-primary); }
+.report-summary-value { font-size: 1.1rem; font-weight: 700; color: var(--color-primary); }
 
 .report-remarks { margin-bottom: 1.5rem; }
 .report-remarks-title { font-size: 1rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.75rem; }
@@ -730,7 +726,7 @@ body {
 .report-select { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; background: white; }
 
 .report-bottom-section { margin-top: 5px; }
-.report-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.2rem; margin-bottom: 30px; }
+.report-remarks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 30px; }
 
 .report-signature-section {
     display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 20px;
@@ -741,7 +737,7 @@ body {
 }
 .report-position-value { font-size: 1.5rem; margin-top: 5px; }
 .report-signature-box { text-align: center; }
-.signature-line { width: 250px; border-bottom: 2px solid #000; margin-bottom: 5px; height: 40px; }
+.signature-line { width: 200px; border-bottom: 2px solid #000; margin-bottom: 5px; height: 40px; }
 
 .btn-print-report {
     width: 100%; padding: 1rem; background: var(--color-accent); color: white;
@@ -749,7 +745,224 @@ body {
 }
 .btn-print-report:hover { filter: brightness(0.9); }
 
-/* PRINT SPECIFIC RULES (A4) */
+/* ============================================
+   13. STUNNING LOGIN HERO SECTION
+   ============================================ */
+.login-hero {
+    position: relative;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    padding: 3rem 1.5rem 4rem;
+    overflow: hidden;
+    text-align: center;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-pattern {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+    background-size: 100% 100%;
+    animation: patternShift 15s ease-in-out infinite;
+}
+
+@keyframes patternShift {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(2deg); }
+}
+
+.hero-particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.hero-particles span {
+    position: absolute; width: 6px; height: 6px; background: rgba(212, 175, 55, 0.4);
+    border-radius: 50%; animation: floatParticle 8s infinite ease-in-out;
+}
+.hero-particles span:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+.hero-particles span:nth-child(2) { top: 60%; left: 85%; animation-delay: 1.5s; width: 4px; height: 4px; }
+.hero-particles span:nth-child(3) { top: 80%; left: 20%; animation-delay: 3s; width: 8px; height: 8px; background: rgba(16, 185, 129, 0.3); }
+.hero-particles span:nth-child(4) { top: 30%; left: 70%; animation-delay: 4.5s; width: 5px; height: 5px; }
+.hero-particles span:nth-child(5) { top: 70%; left: 50%; animation-delay: 6s; width: 7px; height: 7px; background: rgba(212, 175, 55, 0.3); }
+
+@keyframes floatParticle {
+    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+    50% { transform: translateY(-30px) translateX(15px); opacity: 0.8; }
+}
+
+.hero-content { position: relative; z-index: 2; animation: heroFadeIn 0.8s ease-out; }
+@keyframes heroFadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+
+.hero-logos {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; /* FIXED: Prevents breaking on small screens */
+}
+
+.logo-wrapper {
+    background: white; padding: 12px; border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    animation: logoPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0;
+    transition: transform 0.3s ease;
+}
+.logo-wrapper:hover { transform: scale(1.05) rotate(-2deg); }
+.school-logo-wrapper { animation-delay: 0.2s; }
+.alpha-logo-wrapper { animation-delay: 0.4s; }
+
+@keyframes logoPopIn { 0% { transform: scale(0.5) rotate(-10deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+
+.hero-logo { width: 70px; height: 70px; object-fit: contain; display: block; }
+
+.logo-divider {
+    width: 2px; height: 60px;
+    background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.6), transparent);
+    animation: dividerFadeIn 1s ease-out 0.6s forwards; opacity: 0;
+}
+@keyframes dividerFadeIn { 0% { opacity: 0; height: 0; } 100% { opacity: 1; height: 60px; } }
+
+.hero-title {
+    color: white; font-size: 2rem; font-weight: 800; letter-spacing: 2px;
+    margin-bottom: 1rem; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    animation: titleSlideIn 0.8s ease-out 0.5s forwards; opacity: 0;
+}
+@keyframes titleSlideIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+.hero-tagline {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+    margin-bottom: 0.75rem; animation: taglineFadeIn 0.8s ease-out 0.7s forwards; opacity: 0;
+}
+@keyframes taglineFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+.tagline-line { width: 40px; height: 2px; background: linear-gradient(to right, transparent, #d4af37, transparent); }
+.tagline-text { color: #d4af37; font-size: 0.95rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; }
+
+.hero-subtitle {
+    color: rgba(255, 255, 255, 0.7); font-size: 0.85rem; letter-spacing: 1px; margin: 0;
+    animation: subtitleFadeIn 0.8s ease-out 0.9s forwards; opacity: 0;
+}
+@keyframes subtitleFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+.login-form-card {
+    margin-top: -2rem; position: relative; z-index: 3;
+    animation: formSlideUp 0.6s ease-out 0.3s forwards; opacity: 0;
+}
+@keyframes formSlideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* ============================================
+   14. COMPREHENSIVE MOBILE RESPONSIVENESS
+   ============================================ */
+@media (max-width: 768px) {
+    .container { padding: 1rem; }
+    
+    .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .dashboard-header > div:last-child { width: 100%; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .dashboard-header > div:last-child .btn { flex: 1; justify-content: center; }
+
+    .portal-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .portal-stats { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+
+    /* FIXED: Student rows wrap neatly, names never get cut off */
+    .student-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    .student-info {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .student-name {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        width: 100%;
+        line-height: 1.3;
+    }
+    .student-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .score-entry-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .score-input-wrapper { width: 100%; justify-content: space-between; }
+    
+    .checklist-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+    .checklist-items { width: 100%; justify-content: flex-start; }
+    .item-toggle { flex: 1; text-align: center; padding: 0.75rem; }
+    
+    .compliance-table { font-size: 0.85rem; }
+    .compliance-table th, .compliance-table td { padding: 0.5rem 0.25rem; }
+
+    .settings-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+    .settings-input-wrapper { width: 100%; justify-content: space-between; }
+
+    .payment-summary { grid-template-columns: 1fr; }
+    .fee-checkbox-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .fee-checkbox-amount { font-size: 1.2rem; }
+
+    .report-card { padding: 1rem; }
+    .report-subjects-table { font-size: 0.8rem; }
+    .report-subjects-table th, .report-subjects-table td { padding: 0.5rem; }
+    .report-school-name { font-size: 1.3rem; }
+    .report-title { font-size: 1rem; }
+}
+
+@media (max-width: 480px) {
+    .login-hero { padding: 2rem 1rem 3rem; min-height: 260px; }
+    .hero-logos { gap: 1rem; margin-bottom: 1.25rem; }
+    .logo-wrapper { padding: 10px; border-radius: 14px; }
+    .hero-logo { width: 60px; height: 60px; }
+    .logo-divider { height: 50px; }
+    .hero-title { font-size: 1.6rem; letter-spacing: 1.5px; margin-bottom: 0.75rem; }
+    .hero-tagline { gap: 0.75rem; margin-bottom: 0.5rem; }
+    .tagline-line { width: 30px; }
+    .tagline-text { font-size: 0.85rem; letter-spacing: 2px; }
+    .hero-subtitle { font-size: 0.8rem; }
+    .login-form-card { margin-top: -1.5rem; }
+    
+    .splash-logo { max-width: 150px; max-height: 150px; }
+    .school-name { font-size: 1.1rem; }
+}
+
+@media (max-width: 360px) {
+    .login-hero { padding: 1.5rem 1rem 2.5rem; min-height: 220px; }
+    .hero-logos { gap: 0.75rem; }
+    .logo-wrapper { padding: 8px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); }
+    .hero-logo { width: 50px; height: 50px; }
+    .logo-divider { height: 40px; width: 1.5px; }
+    .hero-title { font-size: 1.3rem; letter-spacing: 1px; margin-bottom: 0.5rem; }
+    .hero-tagline { gap: 0.5rem; margin-bottom: 0.5rem; }
+    .tagline-line { width: 20px; }
+    .tagline-text { font-size: 0.75rem; letter-spacing: 1.5px; }
+    .hero-subtitle { font-size: 0.75rem; letter-spacing: 0.5px; }
+    .login-form-card { margin-top: -1.25rem; padding: 1.5rem; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .login-hero { padding: 1rem; min-height: 160px; }
+    .hero-logos { margin-bottom: 0.5rem; }
+    .hero-logo { width: 45px; height: 45px; }
+    .hero-title { font-size: 1.2rem; margin-bottom: 0.25rem; }
+    .hero-tagline { margin-bottom: 0.25rem; }
+    .hero-subtitle { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-pattern, .hero-particles span, .logo-wrapper, .hero-title, .hero-tagline, .hero-subtitle, .login-form-card {
+        animation: none !important; opacity: 1 !important; transform: none !important;
+    }
+}
+
+/* Custom Confirm & Factory Reset Modal Styles */
+#confirm-modal, #factory-reset-modal { display: none; }
+#confirm-modal[style*="flex"], #factory-reset-modal[style*="flex"] { display: flex !important; }
+
+/* ============================================
+   PRINT SPECIFIC RULES (A4)
+   ============================================ */
 @media print {
     @page {
         size: A4 portrait;
@@ -759,23 +972,12 @@ body {
     .report-card, .report-card * { visibility: visible; }
     .report-card {
         position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+        max-width: 210mm; min-height: 297mm; /* Restores A4 for print */
         border: 2px solid #000; box-shadow: none; padding: 20px; margin: 0;
+        overflow-x: visible;
     }
     .btn-print-report, .sidebar, .dashboard-header, #sidebar-overlay { display: none !important; }
     .report-info-value, .report-remarks-text, .report-school-info {
         border-bottom: 1px solid #000; background: transparent !important;
     }
-}
-
-@media (max-width: 768px) {
-    .score-entry-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-    .score-input-wrapper { width: 100%; justify-content: space-between; }
-    .report-card { padding: 1rem; }
-    .report-subjects-table { font-size: 0.8rem; }
-    .report-subjects-table th, .report-subjects-table td { padding: 0.5rem; }
-    .checklist-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
-    .checklist-items { width: 100%; justify-content: flex-start; }
-    .item-toggle { flex: 1; text-align: center; padding: 0.75rem; }
-    .compliance-table { font-size: 0.85rem; }
-    .compliance-table th, .compliance-table td { padding: 0.5rem 0.25rem; }
 }
