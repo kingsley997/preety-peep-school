@@ -50,7 +50,7 @@ function getDepartment(className) {
 }
 
 // ==========================================
-// BULLETPROOF PDF GENERATOR (Fixes Blank PDFs)
+// BULLETPROOF PDF GENERATOR (Fixes Blank PDFs & Centering)
 // ==========================================
 function generateSecurePDF(element, filename) {
     const clone = element.cloneNode(true);
@@ -72,12 +72,12 @@ function generateSecurePDF(element, filename) {
         display: flex; justify-content: center; align-items: flex-start; padding: 20px;
     `;
     
-    // 4. Style the clone for perfect A4 rendering
+    // 4. Style the clone for perfect A4 rendering with proper centering
     clone.style.cssText = `
-        width: 210mm; min-height: 297mm; padding: 15mm; 
+        max-width: 210mm; width: 100%; min-height: 297mm; padding: 15mm; 
         background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        position: relative;
+        position: relative; margin: 0 auto; box-sizing: border-box;
     `;
     
     overlay.appendChild(clone);
@@ -88,6 +88,7 @@ function generateSecurePDF(element, filename) {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
+        // windowWidth: 1000 ensures it renders like a desktop screen, preventing mobile squishing
         html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, scrollY: 0, windowWidth: 1000 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
@@ -1381,7 +1382,6 @@ const UI = {
         this.initializePaymentView();
     },
 
-    // UPDATED: Generates a professional HTML receipt with a STRICT PDF download button
     showPaymentReceipt(studentId, classId, totalAmountPesewas, paymentDetails, method, note, dateStr, timeStr) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -1441,7 +1441,6 @@ const UI = {
         document.getElementById('report-modal').style.display = 'flex';
     },
 
-    // UPDATED: Uses the Bulletproof PDF Generator
     downloadFeeReceipt(receiptId) {
         const element = document.getElementById('fee-receipt-content');
         if (!element) return;
@@ -2032,7 +2031,7 @@ const UI = {
             `;
         });
 
-        // 3. Build the optimized A4 HTML structure
+        // 3. Build the optimized A4 HTML structure (FIXED: Removed nowrap to prevent text mashing)
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
@@ -2043,16 +2042,16 @@ const UI = {
                     <div class="report-title" style="border-bottom: 1px solid #000000; margin: 5px 0; padding-bottom: 5px;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
 
-                <div class="report-student-info-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Name of Learner:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${student.name}</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Class:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${cls.name}</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Position:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${positionString}</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Department:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${getDepartment(cls.name)}</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">No. on Roll:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${cls.students.length}</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Year:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">2026</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Term:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">1st Term</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Date:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">${this.getLocalDateStr()}</span></div>
-                    <div style="white-space: nowrap;"><span class="report-info-label" style="white-space: nowrap;">Next Term Begins:</span> <span class="report-info-value" contenteditable="true" style="white-space: nowrap; display: inline-block; min-width: 100px;">[Enter Date]</span></div>
+                <div class="report-student-info-grid" style="margin-bottom: 1rem;">
+                    <div><span class="report-info-label">Name of Learner:</span> <span class="report-info-value" contenteditable="true">${student.name}</span></div>
+                    <div><span class="report-info-label">Class:</span> <span class="report-info-value" contenteditable="true">${cls.name}</span></div>
+                    <div><span class="report-info-label">Position:</span> <span class="report-info-value" contenteditable="true">${positionString}</span></div>
+                    <div><span class="report-info-label">Department:</span> <span class="report-info-value" contenteditable="true">${getDepartment(cls.name)}</span></div>
+                    <div><span class="report-info-label">No. on Roll:</span> <span class="report-info-value" contenteditable="true">${cls.students.length}</span></div>
+                    <div><span class="report-info-label">Year:</span> <span class="report-info-value" contenteditable="true">2026</span></div>
+                    <div><span class="report-info-label">Term:</span> <span class="report-info-value" contenteditable="true">1st Term</span></div>
+                    <div><span class="report-info-label">Date:</span> <span class="report-info-value" contenteditable="true">${this.getLocalDateStr()}</span></div>
+                    <div><span class="report-info-label">Next Term Begins:</span> <span class="report-info-value" contenteditable="true">[Enter Date]</span></div>
                 </div>
 
                 <table class="report-subjects-table">
@@ -2132,7 +2131,6 @@ const UI = {
         document.getElementById('assess-report-card-preview').style.display = 'block';
     },
 
-    // FIXED: Uses the Bulletproof PDF Generator to prevent blank pages
     downloadReportCard(studentId, classId) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);

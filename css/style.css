@@ -659,19 +659,20 @@ body {
     background: #f0f9ff;
 }
 
+/* FIXED: Reduced minmax to 130px to prevent squishing on mobile/PDF */
 .report-student-info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 0.5rem;
     margin-bottom: 1rem;
     font-size: 0.9rem;
 }
 
+/* FIXED: Removed white-space: nowrap so text can wrap naturally */
 .report-info-label {
     font-weight: 700;
     color: var(--color-text-main);
     margin-right: 5px;
-    white-space: nowrap;
 }
 
 .report-subjects-table {
