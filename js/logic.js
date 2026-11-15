@@ -50,15 +50,14 @@ function getDepartment(className) {
 
 // ==========================================
 // BULLETPROOF PDF GENERATOR (Library-Managed Rendering)
-// FIXES BLANK PDFs: No manual cloning, no off-screen wrappers, no fixed positioning.
-// html2pdf.js renders the LIVE element internally (its documented, reliable mode).
-// Buttons are excluded via data-html2canvas-ignore.
+// FIXES: blank PDFs, and forces desktop-width layout so mobile
+// downloads keep the 3-column A4 design (windowWidth: 900).
 // ==========================================
 function generateSecurePDF(element, filename) {
-    // 1. Reset scroll so html2canvas has zero offset (prevents blank/shifted captures)
+    // 1. Reset scroll so html2canvas has zero offset
     window.scrollTo(0, 0);
 
-    // 2. Hide buttons from the PDF only (html2canvas skips these elements)
+    // 2. Hide buttons from the PDF only
     element.querySelectorAll('button').forEach(btn => {
         btn.setAttribute('data-html2canvas-ignore', 'true');
     });
@@ -73,13 +72,17 @@ function generateSecurePDF(element, filename) {
             useCORS: true,
             allowTaint: true,
             logging: false,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            // KEY FIX: render as if the screen were 900px wide, so the
+            // @media (max-width: 768px) stacking rules NEVER apply to the PDF.
+            windowWidth: 900,
+            windowHeight: 1400
         },
         jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak:   { mode: ['css', 'legacy'] }
     };
 
-    // 4. Let html2pdf render the live element (it handles cloning + A4 sizing itself)
+    // 4. Let html2pdf render the live element
     setTimeout(() => {
         html2pdf().set(opt).from(element).save().catch(err => {
             console.error('PDF Generation Error:', err);
