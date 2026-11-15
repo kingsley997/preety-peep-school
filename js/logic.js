@@ -49,68 +49,43 @@ function getDepartment(className) {
 }
 
 // ==========================================
-// BULLETPROOF PDF GENERATOR (Fixed Blank Page Issue)
+// BULLETPROOF PDF GENERATOR (Library-Managed Rendering)
+// FIXES BLANK PDFs: No manual cloning, no off-screen wrappers, no fixed positioning.
+// html2pdf.js renders the LIVE element internally (its documented, reliable mode).
+// Buttons are excluded via data-html2canvas-ignore.
 // ==========================================
 function generateSecurePDF(element, filename) {
-    const clone = element.cloneNode(true);
-    
-    // 1. Cleanup clone
-    clone.querySelectorAll('button').forEach(b => b.remove());
-    clone.querySelectorAll('[contenteditable]').forEach(el => {
-        el.removeAttribute('contenteditable');
-        el.style.borderBottom = '1px solid #000';
-        el.style.background = 'transparent';
+    // 1. Reset scroll so html2canvas has zero offset (prevents blank/shifted captures)
+    window.scrollTo(0, 0);
+
+    // 2. Hide buttons from the PDF only (html2canvas skips these elements)
+    element.querySelectorAll('button').forEach(btn => {
+        btn.setAttribute('data-html2canvas-ignore', 'true');
     });
 
-    // 2. Force styles for PDF generation using position: fixed
-    // This guarantees the browser renders it and html2canvas captures it
-    clone.style.cssText = `
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 210mm !important;
-        min-height: 297mm !important;
-        padding: 10mm !important;
-        background: white !important;
-        z-index: 99999 !important;
-        box-shadow: none !important;
-        border: none !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-        font-family: 'Segoe UI', sans-serif !important;
-        overflow: visible !important;
-    `;
-
-    document.body.appendChild(clone);
-
-    // 3. Configure html2pdf
+    // 3. PDF configuration
     const opt = {
-        margin: 0,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true, 
+        margin:      0,
+        filename:    filename,
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
             allowTaint: true,
             logging: false,
-            scrollX: 0,
-            scrollY: 0,
-            x: 0,
-            y: 0
+            backgroundColor: '#ffffff'
         },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:   { mode: ['css', 'legacy'] }
     };
 
-    // 4. Generate PDF
+    // 4. Let html2pdf render the live element (it handles cloning + A4 sizing itself)
     setTimeout(() => {
-        html2pdf().set(opt).from(clone).save().then(() => {
-            document.body.removeChild(clone);
-        }).catch(err => {
-            console.error("PDF Error:", err);
-            document.body.removeChild(clone);
-            alert("Error generating PDF. Please try again.");
+        html2pdf().set(opt).from(element).save().catch(err => {
+            console.error('PDF Generation Error:', err);
+            alert('Error generating PDF. Please try again.');
         });
-    }, 500);
+    }, 300);
 }
 
 const UI = {
