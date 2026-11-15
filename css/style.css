@@ -227,7 +227,7 @@ body {
 .row-overall { background: #f0fdf4; font-weight: 800; font-size: 0.95rem; }
 .row-position { background: #fef3c7; }
 
-/* 12. ASSESSMENT & REPORT CARD STYLES (FIXED FOR PDF) */
+/* 12. ASSESSMENT & REPORT CARD STYLES */
 .subject-card { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; box-shadow: var(--shadow-sm); }
 .subject-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
 .subject-name { font-weight: 700; font-size: 1.1rem; color: var(--color-primary); }
@@ -255,7 +255,6 @@ body {
 .report-logo { width: 70px; height: 70px; object-fit: contain; margin: 0 auto 5px auto; display: block; }
 .report-school-name { font-size: 1.4rem; font-weight: 800; color: var(--color-primary); text-align: center; margin-bottom: 2px; text-transform: uppercase; }
 
-/* District/Region centered on one line */
 .report-school-info {
     display: inline-block !important;
     text-align: center;
@@ -293,13 +292,13 @@ body {
     padding: 4px 6px;
     width: 33.33%;
     vertical-align: top;
-    border: none; /* No borders for this layout table */
+    border: none;
 }
 .report-info-label {
     font-weight: 700;
     color: var(--color-text-main);
     margin-right: 4px;
-    white-space: normal; /* ALLOW WRAPPING */
+    white-space: normal;
 }
 .report-info-value {
     border-bottom: 1px dotted #999;
@@ -308,7 +307,7 @@ body {
     outline: none;
     display: inline-block;
     min-width: 60px;
-    white-space: normal; /* ALLOW WRAPPING */
+    white-space: normal;
 }
 .report-info-value:focus { border-bottom: 1px solid var(--color-primary); background: #f0f9ff; }
 
@@ -336,7 +335,7 @@ body {
 .grade-9 { color: #991b1b; font-weight: 700; }
 
 .report-bottom-section { margin-top: 5px; }
-.report-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 20px; }
+.report-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 20px; }
 .report-remarks-item { margin-bottom: 0.5rem; }
 .report-remarks-label { font-size: 0.75rem; font-weight: 800; color: var(--color-primary); text-transform: uppercase; margin-bottom: 2px; }
 .report-remarks-text { font-size: 0.85rem; color: var(--color-text-main); width: 100%; border-bottom: 1px dotted #999; min-height: 1.2em; padding: 2px 4px; outline: none; display: block; }

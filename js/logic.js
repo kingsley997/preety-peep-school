@@ -49,58 +49,41 @@ function getDepartment(className) {
 }
 
 // ==========================================
-// BULLETPROOF PDF GENERATOR (Fixed Cutoff & Mashed Text)
+// BULLETPROOF PDF GENERATOR (Fixed Blank Page Issue)
 // ==========================================
 function generateSecurePDF(element, filename) {
     const clone = element.cloneNode(true);
     
     // 1. Cleanup clone
-    const buttons = clone.querySelectorAll('button');
-    buttons.forEach(b => b.remove());
-    
-    const editables = clone.querySelectorAll('[contenteditable]');
-    editables.forEach(el => {
+    clone.querySelectorAll('button').forEach(b => b.remove());
+    clone.querySelectorAll('[contenteditable]').forEach(el => {
         el.removeAttribute('contenteditable');
         el.style.borderBottom = '1px solid #000';
         el.style.background = 'transparent';
     });
 
-    // 2. Create a strict A4-sized wrapper positioned at top-left
-    // This prevents the "cut off left side" and "blank page" issues
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 210mm;
-        min-height: 297mm;
-        padding: 10mm;
-        background: white;
-        z-index: 99999;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow: hidden;
-    `;
-    
-    // 3. Style the clone to fit perfectly inside the wrapper
+    // 2. Force styles for PDF generation using position: fixed
+    // This guarantees the browser renders it and html2canvas captures it
     clone.style.cssText = `
-        width: 100%;
-        max-width: 100%;
-        box-shadow: none;
-        border: none;
-        padding: 0;
-        margin: 0;
-        box-sizing: border-box;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 210mm !important;
+        min-height: 297mm !important;
+        padding: 10mm !important;
+        background: white !important;
+        z-index: 99999 !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        font-family: 'Segoe UI', sans-serif !important;
+        overflow: visible !important;
     `;
 
-    // Ensure images load for PDF
-    const images = clone.querySelectorAll('img');
-    images.forEach(img => { img.crossOrigin = 'anonymous'; });
+    document.body.appendChild(clone);
 
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
-
-    // 4. Configure html2pdf (794px is exactly 210mm at 96 DPI)
+    // 3. Configure html2pdf
     const opt = {
         margin: 0,
         filename: filename,
@@ -112,22 +95,22 @@ function generateSecurePDF(element, filename) {
             logging: false,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 794, // Force exact A4 width rendering
-            width: 794
+            x: 0,
+            y: 0
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 5. Wait for render then generate
+    // 4. Generate PDF
     setTimeout(() => {
-        html2pdf().set(opt).from(wrapper).save().then(() => {
-            document.body.removeChild(wrapper);
+        html2pdf().set(opt).from(clone).save().then(() => {
+            document.body.removeChild(clone);
         }).catch(err => {
             console.error("PDF Error:", err);
-            document.body.removeChild(wrapper);
+            document.body.removeChild(clone);
             alert("Error generating PDF. Please try again.");
         });
-    }, 600);
+    }, 500);
 }
 
 const UI = {
@@ -2042,7 +2025,6 @@ const UI = {
             `;
         });
 
-        // BULLETPROOF HTML STRUCTURE USING TABLES
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
@@ -2050,7 +2032,7 @@ const UI = {
                     <div class="report-school-name">PREETY PEEP SCHOOL</div>
                     <div class="report-school-info" contenteditable="true">DISTRICT: [Enter District]</div>
                     <div class="report-school-info" contenteditable="true">REGION: [Enter Region]</div>
-                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 5px 0; padding-bottom: 5px;">LEARNER'S ASSESSMENT REPORT</div>
+                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 3px 0; padding-bottom: 2px;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
 
                 <table class="report-info-table">
