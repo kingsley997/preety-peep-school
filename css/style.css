@@ -1,4 +1,4 @@
-/* css/style.css - COMPLETE MOBILE-OPTIMIZED STYLESHEET */
+/* css/style.css - COMPLETE STYLESHEET */
 
 :root {
   --color-primary: #0f172a;
@@ -572,6 +572,7 @@ body {
 .score-input:focus { outline: none; border-color: var(--color-primary); }
 .score-max { color: var(--color-text-muted); font-size: 0.85rem; }
 
+/* REPORT CARD STYLES - Optimized for html2canvas PDF generation */
 .report-card {
     position: relative;
     background: white;
@@ -579,11 +580,10 @@ body {
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     width: 100%;
-    max-width: 100%;
+    max-width: 210mm;
     margin: 0 auto;
     box-shadow: var(--shadow-lg);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: auto; 
 }
 
 .report-card-header { text-align: center; }
@@ -626,7 +626,7 @@ body {
     padding-bottom: 3px;
 }
 
-/* BULLETPROOF TABLE FOR STUDENT INFO (Fixes html2canvas text mashing) */
+/* Table-based layout for student info to prevent html2canvas text mashing */
 .report-info-table {
     width: 100%;
     border-collapse: collapse;
@@ -635,10 +635,9 @@ body {
     line-height: 1.8;
 }
 .report-info-table td {
-    padding: 6px 8px;
+    padding: 4px 8px;
     width: 33.33%;
     vertical-align: top;
-    word-wrap: break-word;
 }
 .report-info-table .report-info-label {
     font-weight: 700;

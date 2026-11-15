@@ -39,7 +39,6 @@ const Auth = {
     }
 };
 
-// Helper function to determine Department based on Class Name
 function getDepartment(className) {
     const name = className.toLowerCase();
     if (name.includes('kg') || name.includes('nursery') || name.includes('creche') || name.includes('pre')) return 'Pre-School';
@@ -50,43 +49,48 @@ function getDepartment(className) {
 }
 
 // ==========================================
-// BULLETPROOF PDF GENERATOR (Mathematically Locked to 210mm/794px)
-// Fixes: Shifted PDFs, Blank PDFs, and Mashed Text
+// BULLETPROOF PDF GENERATOR (Direct Capture Method)
+// Fixes: Blank PDFs, Shifted Content, and Mashed Text
 // ==========================================
 function generateSecurePDF(element, filename) {
+    // 1. Create a clone
     const clone = element.cloneNode(true);
     
-    // 1. Remove buttons from the clone so they don't appear in the PDF
+    // 2. Strip problematic attributes from the clone
     const buttons = clone.querySelectorAll('button');
-    buttons.forEach(b => b.remove());
-
-    // 2. Remove contenteditable attributes so text locks in place
-    const editables = clone.querySelectorAll('[contenteditable="true"]');
-    editables.forEach(el => el.removeAttribute('contenteditable'));
-
-    // 3. Create a strict, zero-margin overlay locked to exactly 210mm width
-    // This prevents the PDF engine from guessing the wrong width and shifting content
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 210mm; height: 100vh; 
-        background: white; z-index: 99999; overflow: hidden; 
-        padding: 0; margin: 0;
-    `;
+    buttons.forEach(b => b.remove()); // Remove buttons entirely
     
-    // 4. Pin the clone to the absolute top-left of the overlay (no centering, no margins)
-    clone.style.cssText = `
-        width: 210mm; min-height: 297mm; padding: 15mm; 
-        background: white; box-shadow: none;
+    const editables = clone.querySelectorAll('[contenteditable]');
+    editables.forEach(el => {
+        el.removeAttribute('contenteditable');
+        // Ensure it has a solid background and border for PDF rendering
+        el.style.borderBottom = '1px solid #000';
+        el.style.background = 'transparent';
+    });
+
+    // 3. Create a dedicated off-screen container sized exactly to A4 at 96 DPI (794px width)
+    const container = document.createElement('div');
+    container.style.cssText = `
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        width: 794px; /* Exactly 210mm at 96 DPI */
+        background: white;
+        padding: 40px; /* ~15mm */
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        position: absolute; left: 0; top: 0;
-        box-sizing: border-box; margin: 0;
+        z-index: -1;
     `;
     
-    overlay.appendChild(clone);
-    document.body.appendChild(overlay);
+    // Ensure images in the clone can be captured by html2canvas
+    const images = clone.querySelectorAll('img');
+    images.forEach(img => {
+        img.crossOrigin = 'anonymous';
+    });
 
-    // 5. PDF Configuration
-    // windowWidth: 794 is EXACTLY 210mm at 96 DPI - this locks the rendering engine
+    container.appendChild(clone);
+    document.body.appendChild(container);
+
+    // 4. Configure html2pdf
     const opt = {
         margin: 0,
         filename: filename,
@@ -94,27 +98,26 @@ function generateSecurePDF(element, filename) {
         html2canvas: { 
             scale: 2, 
             useCORS: true, 
-            logging: false, 
-            allowTaint: true, 
-            scrollY: 0, 
-            windowWidth: 794,  // Locked to 210mm A4 width
+            allowTaint: true,
+            logging: false,
             scrollX: 0,
-            x: 0,
-            y: 0
+            scrollY: 0,
+            windowWidth: 794, // Force the canvas to render at A4 width
+            width: 794
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 6. Wait 600ms for the browser to fully paint the overlay and load images, then generate
+    // 5. Small delay to ensure the browser paints the off-screen element
     setTimeout(() => {
         html2pdf().set(opt).from(clone).save().then(() => {
-            document.body.removeChild(overlay);
+            document.body.removeChild(container);
         }).catch(err => {
             console.error("PDF Error:", err);
-            document.body.removeChild(overlay);
+            document.body.removeChild(container);
             alert("Error generating PDF. Please try again.");
         });
-    }, 600);
+    }, 500);
 }
 
 const UI = {
