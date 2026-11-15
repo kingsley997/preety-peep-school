@@ -48,40 +48,31 @@ function getDepartment(className) {
     return 'General';
 }
 
-// ==========================================
-// BULLETPROOF PDF GENERATOR (Direct Capture Method)
-// Fixes: Blank PDFs, Shifted Content, and Mashed Text
-// ==========================================
 function generateSecurePDF(element, filename) {
-    // 1. Create a clone
     const clone = element.cloneNode(true);
     
-    // 2. Strip problematic attributes from the clone
     const buttons = clone.querySelectorAll('button');
-    buttons.forEach(b => b.remove()); // Remove buttons entirely
+    buttons.forEach(b => b.remove());
     
     const editables = clone.querySelectorAll('[contenteditable]');
     editables.forEach(el => {
         el.removeAttribute('contenteditable');
-        // Ensure it has a solid background and border for PDF rendering
         el.style.borderBottom = '1px solid #000';
         el.style.background = 'transparent';
     });
 
-    // 3. Create a dedicated off-screen container sized exactly to A4 at 96 DPI (794px width)
     const container = document.createElement('div');
     container.style.cssText = `
         position: absolute;
         left: -9999px;
         top: 0;
-        width: 794px; /* Exactly 210mm at 96 DPI */
+        width: 794px;
         background: white;
-        padding: 40px; /* ~15mm */
+        padding: 30px;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         z-index: -1;
     `;
     
-    // Ensure images in the clone can be captured by html2canvas
     const images = clone.querySelectorAll('img');
     images.forEach(img => {
         img.crossOrigin = 'anonymous';
@@ -90,7 +81,6 @@ function generateSecurePDF(element, filename) {
     container.appendChild(clone);
     document.body.appendChild(container);
 
-    // 4. Configure html2pdf
     const opt = {
         margin: 0,
         filename: filename,
@@ -102,13 +92,12 @@ function generateSecurePDF(element, filename) {
             logging: false,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 794, // Force the canvas to render at A4 width
+            windowWidth: 794,
             width: 794
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // 5. Small delay to ensure the browser paints the off-screen element
     setTimeout(() => {
         html2pdf().set(opt).from(clone).save().then(() => {
             document.body.removeChild(container);
@@ -784,9 +773,6 @@ const UI = {
         alert("✅ Report downloaded to your device!");
     },
 
-    // ==========================================
-    // TOILETRIES MODULE FUNCTIONS
-    // ==========================================
     switchToiletriesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
@@ -1082,9 +1068,6 @@ const UI = {
         document.body.removeChild(textArea);
     },
 
-    // ==========================================
-    // SCHOOL FEES MODULE FUNCTIONS
-    // ==========================================
     switchSchoolFeesTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-fees-${tabName}`).classList.add('active');
@@ -1609,9 +1592,6 @@ const UI = {
         container.innerHTML = html;
     },
 
-    // ==========================================
-    // ASSESSMENT MODULE FUNCTIONS (CUMULATIVE RECORD FORMAT)
-    // ==========================================
     switchAssessmentTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-assess-${tabName}`).classList.add('active');
@@ -1970,7 +1950,6 @@ const UI = {
         const scores = Store.get('assessment_scores') || [];
         const classSubjects = subjects.filter(s => s.classId === classId);
 
-        // 1. Calculate Overall Class Position for ALL students first
         const studentTotals = cls.students.map(s => {
             let studentTotalScore = 0;
             classSubjects.forEach(subject => {
@@ -1989,10 +1968,8 @@ const UI = {
             return { id: s.id, name: s.name, totalScore: studentTotalScore };
         });
 
-        // Sort by total score descending
         studentTotals.sort((a, b) => b.totalScore - a.totalScore);
 
-        // Find current student's rank
         let overallPosition = 1;
         for (let i = 0; i < studentTotals.length; i++) {
             if (studentTotals[i].id === studentId) {
@@ -2003,7 +1980,6 @@ const UI = {
         const suffix = overallPosition === 1 ? 'st' : overallPosition === 2 ? 'nd' : overallPosition === 3 ? 'rd' : 'th';
         const positionString = `${overallPosition}${suffix}`;
 
-        // 2. Generate Subject Rows for the current student
         let subjectRows = '';
         classSubjects.forEach(subject => {
             const studentScores = scores.filter(s => s.studentId === studentId && s.subjectId === subject.id);
@@ -2022,7 +1998,6 @@ const UI = {
             const grade = this.calculateGrade(overall);
             const remark = this.getRemark(grade);
 
-            // Calculate position for this specific subject
             const allStudentOveralls = cls.students.map(s => {
                 const sScores = scores.filter(sc => sc.studentId === s.id && sc.subjectId === subject.id);
                 const sTotalSBA = (sScores.find(x=>x.component==='ct1')?.score||0) + (sScores.find(x=>x.component==='gw')?.score||0) + (sScores.find(x=>x.component==='ct2')?.score||0) + (sScores.find(x=>x.component==='pw')?.score||0);
@@ -2046,7 +2021,6 @@ const UI = {
             `;
         });
 
-        // 3. Build the optimized A4 HTML structure using a TABLE to prevent html2canvas text mashing
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
@@ -2054,7 +2028,7 @@ const UI = {
                     <div class="report-school-name">PREETY PEEP SCHOOL</div>
                     <div class="report-school-info" contenteditable="true">DISTRICT: [Enter District]</div>
                     <div class="report-school-info" contenteditable="true">REGION: [Enter Region]</div>
-                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 5px 0; padding-bottom: 5px;">LEARNER'S ASSESSMENT REPORT</div>
+                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 3px 0; padding-bottom: 2px;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
 
                 <table class="report-info-table">
@@ -2090,8 +2064,8 @@ const UI = {
                     <tbody>${subjectRows}</tbody>
                 </table>
 
-                <div class="report-bottom-section" style="margin-top: 10px;">
-                    <div class="report-remarks-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <div class="report-bottom-section" style="margin-top: 5px;">
+                    <div class="report-remarks-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
                         <div class="report-remarks-item">
                             <div class="report-remarks-label">ATTENDANCE</div>
                             <div class="report-remarks-text" contenteditable="true">Days Present: ___ / ___</div>
@@ -2141,7 +2115,7 @@ const UI = {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; margin-top: 20px;">
+                <div style="display: flex; gap: 0.75rem; margin-top: 10px;">
                     <button class="btn-print-report" style="flex: 1;" onclick="UI.downloadReportCard('${student.id}', '${classId}')">⬇️ Download Report</button>
                     <button class="btn-print-report" style="flex: 1;" onclick="window.print()">🖨️ Print Report Card</button>
                 </div>
