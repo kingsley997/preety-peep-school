@@ -48,9 +48,13 @@ function getDepartment(className) {
     return 'General';
 }
 
+// ==========================================
+// BULLETPROOF PDF GENERATOR (Fixed Cutoff & Mashed Text)
+// ==========================================
 function generateSecurePDF(element, filename) {
     const clone = element.cloneNode(true);
     
+    // 1. Cleanup clone
     const buttons = clone.querySelectorAll('button');
     buttons.forEach(b => b.remove());
     
@@ -61,26 +65,42 @@ function generateSecurePDF(element, filename) {
         el.style.background = 'transparent';
     });
 
-    const container = document.createElement('div');
-    container.style.cssText = `
+    // 2. Create a strict A4-sized wrapper positioned at top-left
+    // This prevents the "cut off left side" and "blank page" issues
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = `
         position: absolute;
-        left: -9999px;
         top: 0;
-        width: 794px;
+        left: 0;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 10mm;
         background: white;
-        padding: 30px;
+        z-index: 99999;
+        box-sizing: border-box;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        z-index: -1;
+        overflow: hidden;
     `;
     
+    // 3. Style the clone to fit perfectly inside the wrapper
+    clone.style.cssText = `
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    `;
+
+    // Ensure images load for PDF
     const images = clone.querySelectorAll('img');
-    images.forEach(img => {
-        img.crossOrigin = 'anonymous';
-    });
+    images.forEach(img => { img.crossOrigin = 'anonymous'; });
 
-    container.appendChild(clone);
-    document.body.appendChild(container);
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
 
+    // 4. Configure html2pdf (794px is exactly 210mm at 96 DPI)
     const opt = {
         margin: 0,
         filename: filename,
@@ -92,21 +112,22 @@ function generateSecurePDF(element, filename) {
             logging: false,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 794,
+            windowWidth: 794, // Force exact A4 width rendering
             width: 794
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
+    // 5. Wait for render then generate
     setTimeout(() => {
-        html2pdf().set(opt).from(clone).save().then(() => {
-            document.body.removeChild(container);
+        html2pdf().set(opt).from(wrapper).save().then(() => {
+            document.body.removeChild(wrapper);
         }).catch(err => {
             console.error("PDF Error:", err);
-            document.body.removeChild(container);
+            document.body.removeChild(wrapper);
             alert("Error generating PDF. Please try again.");
         });
-    }, 500);
+    }, 600);
 }
 
 const UI = {
@@ -2021,6 +2042,7 @@ const UI = {
             `;
         });
 
+        // BULLETPROOF HTML STRUCTURE USING TABLES
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
@@ -2028,24 +2050,24 @@ const UI = {
                     <div class="report-school-name">PREETY PEEP SCHOOL</div>
                     <div class="report-school-info" contenteditable="true">DISTRICT: [Enter District]</div>
                     <div class="report-school-info" contenteditable="true">REGION: [Enter Region]</div>
-                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 3px 0; padding-bottom: 2px;">LEARNER'S ASSESSMENT REPORT</div>
+                    <div class="report-title" style="border-bottom: 1px solid #000000; margin: 5px 0; padding-bottom: 5px;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
 
                 <table class="report-info-table">
                     <tr>
-                        <td><span class="report-info-label">Name of Learner:</span> <span class="report-info-value" contenteditable="true">${student.name}</span></td>
+                        <td><span class="report-info-label">Name:</span> <span class="report-info-value" contenteditable="true">${student.name}</span></td>
                         <td><span class="report-info-label">Class:</span> <span class="report-info-value" contenteditable="true">${cls.name}</span></td>
                         <td><span class="report-info-label">Position:</span> <span class="report-info-value" contenteditable="true">${positionString}</span></td>
                     </tr>
                     <tr>
-                        <td><span class="report-info-label">Department:</span> <span class="report-info-value" contenteditable="true">${getDepartment(cls.name)}</span></td>
-                        <td><span class="report-info-label">No. on Roll:</span> <span class="report-info-value" contenteditable="true">${cls.students.length}</span></td>
+                        <td><span class="report-info-label">Dept:</span> <span class="report-info-value" contenteditable="true">${getDepartment(cls.name)}</span></td>
+                        <td><span class="report-info-label">Roll:</span> <span class="report-info-value" contenteditable="true">${cls.students.length}</span></td>
                         <td><span class="report-info-label">Year:</span> <span class="report-info-value" contenteditable="true">2026</span></td>
                     </tr>
                     <tr>
                         <td><span class="report-info-label">Term:</span> <span class="report-info-value" contenteditable="true">1st Term</span></td>
                         <td><span class="report-info-label">Date:</span> <span class="report-info-value" contenteditable="true">${this.getLocalDateStr()}</span></td>
-                        <td><span class="report-info-label">Next Term Begins:</span> <span class="report-info-value" contenteditable="true">[Enter Date]</span></td>
+                        <td><span class="report-info-label">Next Term:</span> <span class="report-info-value" contenteditable="true">[Enter Date]</span></td>
                     </tr>
                 </table>
 
