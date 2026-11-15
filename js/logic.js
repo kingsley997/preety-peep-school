@@ -48,47 +48,162 @@ function getDepartment(className) {
     return 'General';
 }
 
+function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 // ==========================================
-// BULLETPROOF PDF GENERATOR (Library-Managed Rendering)
-// FIXES: blank PDFs, and forces desktop-width layout so mobile
-// downloads keep the 3-column A4 design (windowWidth: 900).
+// DETERMINISTIC A4 PDF BUILDER (device-independent)
+// Renders a self-contained fixed-width template so mobile viewports
+// can NEVER shift, crop or re-stack the PDF layout.
 // ==========================================
-function generateSecurePDF(element, filename) {
-    // 1. Reset scroll so html2canvas has zero offset
+function generatePDFFromHtml(htmlString, filename) {
     window.scrollTo(0, 0);
 
-    // 2. Hide buttons from the PDF only
-    element.querySelectorAll('button').forEach(btn => {
-        btn.setAttribute('data-html2canvas-ignore', 'true');
-    });
+    const host = document.createElement('div');
+    host.setAttribute('data-pdf-host', 'true');
+    host.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:99990;background:#ffffff;opacity:0;pointer-events:none;';
+    host.innerHTML = htmlString;
+    document.body.appendChild(host);
 
-    // 3. PDF configuration
+    const target = host.firstElementChild;
+
     const opt = {
-        margin:      0,
-        filename:    filename,
-        image:       { type: 'jpeg', quality: 0.98 },
+        margin: 0,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
             scale: 2,
             useCORS: true,
             allowTaint: true,
             logging: false,
             backgroundColor: '#ffffff',
-            // KEY FIX: render as if the screen were 900px wide, so the
-            // @media (max-width: 768px) stacking rules NEVER apply to the PDF.
-            windowWidth: 900,
-            windowHeight: 1400
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1000,
+            windowHeight: 1500
         },
-        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:   { mode: ['css', 'legacy'] }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
     };
 
-    // 4. Let html2pdf render the live element
+    setTimeout(() => {
+        html2pdf().set(opt).from(target).save().then(() => {
+            if (host.parentNode) document.body.removeChild(host);
+        }).catch(err => {
+            console.error('PDF Generation Error:', err);
+            if (host.parentNode) document.body.removeChild(host);
+            alert('Error generating PDF. Please try again.');
+        });
+    }, 350);
+}
+
+// Legacy element-based generator (kept for the Fee Receipt modal)
+function generateSecurePDF(element, filename) {
+    window.scrollTo(0, 0);
+    element.querySelectorAll('button').forEach(btn => btn.setAttribute('data-html2canvas-ignore', 'true'));
+    const opt = {
+        margin: 0,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 1000, windowHeight: 1500 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+    };
     setTimeout(() => {
         html2pdf().set(opt).from(element).save().catch(err => {
             console.error('PDF Generation Error:', err);
             alert('Error generating PDF. Please try again.');
         });
     }, 300);
+}
+
+// Builds the locked A4 report-card template (inline styles only, fixed table layout)
+function buildReportCardPDFHtml(d) {
+    return `
+<div class="pdfdoc" style="width:100%;box-sizing:border-box;padding:36px;background:#ffffff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#000000;">
+<style>
+  .pdfdoc * { box-sizing: border-box; }
+  .pdfdoc .hd { text-align: center; }
+  .pdfdoc .hd img { width: 64px; height: 64px; object-fit: contain; display: block; margin: 0 auto 6px auto; }
+  .pdfdoc .sch { font-size: 19px; font-weight: 800; letter-spacing: .5px; margin: 0 0 4px 0; text-transform: uppercase; }
+  .pdfdoc .loc { font-size: 11px; font-weight: 600; display: inline-block; margin: 0 8px; border-bottom: 1px dotted #777; padding: 0 4px 1px 4px; min-width: 120px; }
+  .pdfdoc .ttl { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 3px; margin: 8px 0 10px 0; }
+  .pdfdoc table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .pdfdoc td, .pdfdoc th { border: 1px solid #000; padding: 4px 5px; font-size: 11px; text-align: center; word-wrap: break-word; overflow: hidden; vertical-align: top; }
+  .pdfdoc th { background: #eeeeee; font-weight: 800; font-size: 10.5px; }
+  .pdfdoc tbody td:first-child { text-align: left; font-weight: 600; }
+  .pdfdoc table.info td { border: none; text-align: left; padding: 2px 4px; }
+  .pdfdoc .lbl { font-weight: 700; }
+  .pdfdoc .val { border-bottom: 1px dotted #777; display: inline-block; min-width: 60px; padding: 0 3px; }
+  .pdfdoc table.rm td { border: none; padding: 3px 6px; text-align: left; font-size: 10.5px; }
+  .pdfdoc .rm .k { font-weight: 800; font-size: 9.5px; text-transform: uppercase; margin-bottom: 2px; }
+  .pdfdoc .rm .v { border-bottom: 1px dotted #777; min-height: 16px; padding: 1px 3px; }
+  .pdfdoc .sig { margin-top: 14px; text-align: right; }
+  .pdfdoc .sig .line { display: inline-block; width: 200px; border-bottom: 2px solid #000; height: 34px; }
+  .pdfdoc .sig .cap { font-size: 10px; font-weight: 700; }
+  .pdfdoc .avoid { page-break-inside: avoid; }
+</style>
+
+  <div class="hd avoid">
+    <img src="images/school-logo.png" alt="logo">
+    <div class="sch">PREETY PEEP SCHOOL</div>
+    <div><span class="loc">${esc(d.district)}</span><span class="loc">${esc(d.region)}</span></div>
+    <div class="ttl">LEARNER'S ASSESSMENT REPORT</div>
+  </div>
+
+  <table class="info avoid">
+    <colgroup><col style="width:34%"><col style="width:33%"><col style="width:33%"></colgroup>
+    <tr>
+      <td><span class="lbl">Name:</span> <span class="val">${esc(d.name)}</span></td>
+      <td><span class="lbl">Class:</span> <span class="val">${esc(d.cls)}</span></td>
+      <td><span class="lbl">Position:</span> <span class="val">${esc(d.position)}</span></td>
+    </tr>
+    <tr>
+      <td><span class="lbl">Dept:</span> <span class="val">${esc(d.department)}</span></td>
+      <td><span class="lbl">Roll:</span> <span class="val">${esc(d.roll)}</span></td>
+      <td><span class="lbl">Year:</span> <span class="val">2026</span></td>
+    </tr>
+    <tr>
+      <td><span class="lbl">Term:</span> <span class="val">1st Term</span></td>
+      <td><span class="lbl">Date:</span> <span class="val">${esc(d.date)}</span></td>
+      <td><span class="lbl">Next Term:</span> <span class="val">${esc(d.nextTerm)}</span></td>
+    </tr>
+  </table>
+
+  <table class="avoid" style="margin-top:8px;">
+    <colgroup>
+      <col style="width:26%"><col style="width:11%"><col style="width:12%"><col style="width:12%"><col style="width:9%"><col style="width:18%"><col style="width:12%">
+    </colgroup>
+    <thead>
+      <tr><th>SUBJECT</th><th>SBA (50%)</th><th>EXAM (50%)</th><th>TOTAL (100)</th><th>GRADE</th><th>REMARK</th><th>POS</th></tr>
+    </thead>
+    <tbody>${d.subjectRows}</tbody>
+  </table>
+
+  <table class="rm avoid" style="margin-top:10px;">
+    <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+    <tr>
+      <td><div class="k">ATTENDANCE</div><div class="v">${esc(d.attendance)}</div></td>
+      <td><div class="k">TALENTS &amp; INTEREST</div><div class="v">${esc(d.talents)}</div></td>
+    </tr>
+    <tr>
+      <td><div class="k">CONDUCT</div><div class="v">${esc(d.conduct)}</div></td>
+      <td><div class="k">NEXT TERM'S FEES</div><div class="v">${esc(d.nextFees)}</div></td>
+    </tr>
+    <tr><td colspan="2"><div class="k">CLASS TEACHER'S REMARK</div><div class="v">${esc(d.teacherRemark)}</div></td></tr>
+    <tr><td colspan="2"><div class="k">HEADTEACHER'S REMARK</div><div class="v">${esc(d.headRemark)}</div></td></tr>
+    <tr>
+      <td><div class="k">ARREARS</div><div class="v">${esc(d.arrears)}</div></td>
+      <td><div class="k">TOTAL</div><div class="v">${esc(d.total)}</div></td>
+    </tr>
+  </table>
+
+  <div class="sig avoid">
+    <span class="line"></span><br>
+    <span class="cap">HEADTEACHER'S SIGNATURE &amp; STAMP</span>
+  </div>
+</div>`;
 }
 
 const UI = {
@@ -98,6 +213,7 @@ const UI = {
     currentReportText: "",
     currentScreen: 'login',
     pendingConfirmCallback: null,
+    lastReportPDF: null,
 
     getLocalDateStr() {
         const d = new Date();
@@ -1992,16 +2108,19 @@ const UI = {
 
             subjectRows += `
                 <tr>
-                    <td>${subject.name}</td>
+                    <td>${esc(subject.name)}</td>
                     <td>${sba50.toFixed(1)}</td>
                     <td>${exam50.toFixed(1)}</td>
                     <td>${overall.toFixed(1)}</td>
                     <td>${grade}</td>
-                    <td>${remark}</td>
+                    <td>${esc(remark)}</td>
                     <td>${pos}${posSuffix}</td>
                 </tr>
             `;
         });
+
+        // Cache data for the locked PDF template
+        this.lastReportPDF = { subjectRows: subjectRows, positionString: positionString };
 
         const html = `
             <div class="report-card">
@@ -2015,12 +2134,12 @@ const UI = {
 
                 <table class="report-info-table">
                     <tr>
-                        <td><span class="report-info-label">Name:</span> <span class="report-info-value" contenteditable="true">${student.name}</span></td>
-                        <td><span class="report-info-label">Class:</span> <span class="report-info-value" contenteditable="true">${cls.name}</span></td>
+                        <td><span class="report-info-label">Name:</span> <span class="report-info-value" contenteditable="true">${esc(student.name)}</span></td>
+                        <td><span class="report-info-label">Class:</span> <span class="report-info-value" contenteditable="true">${esc(cls.name)}</span></td>
                         <td><span class="report-info-label">Position:</span> <span class="report-info-value" contenteditable="true">${positionString}</span></td>
                     </tr>
                     <tr>
-                        <td><span class="report-info-label">Dept:</span> <span class="report-info-value" contenteditable="true">${getDepartment(cls.name)}</span></td>
+                        <td><span class="report-info-label">Dept:</span> <span class="report-info-value" contenteditable="true">${esc(getDepartment(cls.name))}</span></td>
                         <td><span class="report-info-label">Roll:</span> <span class="report-info-value" contenteditable="true">${cls.students.length}</span></td>
                         <td><span class="report-info-label">Year:</span> <span class="report-info-value" contenteditable="true">2026</span></td>
                     </tr>
@@ -2108,6 +2227,7 @@ const UI = {
         document.getElementById('assess-report-card-preview').style.display = 'block';
     },
 
+    // Downloads a device-independent, perfectly centered A4 PDF
     downloadReportCard(studentId, classId) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -2115,13 +2235,40 @@ const UI = {
         const student = cls.students.find(s => s.id === studentId);
         if (!student) return;
 
-        const reportCardElement = document.querySelector('#assess-report-card-preview .report-card');
-        if (!reportCardElement) {
+        const card = document.querySelector('#assess-report-card-preview .report-card');
+        if (!card || !this.lastReportPDF) {
             alert("Please generate the report card first before downloading.");
             return;
         }
 
-        generateSecurePDF(reportCardElement, `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`);
+        // Carry over anything the teacher typed on screen into the locked PDF
+        const infoNodes = card.querySelectorAll('.report-school-info');
+        const rt = card.querySelectorAll('.report-remarks-text');
+        const conductSel = card.querySelector('.report-select');
+
+        const data = {
+            name: student.name,
+            cls: cls.name,
+            position: this.lastReportPDF.positionString,
+            department: getDepartment(cls.name),
+            roll: cls.students.length,
+            date: this.getLocalDateStr(),
+            nextTerm: '[Enter Date]',
+            district: infoNodes[0] ? infoNodes[0].textContent.trim() : 'DISTRICT: [Enter District]',
+            region: infoNodes[1] ? infoNodes[1].textContent.trim() : 'REGION: [Enter Region]',
+            attendance: rt[0] ? rt[0].textContent.trim() : '',
+            talents: rt[1] ? rt[1].textContent.trim() : '',
+            nextFees: rt[2] ? rt[2].textContent.trim() : '',
+            teacherRemark: rt[3] ? rt[3].textContent.trim() : '',
+            headRemark: rt[4] ? rt[4].textContent.trim() : '',
+            arrears: rt[5] ? rt[5].textContent.trim() : '',
+            total: rt[6] ? rt[6].textContent.trim() : '',
+            conduct: conductSel ? conductSel.value : 'Good',
+            subjectRows: this.lastReportPDF.subjectRows
+        };
+
+        const pdfHtml = buildReportCardPDFHtml(data);
+        generatePDFFromHtml(pdfHtml, `Report_Card_${student.name.replace(/\s+/g, '_')}.pdf`);
     },
 
     calculateGrade(score) {
