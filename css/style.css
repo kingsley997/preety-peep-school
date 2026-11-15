@@ -1,6 +1,5 @@
 /* css/style.css - COMPLETE MOBILE-OPTIMIZED STYLESHEET */
 
-/* 1. VARIABLES */
 :root {
   --color-primary: #0f172a;
   --color-primary-light: #1e293b;
@@ -21,7 +20,6 @@
   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
 }
 
-/* 2. BASE STYLES */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,7 +38,6 @@ body {
 .text-center { text-align: center; }
 .text-muted { color: var(--color-text-muted); }
 
-/* 3. SPLASH SCREEN STYLES */
 #splash-container {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     z-index: 9999; display: flex; justify-content: center; align-items: center;
@@ -78,7 +75,6 @@ body {
 @keyframes fadeUp { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-/* 4. AUTH / LOGIN STYLES */
 .auth-container {
     max-width: 420px; margin: 5vh auto; background: var(--color-surface);
     padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
@@ -135,7 +131,6 @@ body {
 }
 .eye-btn:hover { color: var(--color-primary); }
 
-/* 5. DASHBOARD STYLES */
 .dashboard-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border);
@@ -185,7 +180,6 @@ body {
     font-size: 0.85rem; color: var(--color-text-muted); display: flex; justify-content: space-between;
 }
 
-/* 6. CLASS PORTAL STYLES */
 .portal-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border);
@@ -234,7 +228,6 @@ body {
 }
 .btn-icon:hover { color: var(--color-primary); }
 
-/* 7. ADMIN SETTINGS STYLES */
 .settings-container {
     background: var(--color-surface); border-radius: var(--radius-md);
     border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); padding: 2rem;
@@ -253,7 +246,6 @@ body {
 .settings-input:focus { outline: none; border-color: var(--color-primary); }
 .currency-label { font-weight: 600; color: var(--color-text-muted); width: 40px; }
 
-/* 8. SIDEBAR NAVIGATION STYLES */
 .hamburger-btn {
     background: var(--color-primary); color: white; border: none; font-size: 1.5rem;
     width: 48px; height: 48px; border-radius: var(--radius-md); cursor: pointer;
@@ -302,7 +294,6 @@ body {
 .sidebar-text { font-size: 1rem; }
 .sidebar-divider { height: 1px; background: var(--color-border); margin: 1rem 0; }
 
-/* 9. TOILETRIES MODULE STYLES */
 .tab-btn {
     flex: 1; padding: 0.75rem; background: transparent; border: none;
     border-bottom: 3px solid transparent; color: var(--color-text-muted);
@@ -376,7 +367,6 @@ body {
 }
 .btn-copy-missing:hover { background: var(--color-primary-light); }
 
-/* 10. SCHOOL FEES MODULE STYLES */
 .fee-card {
     background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md);
     padding: 1.25rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem;
@@ -476,14 +466,11 @@ body {
 .ledger-payment-details { font-size: 0.9rem; color: var(--color-text-main); margin-top: 0.25rem; }
 .ledger-payment-amount { font-weight: 700; color: var(--color-accent); }
 
-/* ============================================
-   11. CUMULATIVE RECORD TABLE STYLES
-   ============================================ */
 .cumulative-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85rem;
-    min-width: 600px; /* Ensures horizontal scroll on mobile instead of squishing */
+    min-width: 600px; 
     margin-bottom: 1.5rem;
     background: white;
     border-radius: var(--radius-md);
@@ -558,9 +545,6 @@ body {
 .row-overall { background: #f0fdf4; font-weight: 800; font-size: 0.95rem; }
 .row-position { background: #fef3c7; }
 
-/* ============================================
-   12. ASSESSMENT & REPORT CARD STYLES
-   ============================================ */
 .subject-card {
     background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md);
     padding: 1.25rem; box-shadow: var(--shadow-sm);
@@ -588,7 +572,6 @@ body {
 .score-input:focus { outline: none; border-color: var(--color-primary); }
 .score-max { color: var(--color-text-muted); font-size: 0.85rem; }
 
-/* REPORT CARD STYLES - RESPONSIVE FOR MOBILE, A4 FOR PRINT */
 .report-card {
     position: relative;
     background: white;
@@ -600,12 +583,10 @@ body {
     margin: 0 auto;
     box-shadow: var(--shadow-lg);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: auto; /* Allows horizontal scroll for tables on mobile */
+    overflow-x: auto; 
 }
 
-.report-card-header {
-    text-align: center;
-}
+.report-card-header { text-align: center; }
 
 .report-logo {
     width: 80px; height: 80px; object-fit: contain; margin: 0 auto 10px auto; display: block;
@@ -645,7 +626,27 @@ body {
     padding-bottom: 3px;
 }
 
-.report-info-value, .report-remarks-text {
+/* BULLETPROOF TABLE FOR STUDENT INFO (Fixes html2canvas text mashing) */
+.report-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 13px;
+    line-height: 1.8;
+}
+.report-info-table td {
+    padding: 6px 8px;
+    width: 33.33%;
+    vertical-align: top;
+    word-wrap: break-word;
+}
+.report-info-table .report-info-label {
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-right: 5px;
+    white-space: nowrap;
+}
+.report-info-table .report-info-value {
     border-bottom: 1px dotted #999;
     min-height: 1.2em;
     padding: 2px 5px;
@@ -653,26 +654,9 @@ body {
     display: inline-block;
     min-width: 80px;
 }
-
-.report-info-value:focus, .report-remarks-text:focus {
+.report-info-table .report-info-value:focus {
     border-bottom: 1px solid var(--color-primary);
     background: #f0f9ff;
-}
-
-/* FIXED: Reduced minmax to 130px to prevent squishing on mobile/PDF */
-.report-student-info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-/* FIXED: Removed white-space: nowrap so text can wrap naturally */
-.report-info-label {
-    font-weight: 700;
-    color: var(--color-text-main);
-    margin-right: 5px;
 }
 
 .report-subjects-table {
@@ -680,7 +664,7 @@ body {
     border-collapse: collapse;
     margin-bottom: 20px;
     font-size: 0.9rem;
-    min-width: 600px; /* Forces scroll on mobile instead of breaking */
+    min-width: 600px; 
 }
 
 .report-subjects-table th, .report-subjects-table td {
@@ -746,9 +730,6 @@ body {
 }
 .btn-print-report:hover { filter: brightness(0.9); }
 
-/* ============================================
-   13. STUNNING LOGIN HERO SECTION
-   ============================================ */
 .login-hero {
     position: relative;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
@@ -797,7 +778,7 @@ body {
 
 .hero-logos {
     display: flex; align-items: center; justify-content: center;
-    gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; /* FIXED: Prevents breaking on small screens */
+    gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; 
 }
 
 .logo-wrapper {
@@ -848,67 +829,35 @@ body {
 }
 @keyframes formSlideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
 
-/* ============================================
-   14. COMPREHENSIVE MOBILE RESPONSIVENESS
-   ============================================ */
 @media (max-width: 768px) {
     .container { padding: 1rem; }
-    
     .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
     .dashboard-header > div:last-child { width: 100%; display: flex; flex-wrap: wrap; gap: 0.75rem; }
     .dashboard-header > div:last-child .btn { flex: 1; justify-content: center; }
-
     .portal-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
     .portal-stats { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-
-    /* FIXED: Student rows wrap neatly, names never get cut off */
-    .student-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-        padding: 1rem;
-    }
-    .student-info {
-        width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    .student-name {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        width: 100%;
-        line-height: 1.3;
-    }
-    .student-actions {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
+    .student-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; padding: 1rem; }
+    .student-info { width: 100%; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .student-name { word-wrap: break-word; overflow-wrap: break-word; width: 100%; line-height: 1.3; }
+    .student-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 0.5rem; }
     .score-entry-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     .score-input-wrapper { width: 100%; justify-content: space-between; }
-    
     .checklist-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
     .checklist-items { width: 100%; justify-content: flex-start; }
     .item-toggle { flex: 1; text-align: center; padding: 0.75rem; }
-    
     .compliance-table { font-size: 0.85rem; }
     .compliance-table th, .compliance-table td { padding: 0.5rem 0.25rem; }
-
     .settings-row { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
     .settings-input-wrapper { width: 100%; justify-content: space-between; }
-
     .payment-summary { grid-template-columns: 1fr; }
     .fee-checkbox-item { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     .fee-checkbox-amount { font-size: 1.2rem; }
-
     .report-card { padding: 1rem; }
     .report-subjects-table { font-size: 0.8rem; }
     .report-subjects-table th, .report-subjects-table td { padding: 0.5rem; }
     .report-school-name { font-size: 1.3rem; }
     .report-title { font-size: 1rem; }
+    .report-info-table td { width: 100%; display: block; margin-bottom: 8px; }
 }
 
 @media (max-width: 480px) {
@@ -923,7 +872,6 @@ body {
     .tagline-text { font-size: 0.85rem; letter-spacing: 2px; }
     .hero-subtitle { font-size: 0.8rem; }
     .login-form-card { margin-top: -1.5rem; }
-    
     .splash-logo { max-width: 150px; max-height: 150px; }
     .school-name { font-size: 1.1rem; }
 }
@@ -957,23 +905,16 @@ body {
     }
 }
 
-/* Custom Confirm & Factory Reset Modal Styles */
 #confirm-modal, #factory-reset-modal { display: none; }
 #confirm-modal[style*="flex"], #factory-reset-modal[style*="flex"] { display: flex !important; }
 
-/* ============================================
-   PRINT SPECIFIC RULES (A4)
-   ============================================ */
 @media print {
-    @page {
-        size: A4 portrait;
-        margin: 1cm;
-    }
+    @page { size: A4 portrait; margin: 1cm; }
     body * { visibility: hidden; }
     .report-card, .report-card * { visibility: visible; }
     .report-card {
         position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-        max-width: 210mm; min-height: 297mm; /* Restores A4 for print */
+        max-width: 210mm; min-height: 297mm; 
         border: 2px solid #000; box-shadow: none; padding: 20px; margin: 0;
         overflow-x: visible;
     }

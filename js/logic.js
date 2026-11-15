@@ -50,7 +50,8 @@ function getDepartment(className) {
 }
 
 // ==========================================
-// BULLETPROOF PDF GENERATOR (Fixes Blank PDFs & Centering)
+// BULLETPROOF PDF GENERATOR (Mathematically Locked to 210mm/794px)
+// Fixes: Shifted PDFs, Blank PDFs, and Mashed Text
 // ==========================================
 function generateSecurePDF(element, filename) {
     const clone = element.cloneNode(true);
@@ -63,33 +64,44 @@ function generateSecurePDF(element, filename) {
     const editables = clone.querySelectorAll('[contenteditable="true"]');
     editables.forEach(el => el.removeAttribute('contenteditable'));
 
-    // 3. Create a Temporary Full-Screen Overlay
-    // This forces the browser to fully render the element, preventing blank PDFs
+    // 3. Create a strict, zero-margin overlay locked to exactly 210mm width
+    // This prevents the PDF engine from guessing the wrong width and shifting content
     const overlay = document.createElement('div');
     overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-        background: white; z-index: 99999; overflow-y: auto; 
-        display: flex; justify-content: center; align-items: flex-start; padding: 20px;
+        position: fixed; top: 0; left: 0; width: 210mm; height: 100vh; 
+        background: white; z-index: 99999; overflow: hidden; 
+        padding: 0; margin: 0;
     `;
     
-    // 4. Style the clone for perfect A4 rendering with proper centering
+    // 4. Pin the clone to the absolute top-left of the overlay (no centering, no margins)
     clone.style.cssText = `
-        max-width: 210mm; width: 100%; min-height: 297mm; padding: 15mm; 
-        background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        width: 210mm; min-height: 297mm; padding: 15mm; 
+        background: white; box-shadow: none;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        position: relative; margin: 0 auto; box-sizing: border-box;
+        position: absolute; left: 0; top: 0;
+        box-sizing: border-box; margin: 0;
     `;
     
     overlay.appendChild(clone);
     document.body.appendChild(overlay);
 
     // 5. PDF Configuration
+    // windowWidth: 794 is EXACTLY 210mm at 96 DPI - this locks the rendering engine
     const opt = {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
-        // windowWidth: 1000 ensures it renders like a desktop screen, preventing mobile squishing
-        html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, scrollY: 0, windowWidth: 1000 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false, 
+            allowTaint: true, 
+            scrollY: 0, 
+            windowWidth: 794,  // Locked to 210mm A4 width
+            scrollX: 0,
+            x: 0,
+            y: 0
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -2031,7 +2043,7 @@ const UI = {
             `;
         });
 
-        // 3. Build the optimized A4 HTML structure (FIXED: Removed nowrap to prevent text mashing)
+        // 3. Build the optimized A4 HTML structure using a TABLE to prevent html2canvas text mashing
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
@@ -2042,17 +2054,23 @@ const UI = {
                     <div class="report-title" style="border-bottom: 1px solid #000000; margin: 5px 0; padding-bottom: 5px;">LEARNER'S ASSESSMENT REPORT</div>
                 </div>
 
-                <div class="report-student-info-grid" style="margin-bottom: 1rem;">
-                    <div><span class="report-info-label">Name of Learner:</span> <span class="report-info-value" contenteditable="true">${student.name}</span></div>
-                    <div><span class="report-info-label">Class:</span> <span class="report-info-value" contenteditable="true">${cls.name}</span></div>
-                    <div><span class="report-info-label">Position:</span> <span class="report-info-value" contenteditable="true">${positionString}</span></div>
-                    <div><span class="report-info-label">Department:</span> <span class="report-info-value" contenteditable="true">${getDepartment(cls.name)}</span></div>
-                    <div><span class="report-info-label">No. on Roll:</span> <span class="report-info-value" contenteditable="true">${cls.students.length}</span></div>
-                    <div><span class="report-info-label">Year:</span> <span class="report-info-value" contenteditable="true">2026</span></div>
-                    <div><span class="report-info-label">Term:</span> <span class="report-info-value" contenteditable="true">1st Term</span></div>
-                    <div><span class="report-info-label">Date:</span> <span class="report-info-value" contenteditable="true">${this.getLocalDateStr()}</span></div>
-                    <div><span class="report-info-label">Next Term Begins:</span> <span class="report-info-value" contenteditable="true">[Enter Date]</span></div>
-                </div>
+                <table class="report-info-table">
+                    <tr>
+                        <td><span class="report-info-label">Name of Learner:</span> <span class="report-info-value" contenteditable="true">${student.name}</span></td>
+                        <td><span class="report-info-label">Class:</span> <span class="report-info-value" contenteditable="true">${cls.name}</span></td>
+                        <td><span class="report-info-label">Position:</span> <span class="report-info-value" contenteditable="true">${positionString}</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="report-info-label">Department:</span> <span class="report-info-value" contenteditable="true">${getDepartment(cls.name)}</span></td>
+                        <td><span class="report-info-label">No. on Roll:</span> <span class="report-info-value" contenteditable="true">${cls.students.length}</span></td>
+                        <td><span class="report-info-label">Year:</span> <span class="report-info-value" contenteditable="true">2026</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="report-info-label">Term:</span> <span class="report-info-value" contenteditable="true">1st Term</span></td>
+                        <td><span class="report-info-label">Date:</span> <span class="report-info-value" contenteditable="true">${this.getLocalDateStr()}</span></td>
+                        <td><span class="report-info-label">Next Term Begins:</span> <span class="report-info-value" contenteditable="true">[Enter Date]</span></td>
+                    </tr>
+                </table>
 
                 <table class="report-subjects-table">
                     <thead>
