@@ -53,7 +53,7 @@ function esc(s) {
 }
 
 // ==========================================
-// DETERMINISTIC A4 PDF BUILDER (Fixed Mobile Ghosting)
+// DETERMINISTIC A4 PDF BUILDER (Fixed Desktop & Mobile)
 // ==========================================
 function generatePDFFromHtml(htmlString, filename) {
     window.scrollTo(0, 0);
@@ -117,7 +117,7 @@ function generateSecurePDF(element, filename) {
     }, 300);
 }
 
-// Builds the locked A4 report-card template (Using CSS Grid for Header to prevent Mobile Ghosting)
+// Builds the locked A4 report-card template (Bulletproof for Desktop & Mobile)
 function buildReportCardPDFHtml(d) {
     return `
 <div class="pdfdoc" style="width:794px; min-height:1123px; box-sizing:border-box; padding:40px; background:#ffffff; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#000000; position:relative;">
@@ -132,31 +132,72 @@ function buildReportCardPDFHtml(d) {
   .pdf-loc-item { font-size: 12px; font-weight: 600; border-bottom: 1px dotted #777; padding-bottom: 2px; min-width: 150px; text-align: center; }
   .pdf-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 5px; margin-top: 10px; display: inline-block; }
 
-  /* Student Info Grid (Replaces Table to fix Mobile Ghosting) */
+  /* Student Info Grid - FIXED: Explicit widths to prevent collapse on Desktop */
   .pdf-info-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px 20px;
+    grid-template-columns: 33% 33% 34%; /* Explicit percentages summing to 100% */
+    gap: 10px 15px;
     margin-bottom: 20px;
     font-size: 13px;
     line-height: 1.6;
+    width: 100%;
   }
-  .pdf-info-item { display: flex; align-items: baseline; }
-  .pdf-lbl { font-weight: 700; margin-right: 5px; white-space: nowrap; }
-  .pdf-val { border-bottom: 1px dotted #777; flex-grow: 1; padding-left: 5px; min-width: 50px; }
+  .pdf-info-item { 
+    display: flex; 
+    align-items: baseline; 
+    width: 100%; /* Ensure item takes full grid cell */
+  }
+  .pdf-lbl { font-weight: 700; margin-right: 5px; white-space: nowrap; flex-shrink: 0; }
+  .pdf-val { 
+    border-bottom: 1px dotted #777; 
+    flex-grow: 1; 
+    padding-left: 5px; 
+    min-width: 0; /* Allow shrinking if needed */
+    word-break: break-word;
+  }
 
-  /* Subjects Table */
-  .pdf-subjects { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-  .pdf-subjects th, .pdf-subjects td { border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; }
+  /* Subjects Table - FIXED: Explicit column widths */
+  .pdf-subjects { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-bottom: 20px; 
+    font-size: 12px; 
+    table-layout: fixed; /* CRITICAL: Forces columns to respect widths */
+  }
+  .pdf-subjects th, .pdf-subjects td { 
+    border: 1px solid #000; 
+    padding: 6px 4px; 
+    text-align: center; 
+    vertical-align: middle; 
+    overflow: hidden;
+    word-wrap: break-word;
+  }
   .pdf-subjects th { background: #f0f0f0; font-weight: 800; font-size: 11px; text-transform: uppercase; }
-  .pdf-subjects td:first-child { text-align: left; padding-left: 8px; font-weight: 600; width: 25%; }
+  
+  /* Explicit Column Widths for Desktop Stability */
+  .col-subj { width: 25%; }
+  .col-sba { width: 12%; }
+  .col-exam { width: 12%; }
+  .col-tot { width: 13%; }
+  .col-grad { width: 10%; }
+  .col-rem { width: 18%; }
+  .col-pos { width: 10%; }
+
+  .pdf-subjects td:first-child { text-align: left; padding-left: 8px; font-weight: 600; }
   
   /* Remarks Grid */
-  .pdf-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; font-size: 12px; }
-  .pdf-remark-box { display: flex; flex-direction: column; }
+  .pdf-remarks-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    margin-bottom: 30px; 
+    font-size: 12px; 
+    width: 100%;
+  }
+  .pdf-remark-box { display: flex; flex-direction: column; width: 100%; }
   .pdf-remark-full { grid-column: span 2; }
   .pdf-r-lbl { font-weight: 800; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; color: #333; }
-  .pdf-r-val { border-bottom: 1px dotted #777; min-height: 20px; padding: 2px 0; }
+  .pdf-r-val { border-bottom: 1px dotted #777; min-height: 20px; padding: 2px 0; width: 100%; }
 
   /* Signature */
   .pdf-sig-area { position: absolute; bottom: 40px; right: 40px; text-align: center; }
@@ -174,7 +215,7 @@ function buildReportCardPDFHtml(d) {
     <div class="pdf-title">LEARNER'S ASSESSMENT REPORT</div>
   </div>
 
-  <!-- Using Grid instead of Table for Student Info -->
+  <!-- Student Info Grid -->
   <div class="pdf-info-grid">
     <div class="pdf-info-item"><span class="pdf-lbl">Name:</span> <span class="pdf-val">${esc(d.name)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Class:</span> <span class="pdf-val">${esc(d.cls)}</span></div>
@@ -189,21 +230,32 @@ function buildReportCardPDFHtml(d) {
     <div class="pdf-info-item"><span class="pdf-lbl">Next Term:</span> <span class="pdf-val">${esc(d.nextTerm)}</span></div>
   </div>
 
+  <!-- Subjects Table with Explicit Columns -->
   <table class="pdf-subjects">
+    <colgroup>
+        <col class="col-subj">
+        <col class="col-sba">
+        <col class="col-exam">
+        <col class="col-tot">
+        <col class="col-grad">
+        <col class="col-rem">
+        <col class="col-pos">
+    </colgroup>
     <thead>
       <tr>
-        <th style="width:25%">SUBJECT</th>
-        <th style="width:12%">SBA (50%)</th>
-        <th style="width:12%">EXAM (50%)</th>
-        <th style="width:13%">TOTAL (100)</th>
-        <th style="width:10%">GRADE</th>
-        <th style="width:18%">REMARK</th>
-        <th style="width:10%">POS</th>
+        <th>SUBJECT</th>
+        <th>SBA (50%)</th>
+        <th>EXAM (50%)</th>
+        <th>TOTAL (100)</th>
+        <th>GRADE</th>
+        <th>REMARK</th>
+        <th>POS</th>
       </tr>
     </thead>
     <tbody>${d.subjectRows}</tbody>
   </table>
 
+  <!-- Remarks Grid -->
   <div class="pdf-remarks-grid">
     <div class="pdf-remark-box">
         <div class="pdf-r-lbl">ATTENDANCE</div>
