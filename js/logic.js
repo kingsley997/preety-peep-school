@@ -1552,7 +1552,7 @@ const UI = {
             const feeId = cb.value;
             const fee = feeTypes.find(f => f.id === feeId);
             if (!fee) return;
-            const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === feeId);
+            const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === fee.id);
             const totalPaidForFee = studentPayments.reduce((sum, p) => sum + p.amount, 0);
             const outstanding = Math.max(0, fee.amount - totalPaidForFee);
             if (outstanding > 0 && remainingAmount > 0) {
