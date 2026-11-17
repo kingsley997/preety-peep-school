@@ -60,7 +60,6 @@ function generatePDFFromHtml(htmlString, filename) {
 
     const host = document.createElement('div');
     host.setAttribute('data-pdf-host', 'true');
-    // Critical: Use visibility hidden instead of opacity 0 to ensure layout calculation
     host.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:99990;background:#ffffff;visibility:hidden;pointer-events:none;';
     host.innerHTML = htmlString;
     document.body.appendChild(host);
@@ -79,8 +78,8 @@ function generatePDFFromHtml(htmlString, filename) {
             backgroundColor: '#ffffff',
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 794, // Force exact A4 width
-            windowHeight: 1123 // Force exact A4 height ratio
+            windowWidth: 794,
+            windowHeight: 1123
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] }
@@ -94,10 +93,9 @@ function generatePDFFromHtml(htmlString, filename) {
             if (host.parentNode) document.body.removeChild(host);
             alert('Error generating PDF. Please try again.');
         });
-    }, 500); // Increased delay for mobile rendering stability
+    }, 500);
 }
 
-// Legacy element-based generator (kept for the Fee Receipt modal)
 function generateSecurePDF(element, filename) {
     window.scrollTo(0, 0);
     element.querySelectorAll('button').forEach(btn => btn.setAttribute('data-html2canvas-ignore', 'true'));
@@ -117,14 +115,12 @@ function generateSecurePDF(element, filename) {
     }, 300);
 }
 
-// Builds the locked A4 report-card template (Bulletproof for Desktop & Mobile)
+// Builds the locked A4 report-card template
 function buildReportCardPDFHtml(d) {
     return `
 <div class="pdfdoc" style="width:794px; min-height:1123px; box-sizing:border-box; padding:40px; background:#ffffff; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#000000; position:relative;">
 <style>
   .pdfdoc * { box-sizing: border-box; }
-  
-  /* Header Styles */
   .pdf-header { text-align: center; margin-bottom: 20px; }
   .pdf-logo { width: 70px; height: 70px; object-fit: contain; display: block; margin: 0 auto 10px auto; }
   .pdf-school-name { font-size: 22px; font-weight: 800; letter-spacing: 1px; margin: 0 0 5px 0; text-transform: uppercase; }
@@ -132,49 +128,23 @@ function buildReportCardPDFHtml(d) {
   .pdf-loc-item { font-size: 12px; font-weight: 600; border-bottom: 1px dotted #777; padding-bottom: 2px; min-width: 150px; text-align: center; }
   .pdf-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 5px; margin-top: 10px; display: inline-block; }
 
-  /* Student Info Grid - FIXED: Explicit widths to prevent collapse on Desktop */
   .pdf-info-grid {
     display: grid;
-    grid-template-columns: 33% 33% 34%; /* Explicit percentages summing to 100% */
+    grid-template-columns: 33% 33% 34%;
     gap: 10px 15px;
     margin-bottom: 20px;
     font-size: 13px;
     line-height: 1.6;
     width: 100%;
   }
-  .pdf-info-item { 
-    display: flex; 
-    align-items: baseline; 
-    width: 100%; /* Ensure item takes full grid cell */
-  }
+  .pdf-info-item { display: flex; align-items: baseline; width: 100%; }
   .pdf-lbl { font-weight: 700; margin-right: 5px; white-space: nowrap; flex-shrink: 0; }
-  .pdf-val { 
-    border-bottom: 1px dotted #777; 
-    flex-grow: 1; 
-    padding-left: 5px; 
-    min-width: 0; /* Allow shrinking if needed */
-    word-break: break-word;
-  }
+  .pdf-val { border-bottom: 1px dotted #777; flex-grow: 1; padding-left: 5px; min-width: 0; word-break: break-word; }
 
-  /* Subjects Table - FIXED: Explicit column widths */
-  .pdf-subjects { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-bottom: 20px; 
-    font-size: 12px; 
-    table-layout: fixed; /* CRITICAL: Forces columns to respect widths */
-  }
-  .pdf-subjects th, .pdf-subjects td { 
-    border: 1px solid #000; 
-    padding: 6px 4px; 
-    text-align: center; 
-    vertical-align: middle; 
-    overflow: hidden;
-    word-wrap: break-word;
-  }
+  .pdf-subjects { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; table-layout: fixed; }
+  .pdf-subjects th, .pdf-subjects td { border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; overflow: hidden; word-wrap: break-word; }
   .pdf-subjects th { background: #f0f0f0; font-weight: 800; font-size: 11px; text-transform: uppercase; }
   
-  /* Explicit Column Widths for Desktop Stability */
   .col-subj { width: 25%; }
   .col-sba { width: 12%; }
   .col-exam { width: 12%; }
@@ -185,29 +155,20 @@ function buildReportCardPDFHtml(d) {
 
   .pdf-subjects td:first-child { text-align: left; padding-left: 8px; font-weight: 600; }
   
-  /* Remarks Grid */
-  .pdf-remarks-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px; 
-    margin-bottom: 30px; 
-    font-size: 12px; 
-    width: 100%;
-  }
+  .pdf-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; font-size: 12px; width: 100%; }
   .pdf-remark-box { display: flex; flex-direction: column; width: 100%; }
   .pdf-remark-full { grid-column: span 2; }
   .pdf-r-lbl { font-weight: 800; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; color: #333; }
   .pdf-r-val { border-bottom: 1px dotted #777; min-height: 20px; padding: 2px 0; width: 100%; }
 
-  /* Signature */
   .pdf-sig-area { position: absolute; bottom: 40px; right: 40px; text-align: center; }
   .pdf-sig-line { width: 220px; border-bottom: 2px solid #000; margin-bottom: 5px; height: 40px; }
   .pdf-sig-cap { font-size: 11px; font-weight: 700; text-transform: uppercase; }
 </style>
 
   <div class="pdf-header">
-    <img src="images/school-logo.png" alt="logo" class="pdf-logo">
-    <div class="pdf-school-name">PREETY PEEP SCHOOL</div>
+    <img src="images/Mount-Zion-Royal-Complex-Crest.png" alt="logo" class="pdf-logo">
+    <div class="pdf-school-name">MOUNT ZION ROYAL COMPLEX</div>
     <div class="pdf-loc-row">
         <div class="pdf-loc-item">${esc(d.district)}</div>
         <div class="pdf-loc-item">${esc(d.region)}</div>
@@ -215,7 +176,6 @@ function buildReportCardPDFHtml(d) {
     <div class="pdf-title">LEARNER'S ASSESSMENT REPORT</div>
   </div>
 
-  <!-- Student Info Grid -->
   <div class="pdf-info-grid">
     <div class="pdf-info-item"><span class="pdf-lbl">Name:</span> <span class="pdf-val">${esc(d.name)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Class:</span> <span class="pdf-val">${esc(d.cls)}</span></div>
@@ -230,7 +190,6 @@ function buildReportCardPDFHtml(d) {
     <div class="pdf-info-item"><span class="pdf-lbl">Next Term:</span> <span class="pdf-val">${esc(d.nextTerm)}</span></div>
   </div>
 
-  <!-- Subjects Table with Explicit Columns -->
   <table class="pdf-subjects">
     <colgroup>
         <col class="col-subj">
@@ -255,7 +214,6 @@ function buildReportCardPDFHtml(d) {
     <tbody>${d.subjectRows}</tbody>
   </table>
 
-  <!-- Remarks Grid -->
   <div class="pdf-remarks-grid">
     <div class="pdf-remark-box">
         <div class="pdf-r-lbl">ATTENDANCE</div>
@@ -903,7 +861,9 @@ const UI = {
                 Store.set('daily_reports', reports);
                 const resetRoster = roster.map(cls => ({ ...cls, students: cls.students.map(s => ({ ...s, status: 'unpaid', time: null })) }));
                 Store.set(`roster_${dateStr}`, resetRoster);
-                const summary = `ALPHA TECH - DAILY FEEDING SUMMARY\n----------------------------------\nDate: ${report.date} | Time: ${report.timeFinished}\nOfficer: ${report.officer}\n\nFINANCIAL BREAKDOWN:\nTotal Expected: GHS ${(report.totalExpected / 100).toFixed(2)}\nTotal Collected: GHS ${(report.totalCollected / 100).toFixed(2)}\nTotal Outstanding: GHS ${(report.totalOutstanding / 100).toFixed(2)}\n\nATTENDANCE & STATUS:\nStudents Present: ${report.totalPresent}\nStudents Absent: ${report.totalAbsent}\nStudents Not Paying: ${report.totalNotPaying}\nStudents Who Paid: ${report.totalPaidStudents}\n\nCLASS BREAKDOWN:\n${report.classDetails.join('\n')}\n----------------------------------\nGenerated by Alpha Tech System`.trim();
+                
+                // UPDATED SCHOOL NAME IN SUMMARY
+                const summary = `MOUNT ZION ROYAL COMPLEX - DAILY FEEDING SUMMARY\n----------------------------------\nDate: ${report.date} | Time: ${report.timeFinished}\nOfficer: ${report.officer}\n\nFINANCIAL BREAKDOWN:\nTotal Expected: GHS ${(report.totalExpected / 100).toFixed(2)}\nTotal Collected: GHS ${(report.totalCollected / 100).toFixed(2)}\nTotal Outstanding: GHS ${(report.totalOutstanding / 100).toFixed(2)}\n\nATTENDANCE & STATUS:\nStudents Present: ${report.totalPresent}\nStudents Absent: ${report.totalAbsent}\nStudents Not Paying: ${report.totalNotPaying}\nStudents Who Paid: ${report.totalPaidStudents}\n\nCLASS BREAKDOWN:\n${report.classDetails.join('\n')}\n----------------------------------\nGenerated by Alpha Tech System`.trim();
                 this.currentReportText = summary;
                 document.getElementById('report-content').textContent = summary;
                 document.getElementById('report-modal').style.display = 'flex';
@@ -935,7 +895,8 @@ const UI = {
         const reports = Store.get('daily_reports') || [];
         const rep = reports.find(r => r.id === reportId);
         if (!rep) return;
-        const summary = `ALPHA TECH - DAILY FEEDING SUMMARY\n----------------------------------\nDate: ${rep.date} | Time Finished: ${rep.timeFinished}\nOfficer: ${rep.officer}\n\nFINANCIAL BREAKDOWN:\nTotal Expected: GHS ${(rep.totalExpected / 100).toFixed(2)}\nTotal Collected: GHS ${(rep.totalCollected / 100).toFixed(2)}\nTotal Outstanding: GHS ${(rep.totalOutstanding / 100).toFixed(2)}\n\nATTENDANCE & STATUS:\nStudents Present: ${rep.totalPresent}\nStudents Absent: ${rep.totalAbsent || 0}\nStudents Not Paying: ${rep.totalNotPaying || 0}\nStudents Who Paid: ${rep.totalPaidStudents}\n\nCLASS BREAKDOWN:\n${rep.classDetails.join('\n')}\n----------------------------------\nGenerated by Alpha Tech System`.trim();
+        // UPDATED SCHOOL NAME IN SUMMARY
+        const summary = `MOUNT ZION ROYAL COMPLEX - DAILY FEEDING SUMMARY\n----------------------------------\nDate: ${rep.date} | Time Finished: ${rep.timeFinished}\nOfficer: ${rep.officer}\n\nFINANCIAL BREAKDOWN:\nTotal Expected: GHS ${(rep.totalExpected / 100).toFixed(2)}\nTotal Collected: GHS ${(rep.totalCollected / 100).toFixed(2)}\nTotal Outstanding: GHS ${(rep.totalOutstanding / 100).toFixed(2)}\n\nATTENDANCE & STATUS:\nStudents Present: ${rep.totalPresent}\nStudents Absent: ${rep.totalAbsent || 0}\nStudents Not Paying: ${rep.totalNotPaying || 0}\nStudents Who Paid: ${rep.totalPaidStudents}\n\nCLASS BREAKDOWN:\n${rep.classDetails.join('\n')}\n----------------------------------\nGenerated by Alpha Tech System`.trim();
         this.currentReportText = summary;
         document.getElementById('report-content').textContent = summary;
         document.getElementById('report-modal').style.display = 'flex';
@@ -961,7 +922,7 @@ const UI = {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         const dateStr = this.currentReportText.match(/Date: (.*) \|/)?.[1] || 'Report';
-        a.href = url; a.download = `AlphaTech_Summary_${dateStr}.txt`;
+        a.href = url; a.download = `MountZion_Summary_${dateStr}.txt`;
         document.body.appendChild(a); a.click();
         window.URL.revokeObjectURL(url); document.body.removeChild(a);
         alert("✅ Report downloaded to your device!");
@@ -1230,9 +1191,10 @@ const UI = {
 
     _generateMissingListText(record, missingList) {
         if (missingList.length === 0) return '';
+        // UPDATED SCHOOL NAME
         let text = `🧴 TOILETRIES REMINDER - ${record.className}\nDate: ${record.date}\n\nDear Parents,\n\nThe following students are missing required toiletry items. Please send them to school as soon as possible:\n\n`;
         missingList.forEach(s => { text += `• ${s.name} - Missing: ${s.missing.join(', ')}\n`; });
-        text += `\nThank you for your cooperation.\nPreety Peep School`;
+        text += `\nThank you for your cooperation.\nMount Zion Royal Complex`;
         return text;
     },
 
@@ -1552,7 +1514,7 @@ const UI = {
             const feeId = cb.value;
             const fee = feeTypes.find(f => f.id === feeId);
             if (!fee) return;
-            const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === fee.id);
+            const studentPayments = payments.filter(p => p.studentId === studentId && p.feeId === feeId);
             const totalPaidForFee = studentPayments.reduce((sum, p) => sum + p.amount, 0);
             const outstanding = Math.max(0, fee.amount - totalPaidForFee);
             if (outstanding > 0 && remainingAmount > 0) {
@@ -1588,8 +1550,8 @@ const UI = {
         const html = `
             <div id="fee-receipt-content" style="background: white; padding: 2rem; border-radius: var(--radius-lg); max-width: 500px; width: 90%; box-shadow: var(--shadow-lg); font-family: 'Segoe UI', sans-serif;">
                 <div style="text-align: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                    <img src="images/school-logo.png" alt="Logo" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 0.5rem;">
-                    <h2 style="color: var(--color-primary); margin: 0; font-size: 1.5rem;">PREETY PEEP SCHOOL</h2>
+                    <img src="images/Mount-Zion-Royal-Complex-Crest.png" alt="Logo" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 0.5rem;">
+                    <h2 style="color: var(--color-primary); margin: 0; font-size: 1.5rem;">MOUNT ZION ROYAL COMPLEX</h2>
                     <p style="color: var(--color-text-muted); margin: 5px 0 0 0; font-size: 0.9rem;">Official Fee Receipt</p>
                 </div>
                 
@@ -2215,14 +2177,13 @@ const UI = {
             `;
         });
 
-        // Cache data for the locked PDF template
         this.lastReportPDF = { subjectRows: subjectRows, positionString: positionString };
 
         const html = `
             <div class="report-card">
                 <div class="report-card-header">
-                    <img src="images/school-logo.png" alt="School Logo" class="report-logo">
-                    <div class="report-school-name">PREETY PEEP SCHOOL</div>
+                    <img src="images/Mount-Zion-Royal-Complex-Crest.png" alt="School Logo" class="report-logo">
+                    <div class="report-school-name">MOUNT ZION ROYAL COMPLEX</div>
                     <div class="report-school-info" contenteditable="true">DISTRICT: [Enter District]</div>
                     <div class="report-school-info" contenteditable="true">REGION: [Enter Region]</div>
                     <div class="report-title" style="border-bottom: 1px solid #000000; margin: 3px 0; padding-bottom: 2px;">LEARNER'S ASSESSMENT REPORT</div>
@@ -2323,7 +2284,6 @@ const UI = {
         document.getElementById('assess-report-card-preview').style.display = 'block';
     },
 
-    // Downloads a device-independent, perfectly centered A4 PDF
     downloadReportCard(studentId, classId) {
         const classes = Store.get('classes') || [];
         const cls = classes.find(c => c.id === classId);
@@ -2337,7 +2297,6 @@ const UI = {
             return;
         }
 
-        // Carry over anything the teacher typed on screen into the locked PDF
         const infoNodes = card.querySelectorAll('.report-school-info');
         const rt = card.querySelectorAll('.report-remarks-text');
         const conductSel = card.querySelector('.report-select');
