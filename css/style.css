@@ -449,7 +449,12 @@ body {
    PRINT SPECIFIC RULES (A4) - FIXED FOR DESKTOP
    ============================================ */
 @media print {
-    @page { size: A4 portrait; margin: 1cm; }
+    /* 1. Force the browser to hide headers/footers by setting margins to 0 */
+    @page { 
+        size: A4 portrait; 
+        margin: 0; 
+    }
+    
     body * { visibility: hidden; }
     .report-card, .report-card * { visibility: visible; }
     
@@ -461,11 +466,13 @@ body {
         height: 100%;
         max-width: 210mm;
         min-height: 297mm;
-        border: 2px solid #000;
+        border: none; /* Remove border for cleaner print */
         box-shadow: none;
-        padding: 15mm;
+        /* 2. Add padding inside the card to replace the @page margin */
+        padding: 15mm 15mm 20mm 15mm; /* Extra bottom padding prevents page 2 */
         margin: 0;
-        overflow: visible;
+        overflow: hidden; /* Prevents any spillover from creating a 2nd page */
+        page-break-after: avoid;
     }
 
     /* FORCE 3-Column Layout for Print (Overrides Mobile Stacking) */
@@ -497,7 +504,10 @@ body {
         border: 1px solid #000 !important;
     }
 
-    .btn-print-report, .sidebar, .dashboard-header, #sidebar-overlay { display: none !important; }
+    /* 3. Hide buttons, sidebars, AND the print container itself */
+    .btn-print-report, .sidebar, .dashboard-header, #sidebar-overlay, #assess-report-card-preview > div:not(.report-card) { 
+        display: none !important; 
+    }
     
     .report-info-value, .report-remarks-text, .report-school-info {
         border-bottom: 1px solid #000 !important;
