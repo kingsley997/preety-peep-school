@@ -53,16 +53,15 @@ function esc(s) {
 }
 
 // ==========================================
-// DETERMINISTIC A4 PDF BUILDER (device-independent)
-// Renders a self-contained fixed-width template so mobile viewports
-// can NEVER shift, crop or re-stack the PDF layout.
+// DETERMINISTIC A4 PDF BUILDER (Fixed Mobile Ghosting)
 // ==========================================
 function generatePDFFromHtml(htmlString, filename) {
     window.scrollTo(0, 0);
 
     const host = document.createElement('div');
     host.setAttribute('data-pdf-host', 'true');
-    host.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:99990;background:#ffffff;opacity:0;pointer-events:none;';
+    // Critical: Use visibility hidden instead of opacity 0 to ensure layout calculation
+    host.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:99990;background:#ffffff;visibility:hidden;pointer-events:none;';
     host.innerHTML = htmlString;
     document.body.appendChild(host);
 
@@ -80,8 +79,8 @@ function generatePDFFromHtml(htmlString, filename) {
             backgroundColor: '#ffffff',
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 1000,
-            windowHeight: 1500
+            windowWidth: 794, // Force exact A4 width
+            windowHeight: 1123 // Force exact A4 height ratio
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] }
@@ -95,7 +94,7 @@ function generatePDFFromHtml(htmlString, filename) {
             if (host.parentNode) document.body.removeChild(host);
             alert('Error generating PDF. Please try again.');
         });
-    }, 350);
+    }, 500); // Increased delay for mobile rendering stability
 }
 
 // Legacy element-based generator (kept for the Fee Receipt modal)
@@ -106,7 +105,7 @@ function generateSecurePDF(element, filename) {
         margin: 0,
         filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 1000, windowHeight: 1500 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 794, windowHeight: 1123 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] }
     };
@@ -118,90 +117,135 @@ function generateSecurePDF(element, filename) {
     }, 300);
 }
 
-// Builds the locked A4 report-card template (inline styles only, fixed table layout)
+// Builds the locked A4 report-card template (Using CSS Grid for Header to prevent Mobile Ghosting)
 function buildReportCardPDFHtml(d) {
     return `
-<div class="pdfdoc" style="width:100%;box-sizing:border-box;padding:36px;background:#ffffff;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#000000;">
+<div class="pdfdoc" style="width:794px; min-height:1123px; box-sizing:border-box; padding:40px; background:#ffffff; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#000000; position:relative;">
 <style>
   .pdfdoc * { box-sizing: border-box; }
-  .pdfdoc .hd { text-align: center; }
-  .pdfdoc .hd img { width: 64px; height: 64px; object-fit: contain; display: block; margin: 0 auto 6px auto; }
-  .pdfdoc .sch { font-size: 19px; font-weight: 800; letter-spacing: .5px; margin: 0 0 4px 0; text-transform: uppercase; }
-  .pdfdoc .loc { font-size: 11px; font-weight: 600; display: inline-block; margin: 0 8px; border-bottom: 1px dotted #777; padding: 0 4px 1px 4px; min-width: 120px; }
-  .pdfdoc .ttl { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 3px; margin: 8px 0 10px 0; }
-  .pdfdoc table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .pdfdoc td, .pdfdoc th { border: 1px solid #000; padding: 4px 5px; font-size: 11px; text-align: center; word-wrap: break-word; overflow: hidden; vertical-align: top; }
-  .pdfdoc th { background: #eeeeee; font-weight: 800; font-size: 10.5px; }
-  .pdfdoc tbody td:first-child { text-align: left; font-weight: 600; }
-  .pdfdoc table.info td { border: none; text-align: left; padding: 2px 4px; }
-  .pdfdoc .lbl { font-weight: 700; }
-  .pdfdoc .val { border-bottom: 1px dotted #777; display: inline-block; min-width: 60px; padding: 0 3px; }
-  .pdfdoc table.rm td { border: none; padding: 3px 6px; text-align: left; font-size: 10.5px; }
-  .pdfdoc .rm .k { font-weight: 800; font-size: 9.5px; text-transform: uppercase; margin-bottom: 2px; }
-  .pdfdoc .rm .v { border-bottom: 1px dotted #777; min-height: 16px; padding: 1px 3px; }
-  .pdfdoc .sig { margin-top: 14px; text-align: right; }
-  .pdfdoc .sig .line { display: inline-block; width: 200px; border-bottom: 2px solid #000; height: 34px; }
-  .pdfdoc .sig .cap { font-size: 10px; font-weight: 700; }
-  .pdfdoc .avoid { page-break-inside: avoid; }
+  
+  /* Header Styles */
+  .pdf-header { text-align: center; margin-bottom: 20px; }
+  .pdf-logo { width: 70px; height: 70px; object-fit: contain; display: block; margin: 0 auto 10px auto; }
+  .pdf-school-name { font-size: 22px; font-weight: 800; letter-spacing: 1px; margin: 0 0 5px 0; text-transform: uppercase; }
+  .pdf-loc-row { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
+  .pdf-loc-item { font-size: 12px; font-weight: 600; border-bottom: 1px dotted #777; padding-bottom: 2px; min-width: 150px; text-align: center; }
+  .pdf-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 5px; margin-top: 10px; display: inline-block; }
+
+  /* Student Info Grid (Replaces Table to fix Mobile Ghosting) */
+  .pdf-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px 20px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .pdf-info-item { display: flex; align-items: baseline; }
+  .pdf-lbl { font-weight: 700; margin-right: 5px; white-space: nowrap; }
+  .pdf-val { border-bottom: 1px dotted #777; flex-grow: 1; padding-left: 5px; min-width: 50px; }
+
+  /* Subjects Table */
+  .pdf-subjects { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+  .pdf-subjects th, .pdf-subjects td { border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; }
+  .pdf-subjects th { background: #f0f0f0; font-weight: 800; font-size: 11px; text-transform: uppercase; }
+  .pdf-subjects td:first-child { text-align: left; padding-left: 8px; font-weight: 600; width: 25%; }
+  
+  /* Remarks Grid */
+  .pdf-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; font-size: 12px; }
+  .pdf-remark-box { display: flex; flex-direction: column; }
+  .pdf-remark-full { grid-column: span 2; }
+  .pdf-r-lbl { font-weight: 800; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; color: #333; }
+  .pdf-r-val { border-bottom: 1px dotted #777; min-height: 20px; padding: 2px 0; }
+
+  /* Signature */
+  .pdf-sig-area { position: absolute; bottom: 40px; right: 40px; text-align: center; }
+  .pdf-sig-line { width: 220px; border-bottom: 2px solid #000; margin-bottom: 5px; height: 40px; }
+  .pdf-sig-cap { font-size: 11px; font-weight: 700; text-transform: uppercase; }
 </style>
 
-  <div class="hd avoid">
-    <img src="images/school-logo.png" alt="logo">
-    <div class="sch">PREETY PEEP SCHOOL</div>
-    <div><span class="loc">${esc(d.district)}</span><span class="loc">${esc(d.region)}</span></div>
-    <div class="ttl">LEARNER'S ASSESSMENT REPORT</div>
+  <div class="pdf-header">
+    <img src="images/school-logo.png" alt="logo" class="pdf-logo">
+    <div class="pdf-school-name">PREETY PEEP SCHOOL</div>
+    <div class="pdf-loc-row">
+        <div class="pdf-loc-item">${esc(d.district)}</div>
+        <div class="pdf-loc-item">${esc(d.region)}</div>
+    </div>
+    <div class="pdf-title">LEARNER'S ASSESSMENT REPORT</div>
   </div>
 
-  <table class="info avoid">
-    <colgroup><col style="width:34%"><col style="width:33%"><col style="width:33%"></colgroup>
-    <tr>
-      <td><span class="lbl">Name:</span> <span class="val">${esc(d.name)}</span></td>
-      <td><span class="lbl">Class:</span> <span class="val">${esc(d.cls)}</span></td>
-      <td><span class="lbl">Position:</span> <span class="val">${esc(d.position)}</span></td>
-    </tr>
-    <tr>
-      <td><span class="lbl">Dept:</span> <span class="val">${esc(d.department)}</span></td>
-      <td><span class="lbl">Roll:</span> <span class="val">${esc(d.roll)}</span></td>
-      <td><span class="lbl">Year:</span> <span class="val">2026</span></td>
-    </tr>
-    <tr>
-      <td><span class="lbl">Term:</span> <span class="val">1st Term</span></td>
-      <td><span class="lbl">Date:</span> <span class="val">${esc(d.date)}</span></td>
-      <td><span class="lbl">Next Term:</span> <span class="val">${esc(d.nextTerm)}</span></td>
-    </tr>
-  </table>
+  <!-- Using Grid instead of Table for Student Info -->
+  <div class="pdf-info-grid">
+    <div class="pdf-info-item"><span class="pdf-lbl">Name:</span> <span class="pdf-val">${esc(d.name)}</span></div>
+    <div class="pdf-info-item"><span class="pdf-lbl">Class:</span> <span class="pdf-val">${esc(d.cls)}</span></div>
+    <div class="pdf-info-item"><span class="pdf-lbl">Position:</span> <span class="pdf-val">${esc(d.position)}</span></div>
+    
+    <div class="pdf-info-item"><span class="pdf-lbl">Dept:</span> <span class="pdf-val">${esc(d.department)}</span></div>
+    <div class="pdf-info-item"><span class="pdf-lbl">Roll:</span> <span class="pdf-val">${esc(d.roll)}</span></div>
+    <div class="pdf-info-item"><span class="pdf-lbl">Year:</span> <span class="pdf-val">2026</span></div>
+    
+    <div class="pdf-info-item"><span class="pdf-lbl">Term:</span> <span class="pdf-val">1st Term</span></div>
+    <div class="pdf-info-item"><span class="pdf-lbl">Date:</span> <span class="pdf-val">${esc(d.date)}</span></div>
+    <div class="pdf-info-item"><span class="pdf-lbl">Next Term:</span> <span class="pdf-val">${esc(d.nextTerm)}</span></div>
+  </div>
 
-  <table class="avoid" style="margin-top:8px;">
-    <colgroup>
-      <col style="width:26%"><col style="width:11%"><col style="width:12%"><col style="width:12%"><col style="width:9%"><col style="width:18%"><col style="width:12%">
-    </colgroup>
+  <table class="pdf-subjects">
     <thead>
-      <tr><th>SUBJECT</th><th>SBA (50%)</th><th>EXAM (50%)</th><th>TOTAL (100)</th><th>GRADE</th><th>REMARK</th><th>POS</th></tr>
+      <tr>
+        <th style="width:25%">SUBJECT</th>
+        <th style="width:12%">SBA (50%)</th>
+        <th style="width:12%">EXAM (50%)</th>
+        <th style="width:13%">TOTAL (100)</th>
+        <th style="width:10%">GRADE</th>
+        <th style="width:18%">REMARK</th>
+        <th style="width:10%">POS</th>
+      </tr>
     </thead>
     <tbody>${d.subjectRows}</tbody>
   </table>
 
-  <table class="rm avoid" style="margin-top:10px;">
-    <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
-    <tr>
-      <td><div class="k">ATTENDANCE</div><div class="v">${esc(d.attendance)}</div></td>
-      <td><div class="k">TALENTS &amp; INTEREST</div><div class="v">${esc(d.talents)}</div></td>
-    </tr>
-    <tr>
-      <td><div class="k">CONDUCT</div><div class="v">${esc(d.conduct)}</div></td>
-      <td><div class="k">NEXT TERM'S FEES</div><div class="v">${esc(d.nextFees)}</div></td>
-    </tr>
-    <tr><td colspan="2"><div class="k">CLASS TEACHER'S REMARK</div><div class="v">${esc(d.teacherRemark)}</div></td></tr>
-    <tr><td colspan="2"><div class="k">HEADTEACHER'S REMARK</div><div class="v">${esc(d.headRemark)}</div></td></tr>
-    <tr>
-      <td><div class="k">ARREARS</div><div class="v">${esc(d.arrears)}</div></td>
-      <td><div class="k">TOTAL</div><div class="v">${esc(d.total)}</div></td>
-    </tr>
-  </table>
+  <div class="pdf-remarks-grid">
+    <div class="pdf-remark-box">
+        <div class="pdf-r-lbl">ATTENDANCE</div>
+        <div class="pdf-r-val">${esc(d.attendance)}</div>
+    </div>
+    <div class="pdf-remark-box">
+        <div class="pdf-r-lbl">TALENTS & INTEREST</div>
+        <div class="pdf-r-val">${esc(d.talents)}</div>
+    </div>
+    
+    <div class="pdf-remark-box">
+        <div class="pdf-r-lbl">CONDUCT</div>
+        <div class="pdf-r-val">${esc(d.conduct)}</div>
+    </div>
+    <div class="pdf-remark-box">
+        <div class="pdf-r-lbl">NEXT TERM'S FEES</div>
+        <div class="pdf-r-val">${esc(d.nextFees)}</div>
+    </div>
 
-  <div class="sig avoid">
-    <span class="line"></span><br>
-    <span class="cap">HEADTEACHER'S SIGNATURE &amp; STAMP</span>
+    <div class="pdf-remark-box pdf-remark-full">
+        <div class="pdf-r-lbl">CLASS TEACHER'S REMARK</div>
+        <div class="pdf-r-val">${esc(d.teacherRemark)}</div>
+    </div>
+    
+    <div class="pdf-remark-box pdf-remark-full">
+        <div class="pdf-r-lbl">HEADTEACHER'S REMARK</div>
+        <div class="pdf-r-val">${esc(d.headRemark)}</div>
+    </div>
+
+    <div class="pdf-remark-box">
+        <div class="pdf-r-lbl">ARREARS</div>
+        <div class="pdf-r-val">${esc(d.arrears)}</div>
+    </div>
+    <div class="pdf-remark-box">
+        <div class="pdf-r-lbl">TOTAL</div>
+        <div class="pdf-r-val">${esc(d.total)}</div>
+    </div>
+  </div>
+
+  <div class="pdf-sig-area">
+    <div class="pdf-sig-line"></div>
+    <div class="pdf-sig-cap">HEADTEACHER'S SIGNATURE & STAMP</div>
   </div>
 </div>`;
 }
