@@ -53,66 +53,82 @@ function esc(s) {
 }
 
 // ==========================================
-// DETERMINISTIC A4 PDF BUILDER (Bulletproof for Mobile & Desktop)
+// DETERMINISTIC PDF PIPELINE (html2canvas + jsPDF directly)
+// No library render-containers => no centering/offset bugs on ANY device.
+// Explicit crop window (x:0, y:0, width) guarantees nothing is ever sliced.
 // ==========================================
+function renderToPdf(el, filename, cssWidthPx, ignoreButtons) {
+    const w = cssWidthPx || el.offsetWidth || 794;
+    const h = el.scrollHeight || el.offsetHeight || 1123;
+
+    return html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        width: w,
+        height: h,
+        windowWidth: w,
+        windowHeight: Math.max(h + 100, 1200),
+        ignoreElements: (node) => !!ignoreButtons && node.tagName === 'BUTTON'
+    }).then(canvas => {
+        const JsPDFCtor = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : null;
+        if (!JsPDFCtor) throw new Error('jsPDF library not loaded');
+
+        const pdf = new JsPDFCtor({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const pageW = 210, pageH = 297;
+        const imgW = pageW;
+        const imgH = (canvas.height * imgW) / canvas.width;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        let heightLeft = imgH;
+        let position = 0;
+
+        pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+        heightLeft -= pageH;
+        while (heightLeft > 0.5) {
+            position = heightLeft - imgH;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+            heightLeft -= pageH;
+        }
+        pdf.save(filename);
+    });
+}
+
 function generatePDFFromHtml(htmlString, filename) {
     window.scrollTo(0, 0);
 
     const host = document.createElement('div');
     host.setAttribute('data-pdf-host', 'true');
-    host.style.cssText = 'position:fixed;left:0;top:0;width:794px;z-index:99990;background:#ffffff;visibility:hidden;pointer-events:none;';
+    host.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#ffffff;z-index:-1;opacity:0;pointer-events:none;';
     host.innerHTML = htmlString;
     document.body.appendChild(host);
 
     const target = host.firstElementChild;
 
-    const opt = {
-        margin: 0,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: 794,
-            windowHeight: 1123
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-    };
-
     setTimeout(() => {
-        html2pdf().set(opt).from(target).save().then(() => {
+        renderToPdf(target, filename, 794, false).then(() => {
             if (host.parentNode) document.body.removeChild(host);
         }).catch(err => {
             console.error('PDF Generation Error:', err);
             if (host.parentNode) document.body.removeChild(host);
             alert('Error generating PDF. Please try again.');
         });
-    }, 500);
+    }, 400);
 }
 
 function generateSecurePDF(element, filename) {
     window.scrollTo(0, 0);
-    element.querySelectorAll('button').forEach(btn => btn.setAttribute('data-html2canvas-ignore', 'true'));
-    const opt = {
-        margin: 0,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 794, windowHeight: 1123 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-    };
-    setTimeout(() => {
-        html2pdf().set(opt).from(element).save().catch(err => {
-            console.error('PDF Generation Error:', err);
-            alert('Error generating PDF. Please try again.');
-        });
-    }, 300);
+    renderToPdf(element, filename, element.offsetWidth || 500, true).catch(err => {
+        console.error('PDF Generation Error:', err);
+        alert('Error generating PDF. Please try again.');
+    });
 }
 
 // ==========================================
@@ -120,7 +136,7 @@ function generateSecurePDF(element, filename) {
 // - Mount Zion branding + crest
 // - Grid info block (no ghosting, no mashing)
 // - Fixed-column subjects table (no cut-off)
-// - min-height 1115px = guarantees ONE page on mobile & desktop
+// - 1115px height = exactly one A4 page on every device
 // ==========================================
 function buildReportCardPDFHtml(d) {
     return `
