@@ -115,10 +115,16 @@ function generateSecurePDF(element, filename) {
     }, 300);
 }
 
-// Builds the locked A4 report-card template (FIXED: School Name + Bulletproof Layout)
+// ==========================================
+// LOCKED A4 REPORT CARD TEMPLATE
+// - Mount Zion branding + crest
+// - Grid info block (no ghosting, no mashing)
+// - Fixed-column subjects table (no cut-off)
+// - min-height 1115px = guarantees ONE page on mobile & desktop
+// ==========================================
 function buildReportCardPDFHtml(d) {
     return `
-<div class="pdfdoc" style="width:794px; min-height:1123px; box-sizing:border-box; padding:40px; background:#ffffff; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#000000; position:relative;">
+<div class="pdfdoc" style="width:794px; min-height:1115px; box-sizing:border-box; padding:40px; background:#ffffff; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#000000; position:relative;">
 <style>
   .pdfdoc * { box-sizing: border-box; }
   .pdf-header { text-align: center; margin-bottom: 20px; }
@@ -144,7 +150,7 @@ function buildReportCardPDFHtml(d) {
   .pdf-subjects { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; table-layout: fixed; }
   .pdf-subjects th, .pdf-subjects td { border: 1px solid #000; padding: 6px 4px; text-align: center; vertical-align: middle; overflow: hidden; word-wrap: break-word; }
   .pdf-subjects th { background: #f0f0f0; font-weight: 800; font-size: 11px; text-transform: uppercase; }
-  
+
   .col-subj { width: 25%; }
   .col-sba { width: 12%; }
   .col-exam { width: 12%; }
@@ -154,7 +160,7 @@ function buildReportCardPDFHtml(d) {
   .col-pos { width: 10%; }
 
   .pdf-subjects td:first-child { text-align: left; padding-left: 8px; font-weight: 600; }
-  
+
   .pdf-remarks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; font-size: 12px; width: 100%; }
   .pdf-remark-box { display: flex; flex-direction: column; width: 100%; }
   .pdf-remark-full { grid-column: span 2; }
@@ -180,11 +186,11 @@ function buildReportCardPDFHtml(d) {
     <div class="pdf-info-item"><span class="pdf-lbl">Name:</span> <span class="pdf-val">${esc(d.name)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Class:</span> <span class="pdf-val">${esc(d.cls)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Position:</span> <span class="pdf-val">${esc(d.position)}</span></div>
-    
+
     <div class="pdf-info-item"><span class="pdf-lbl">Dept:</span> <span class="pdf-val">${esc(d.department)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Roll:</span> <span class="pdf-val">${esc(d.roll)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Year:</span> <span class="pdf-val">2026</span></div>
-    
+
     <div class="pdf-info-item"><span class="pdf-lbl">Term:</span> <span class="pdf-val">1st Term</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Date:</span> <span class="pdf-val">${esc(d.date)}</span></div>
     <div class="pdf-info-item"><span class="pdf-lbl">Next Term:</span> <span class="pdf-val">${esc(d.nextTerm)}</span></div>
@@ -223,7 +229,7 @@ function buildReportCardPDFHtml(d) {
         <div class="pdf-r-lbl">TALENTS & INTEREST</div>
         <div class="pdf-r-val">${esc(d.talents)}</div>
     </div>
-    
+
     <div class="pdf-remark-box">
         <div class="pdf-r-lbl">CONDUCT</div>
         <div class="pdf-r-val">${esc(d.conduct)}</div>
@@ -237,7 +243,7 @@ function buildReportCardPDFHtml(d) {
         <div class="pdf-r-lbl">CLASS TEACHER'S REMARK</div>
         <div class="pdf-r-val">${esc(d.teacherRemark)}</div>
     </div>
-    
+
     <div class="pdf-remark-box pdf-remark-full">
         <div class="pdf-r-lbl">HEADTEACHER'S REMARK</div>
         <div class="pdf-r-val">${esc(d.headRemark)}</div>
