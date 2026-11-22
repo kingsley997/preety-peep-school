@@ -25,8 +25,7 @@
     <!-- SPLASH SCREEN SEQUENCE -->
     <div id="splash-container">
         <div id="school-splash" class="splash-screen active">
-            <!-- ✅ FIXED: Added "images/" -->
-            <div class="logo-wrapper school-logo-wrapper"><img src="images/Mount-Zion-Royal-Complex-Crest.png" alt="MOUNT ZION ROYAL COMPLEX School" class="hero-logo"></div>
+            <img src="images/Mount-Zion-Royal-Complex-Crest.png" alt="Mount Zion Royal Complex Logo" class="splash-logo">
             <h1 class="school-name">MOUNT ZION ROYAL COMPLEX</h1>
             <div class="loader"><span></span></div>
         </div>
@@ -72,7 +71,7 @@
         <!-- SCREEN: First Time Admin Setup -->
         <div id="setup-screen" class="auth-container" style="display: none;">
             <h2>Welcome to Alpha Tech</h2>
-            <p>Let's set up the Master Admin account for Preety Peep School.</p>
+            <p>Let's set up the Master Admin account for Mount Zion Royal Complex.</p>
             <div id="setup-step-1">
                 <div class="form-group">
                     <label>Admin Username</label>
@@ -115,7 +114,8 @@
                 <div class="hero-particles"><span></span><span></span><span></span><span></span><span></span></div>
                 <div class="hero-content">
                     <div class="hero-logos">
-                        <div class="logo-wrapper school-logo-wrapper"><img src="Mount-Zion-Royal-Complex-Crest.png" alt="MOUNT ZION ROYAL COMPLEX School" class="hero-logo"></div>
+                        <!-- ✅ FIXED: Added the missing "images/" folder path -->
+                        <div class="logo-wrapper school-logo-wrapper"><img src="images/Mount-Zion-Royal-Complex-Crest.png" alt="MOUNT ZION ROYAL COMPLEX School" class="hero-logo"></div>
                         <div class="logo-divider"></div>
                         <div class="logo-wrapper alpha-logo-wrapper"><img src="images/alpha-logo.png" alt="Alpha Tech" class="hero-logo"></div>
                     </div>
@@ -468,21 +468,6 @@
                     <select id="subject-class-select" class="form-select">
                         <option value="">-- Select Class --</option>
                     </select>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">SBA Components (Total = 50%)</label>
-                    <div id="sba-components-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <input type="text" class="form-input sba-component-name" placeholder="Component name (e.g., Test 1)" style="flex: 1;">
-                            <input type="number" class="form-input sba-component-max" placeholder="Max score" style="width: 100px;" min="1">
-                            <button class="btn-icon" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #991b1b;">✕</button>
-                        </div>
-                    </div>
-                    <button class="btn" style="margin-top: 0.5rem; background: var(--color-bg); color: var(--color-primary);" onclick="UI.addSBAComponent()">+ Add SBA Component</button>
-                </div>
-                <div class="form-group">
-                    <label>Exam Max Score (50%)</label>
-                    <input type="number" id="exam-max-score" class="form-input" placeholder="50" value="50" min="1">
                 </div>
                 <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
                     <button onclick="UI.closeSubjectModal()" class="btn" style="background: #f1f5f9; color: var(--color-text-main); flex: 1;">Cancel</button>
