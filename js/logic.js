@@ -54,8 +54,6 @@ function esc(s) {
 
 // ==========================================
 // DETERMINISTIC PDF PIPELINE (html2canvas + jsPDF directly)
-// No library render-containers => no centering/offset bugs on ANY device.
-// Explicit crop window (x:0, y:0, width) guarantees nothing is ever sliced.
 // ==========================================
 function renderToPdf(el, filename, cssWidthPx, ignoreButtons) {
     const w = cssWidthPx || el.offsetWidth || 794;
@@ -133,10 +131,6 @@ function generateSecurePDF(element, filename) {
 
 // ==========================================
 // LOCKED A4 REPORT CARD TEMPLATE
-// - Mount Zion branding + crest
-// - Grid info block (no ghosting, no mashing)
-// - Fixed-column subjects table (no cut-off)
-// - 1115px height = exactly one A4 page on every device
 // ==========================================
 function buildReportCardPDFHtml(d) {
     return `
@@ -683,11 +677,14 @@ const UI = {
                     badgeHTML = `<span class="status-badge status-exempt">Not Paying</span>`;
                     actionHTML = `<button class="btn-icon btn-undo" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset to Unpaid">↩️</button>`;
                 }
+                
+                // UPDATED UI: Added Yellow "Remove Today" and Red "Delete Permanently"
                 htmlContent += `
                     <div class="student-row">
                         <div class="student-info"><span class="student-name">${student.name}</span>${badgeHTML}</div>
                         <div class="student-actions">${actionHTML}
-                            <button class="btn-icon" onclick="UI.removeStudentToday('${classId}', '${student.id}')" title="Remove for Today">🗑️</button>
+                            <button class="btn-icon" onclick="UI.removeStudentToday('${classId}', '${student.id}')" title="Remove for Today Only" style="color: #f59e0b;">🚫</button>
+                            <button class="btn-icon" onclick="UI.deleteStudentPermanently('${classId}', '${student.id}')" title="Delete Permanently from All Portals" style="color: #dc2626;">🗑️</button>
                         </div>
                     </div>`;
             });
@@ -722,6 +719,7 @@ const UI = {
     markAbsent(classId, studentId) { this.updateStudentStatus(classId, studentId, 'absent'); },
     markNotPaying(classId, studentId) { this.updateStudentStatus(classId, studentId, 'exempt'); },
     resetStatus(classId, studentId) { this.showConfirm("Reset this student to Unpaid?", () => { this.updateStudentStatus(classId, studentId, 'unpaid'); }); },
+    
     removeStudentToday(classId, studentId) {
         this.showConfirm("Remove this student from today's list?", () => {
             const dateStr = this.getLocalDateStr();
@@ -730,6 +728,36 @@ const UI = {
             cls.students = cls.students.filter(s => s.id !== studentId);
             Store.set(`roster_${dateStr}`, roster); 
             this.renderClassPortal(classId, document.getElementById('student-search').value);
+        });
+    },
+
+    // NEW FUNCTION: Deletes student from Master List AND Today's Roster
+    deleteStudentPermanently(classId, studentId) {
+        this.showConfirm("⚠️ PERMANENTLY DELETE this student?\n\nThey will be instantly removed from the Feeding Fee, Toiletries, School Fees, and Assessment portals.", () => {
+            // 1. Remove from Master Classes (Fixes Assessment, School Fees, Toiletries, and tomorrow's roster)
+            const classes = Store.get('classes') || [];
+            const masterCls = classes.find(c => c.id === classId);
+            if (masterCls) {
+                masterCls.students = masterCls.students.filter(s => s.id !== studentId);
+                Store.set('classes', classes);
+            }
+
+            // 2. Remove from Today's Roster (Fixes today's Feeding Fee portal instantly)
+            const dateStr = this.getLocalDateStr();
+            const roster = Store.get(`roster_${dateStr}`);
+            if (roster) {
+                const rosterCls = roster.find(c => c.classId === classId);
+                if (rosterCls) {
+                    rosterCls.students = rosterCls.students.filter(s => s.id !== studentId);
+                    Store.set(`roster_${dateStr}`, roster);
+                }
+            }
+
+            // 3. Re-render current screen to reflect changes instantly
+            const searchVal = document.getElementById('student-search') ? document.getElementById('student-search').value : '';
+            this.renderClassPortal(classId, searchVal);
+            
+            alert("✅ Student permanently removed from all active portals.");
         });
     },
     
