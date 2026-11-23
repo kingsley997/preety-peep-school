@@ -678,12 +678,11 @@ const UI = {
                     actionHTML = `<button class="btn-icon btn-undo" onclick="UI.resetStatus('${classId}', '${student.id}')" title="Reset to Unpaid">↩️</button>`;
                 }
                 
-                // UPDATED UI: Added Yellow "Remove Today" and Red "Delete Permanently"
+                // UPDATED UI: Only the red "Delete Permanently" button remains
                 htmlContent += `
                     <div class="student-row">
                         <div class="student-info"><span class="student-name">${student.name}</span>${badgeHTML}</div>
                         <div class="student-actions">${actionHTML}
-                            <button class="btn-icon" onclick="UI.removeStudentToday('${classId}', '${student.id}')" title="Remove for Today Only" style="color: #f59e0b;">🚫</button>
                             <button class="btn-icon" onclick="UI.deleteStudentPermanently('${classId}', '${student.id}')" title="Delete Permanently from All Portals" style="color: #dc2626;">🗑️</button>
                         </div>
                     </div>`;
@@ -719,19 +718,8 @@ const UI = {
     markAbsent(classId, studentId) { this.updateStudentStatus(classId, studentId, 'absent'); },
     markNotPaying(classId, studentId) { this.updateStudentStatus(classId, studentId, 'exempt'); },
     resetStatus(classId, studentId) { this.showConfirm("Reset this student to Unpaid?", () => { this.updateStudentStatus(classId, studentId, 'unpaid'); }); },
-    
-    removeStudentToday(classId, studentId) {
-        this.showConfirm("Remove this student from today's list?", () => {
-            const dateStr = this.getLocalDateStr();
-            const roster = Store.get(`roster_${dateStr}`);
-            const cls = roster.find(c => c.classId === classId);
-            cls.students = cls.students.filter(s => s.id !== studentId);
-            Store.set(`roster_${dateStr}`, roster); 
-            this.renderClassPortal(classId, document.getElementById('student-search').value);
-        });
-    },
 
-    // NEW FUNCTION: Deletes student from Master List AND Today's Roster
+    // Permanently deletes the student from Master List AND Today's Roster
     deleteStudentPermanently(classId, studentId) {
         this.showConfirm("⚠️ PERMANENTLY DELETE this student?\n\nThey will be instantly removed from the Feeding Fee, Toiletries, School Fees, and Assessment portals.", () => {
             // 1. Remove from Master Classes (Fixes Assessment, School Fees, Toiletries, and tomorrow's roster)
